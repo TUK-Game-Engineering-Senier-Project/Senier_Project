@@ -24,6 +24,7 @@
     <ClInclude Include="..\Common\GameTimer.h" />
     <ClInclude Include="..\Common\MathHelper.h" />
     <ClInclude Include="..\Common\UploadBuffer.h" />
+    <ClInclude Include="Objects.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -31,7 +32,7 @@
     <ClCompile Include="..\Common\d3dUtil.cpp" />
     <ClCompile Include="..\Common\GameTimer.cpp" />
     <ClCompile Include="..\Common\MathHelper.cpp" />
-    <ClCompile Include="Makingfile.cpp" />
+    <ClCompile Include="0_Server_Makingnow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\color.hlsl">

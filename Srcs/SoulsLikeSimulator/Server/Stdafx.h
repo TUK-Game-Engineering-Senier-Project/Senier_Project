@@ -1,6 +1,12 @@
 #pragma once
 
-#include <limits> // EPSILON 정의용
+#ifndef STDAFX_H_
+#define STDAFX_H_
 
-// float 오차 체크용 상수
-#define EPSILON std::numeric_limits<float>::epsilon( )
+#include "../Common/d3dApp.h"
+#include "../Common/MathHelper.h"
+#include "../Common/UploadBuffer.h"
+
+#include "Objects.h" // 오브젝트 관련 내용 헤더 파일
+
+#endif 
