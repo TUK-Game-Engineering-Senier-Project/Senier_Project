@@ -19,13 +19,9 @@ struct Vertex
 struct ObjectConstants
 {
     XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
-    XMFLOAT4 objPulseColor = { 0.0f, 0.0f, 0.0f, 0.0f }; // 오브젝트 색상
-    float objTime = 0.0f; // 오브젝트 시간
 };
 
-//////////
-
-
+// 상자 오브젝트 클래스
 class BoxApp : public D3DApp
 {
 public:
@@ -78,12 +74,14 @@ private:
 
     POINT mLastMousePos;
 
-    // 플레이어 위치
-    XMFLOAT3 fPlayerPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    // ----- 추가한 부분 -----
 
-    float fMoveSpeed = 0.0f; // 이동 속도
-    float fJumpSpeed = 0.0f; // 점프 속도
-    bool bJumping = false; // 점프중 여부
+    // 플레이어 위치
+    XMFLOAT3 m_fPlayerPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+    float m_fMoveSpeed = 0.0f; // 이동 속도
+    float m_fJumpSpeed = 0.0f; // 점프 속도
+    bool m_bJumping = false; // 점프중 여부
 };
 
 
@@ -147,7 +145,7 @@ void BoxApp::Update(const GameTimer& gt)
     XMStoreFloat4x4(&mView, view);
 
     // 월드를 플레이어 위치에 맞춰 변환
-    XMMATRIX translation = XMMatrixTranslation(fPlayerPosition.x, fPlayerPosition.y, fPlayerPosition.z);
+    XMMATRIX translation = XMMatrixTranslation(m_fPlayerPosition.x, m_fPlayerPosition.y, m_fPlayerPosition.z);
     XMMATRIX world = translation;
     XMMATRIX proj = XMLoadFloat4x4(&mProj);
     XMMATRIX worldViewProj = world * view * proj;
@@ -157,47 +155,28 @@ void BoxApp::Update(const GameTimer& gt)
     XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
 
     // 키보드 입력에 따른 플레이어 이동 및 점프
-    fMoveSpeed = 3.2f * static_cast<float>(gt.DeltaTime()); // 이동 속도
+    m_fMoveSpeed = 3.2f * static_cast<float>(gt.DeltaTime()); // 이동 속도
 
-    if (GetAsyncKeyState(VK_LEFT) & 0x8000) fPlayerPosition.x -= fMoveSpeed;
-    if (GetAsyncKeyState(VK_RIGHT) & 0x8000) fPlayerPosition.x += fMoveSpeed;
-    if (GetAsyncKeyState(VK_UP) & 0x8000) fPlayerPosition.z += fMoveSpeed;
-    if (GetAsyncKeyState(VK_DOWN) & 0x8000) fPlayerPosition.z -= fMoveSpeed;
+    if (GetAsyncKeyState(VK_LEFT) & 0x8000) m_fPlayerPosition.x -= m_fMoveSpeed;
+    if (GetAsyncKeyState(VK_RIGHT) & 0x8000) m_fPlayerPosition.x += m_fMoveSpeed;
+    if (GetAsyncKeyState(VK_UP) & 0x8000) m_fPlayerPosition.z += m_fMoveSpeed;
+    if (GetAsyncKeyState(VK_DOWN) & 0x8000) m_fPlayerPosition.z -= m_fMoveSpeed;
 
     // 점프중이 아닌 경우 스페이스바 눌러 점프
-    if ((GetAsyncKeyState(VK_SPACE) & 0x8000) && !bJumping)
+    if ((GetAsyncKeyState(VK_SPACE) & 0x8000) && !m_bJumping)
     {
-        fJumpSpeed = 0.022f;
-        bJumping = true;
+        m_fJumpSpeed = 0.022f;
+        m_bJumping = true;
     }
 
-    fPlayerPosition.y += fJumpSpeed;
-    fJumpSpeed -= 0.00012f;
+    m_fPlayerPosition.y += m_fJumpSpeed;
+    m_fJumpSpeed -= 0.00012f;
 
-    if (fPlayerPosition.y < 0.0f)
+    if (m_fPlayerPosition.y < 0.0f)
     {
-        fJumpSpeed = 0.0f;
-        bJumping = false;
+        m_fJumpSpeed = 0.0f;
+        m_bJumping = false;
     }
-
-    /*
-    if ((GetAsyncKeyState(VK_SPACE) & 0x8000) && !bJumping)
-    {
-        fJumpSpeed = 0.3f; // 점프 속도
-        fPlayerPosition.y = 0.01f;
-        bJumping = true;
-    }
-
-
-
-
-
-    // 바닥에 닿으면
-
-        fPlayerPosition.y = 0.0f;
-        bJumping = false; // 다시 점프 가능
-    }
-    */
 
 
     // 상수 데이터 복사
@@ -286,7 +265,7 @@ void BoxApp::OnMouseMove(WPARAM btnState, int x, int y)
         float dy = XMConvertToRadians(0.25f * static_cast<float>(y - mLastMousePos.y));
 
         // Update angles based on input to orbit camera around box.
-        mTheta += dx;
+        mTheta -= dx;
         mPhi += dy;
 
         // 아래에서는 안 보이게 각도 제한
