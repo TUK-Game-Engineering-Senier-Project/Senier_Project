@@ -128,7 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GameObject.cpp" />
-    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="ServerMain.cpp" />
     <ClCompile Include="ServerFunctions.cpp" />
     <ClCompile Include="Stdafx.cpp" />
   </ItemGroup>

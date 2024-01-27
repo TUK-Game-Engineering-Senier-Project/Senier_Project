@@ -46,20 +46,20 @@ int main(int argc, char* argv[])
 
 	// 소켓 생성
 	g_sListenSock = socket(AF_INET, SOCK_STREAM, 0);
-	if (g_sListenSock == INVALID_SOCKET) err_quit("socket()");
+	if (g_sListenSock == INVALID_SOCKET) err_quit("Error: 소켓 생성");
 
-	// bind()
+	// 소켓 bind()
 	struct sockaddr_in serveraddr;
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	serveraddr.sin_port = htons(SERVERPORT);
 	retval = bind(g_sListenSock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
-	if (retval == SOCKET_ERROR) err_quit("bind()");
+	if (retval == SOCKET_ERROR) err_quit("Error: 소켓 bind()");
 
-	// listen()
+	// 소켓 listen()
 	retval = listen(g_sListenSock, SOMAXCONN);
-	if (retval == SOCKET_ERROR) err_quit("listen()");
+	if (retval == SOCKET_ERROR) err_quit("Error: 소켓 listen()");
 
 	// 데이터 통신에 사용할 변수
 	g_sockInfo* siClients = new g_sockInfo[2]; // 클라이언트 (2인)
@@ -73,16 +73,19 @@ int main(int argc, char* argv[])
 	printf("<서버 실행 시작>\n\n");
 
 	while (1) {
-		// accept()
+		// 소켓 accept()
 		iAddrlen = sizeof(saClientAddr);
 		sClientSock = accept(g_sListenSock, (struct sockaddr*)&saClientAddr, &iAddrlen);
 		if (g_sListenSock == 0)break;
 		if (sClientSock == INVALID_SOCKET) {
-			err_quit("accept()");
+			err_quit("Error: 소켓 accept()");
 			break;
 		}
+
+		// 뮤텍스 잠그기
 		lock_guard<mutex> lock(g_mClientListMutex);
 
+		// 현재 번호에 맞는 플레이어 지정
 		siClients[iPlayerNum - 1].sock = sClientSock;
 		siClients[iPlayerNum - 1].id = (iPlayerNum - 1);
 		g_cPlayer* newPlayer = new g_cPlayer;
@@ -102,7 +105,7 @@ int main(int argc, char* argv[])
 	}
 
 	// 소켓 닫기
-	//closesocket(g_sListenSock);
+	// closesocket(g_sListenSock);
 
 	// 윈속 종료
 	WSACleanup();

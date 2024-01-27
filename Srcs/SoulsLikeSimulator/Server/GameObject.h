@@ -6,7 +6,7 @@ class g_cPlayer
 {
 public:
     // 플레이어 종류 (master(방장) / visitor(손님))
-    char type; 
+    char cPlayerType; 
 
     // 각 키 입력여부
     bool 
