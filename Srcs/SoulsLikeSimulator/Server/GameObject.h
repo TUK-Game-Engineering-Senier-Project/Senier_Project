@@ -2,6 +2,7 @@
 
 // <게임 오브젝트 헤더 파일>
 
+// 플레이어 클래스
 class g_cPlayer 
 {
 public:
@@ -14,4 +15,10 @@ public:
         bBackKeyDown{ false }, 
         bLeftKeyDown{ false }, 
         bRightKeyDown{ false };
+
+    float fPos[3];    // 위치
+    float fRotate[3]; // 회전
+    float fScale[3];  // 크기
+    float fColor[3];  // 색상
 };
+

@@ -2,8 +2,9 @@
 // d3dApp.cpp by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 
-#include "d3dApp.h"
 #include <WindowsX.h>
+
+#include "d3dApp.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace std;
@@ -100,6 +101,8 @@ int D3DApp::Run()
 			}
         }
     }
+
+
 
 	return (int)msg.wParam;
 }
@@ -679,3 +682,4 @@ void D3DApp::LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
         ::OutputDebugString(text.c_str());
     }
 }
+
