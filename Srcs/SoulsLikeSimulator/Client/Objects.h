@@ -4,6 +4,11 @@
 
 #include "Stdafx.h" // 사용자 정의 헤더
 
+
+#include "../Common/d3dApp.h"
+#include "../Common/MathHelper.h"
+#include "../Common/UploadBuffer.h"
+
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -154,6 +159,10 @@ void BoxApp::Update(const GameTimer& gt)
     ObjectConstants objConstants;
     XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
 
+
+    // ### 이동 부분 서버에서 처리 예정
+
+    /*
     // 키보드 입력에 따른 플레이어 이동 및 점프
     m_fMoveSpeed = 3.2f * static_cast<float>(gt.DeltaTime()); // 이동 속도
 
@@ -177,6 +186,7 @@ void BoxApp::Update(const GameTimer& gt)
         m_fJumpSpeed = 0.0f;
         m_bJumping = false;
     }
+    */
 
 
     // 상수 데이터 복사
