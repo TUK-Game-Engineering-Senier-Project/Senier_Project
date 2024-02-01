@@ -16,7 +16,7 @@ public:
         bLeftKeyDown{ false }, 
         bRightKeyDown{ false };
 
-    float fPos[3];    // 위치
+    float fPos[3] = { 0.0f, 0.0f, 0.0f };    // 위치
     float fRotate[3]; // 회전
     float fScale[3];  // 크기
     float fColor[3];  // 색상

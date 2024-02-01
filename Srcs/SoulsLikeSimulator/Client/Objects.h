@@ -4,10 +4,11 @@
 
 #include "Stdafx.h" // 사용자 정의 헤더
 
-
 #include "../Common/d3dApp.h"
 #include "../Common/MathHelper.h"
 #include "../Common/UploadBuffer.h"
+
+
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
@@ -26,7 +27,7 @@ struct ObjectConstants
     XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
 };
 
-// 상자 오브젝트 클래스
+// 프로그램 실행
 class BoxApp : public D3DApp
 {
 public:
@@ -36,6 +37,11 @@ public:
     ~BoxApp();
 
     virtual bool Initialize()override;
+
+    // 플레이어 위치
+    XMFLOAT3 m_fPos = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    // 회전 각도
+    float m_fRot = 0.0f;
 
 private:
     virtual void OnResize()override;
@@ -78,17 +84,7 @@ private:
     float mRadius = 10.0f;
 
     POINT mLastMousePos;
-
-    // ----- 추가한 부분 -----
-
-    // 플레이어 위치
-    XMFLOAT3 m_fPlayerPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
-
-    float m_fMoveSpeed = 0.0f; // 이동 속도
-    float m_fJumpSpeed = 0.0f; // 점프 속도
-    bool m_bJumping = false; // 점프중 여부
 };
-
 
 BoxApp::BoxApp(HINSTANCE hInstance)
     : D3DApp(hInstance)
@@ -150,7 +146,9 @@ void BoxApp::Update(const GameTimer& gt)
     XMStoreFloat4x4(&mView, view);
 
     // 월드를 플레이어 위치에 맞춰 변환
-    XMMATRIX translation = XMMatrixTranslation(m_fPlayerPosition.x, m_fPlayerPosition.y, m_fPlayerPosition.z);
+    // ### 여기에 player[id].trans_x (y, z)가 적용되게 해야 함
+
+    XMMATRIX translation = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
     XMMATRIX world = translation;
     XMMATRIX proj = XMLoadFloat4x4(&mProj);
     XMMATRIX worldViewProj = world * view * proj;
@@ -158,9 +156,6 @@ void BoxApp::Update(const GameTimer& gt)
     // Update the constant buffer with the latest worldViewProj matrix.
     ObjectConstants objConstants;
     XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
-
-
-    // ### 이동 부분 서버에서 처리 예정
 
     /*
     // 키보드 입력에 따른 플레이어 이동 및 점프
@@ -384,6 +379,7 @@ void BoxApp::BuildShadersAndInputLayout()
 
 void BoxApp::BuildBoxGeometry()
 {
+    // ### 여기도 scale_x (y, z)로 수정해야 함
     float fBoxSize = 0.6f;
 
     std::array<Vertex, 8> vertices =

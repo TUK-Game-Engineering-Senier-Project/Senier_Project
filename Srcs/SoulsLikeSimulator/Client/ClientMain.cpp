@@ -1,5 +1,7 @@
 // ----- 클라이언트 cpp 파일 -----
 
+// 프로그램 시작시 도입부로의 기능만을 수행함
+
 #include "Stdafx.h" // 사용자 정의 헤더
 
 using namespace std;

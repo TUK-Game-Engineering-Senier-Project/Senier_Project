@@ -140,6 +140,7 @@
     <ClInclude Include="..\Common\GameTimer.h" />
     <ClInclude Include="..\Common\MathHelper.h" />
     <ClInclude Include="..\Common\UploadBuffer.h" />
+    <ClInclude Include="GameData.h" />
     <ClInclude Include="Objects.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>

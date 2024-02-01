@@ -11,7 +11,7 @@ SOCKET listen_sock{}; // listen 소켓
 // 랜덤 디바이스
 random_device rd;
 mt19937 gen{ rd() };
-uniform_int_distribution<int> uid{ 0,2000 };
+// uniform_int_distribution<int> uid{ 0,2000 };
 
 
 // 소켓 함수 오류 출력 후 종료
@@ -33,10 +33,37 @@ void SendPlayerMove(SOCK_INFO* sock_info, char input, bool KeyDown)
 {
 	switch (input) 
 	{
-	case VK_LEFT: {g_Players[sock_info->id]->bLeftKeyDown = KeyDown; printf("왼쪽 방향키 입력\n"); break; }
-		case VK_RIGHT: {g_Players[sock_info->id]->bRightKeyDown = KeyDown; printf("오른쪽 방향키 입력\n"); break; }
-		case VK_UP: {g_Players[sock_info->id]->bForwardKeyDown = KeyDown; printf("위 방향키 입력\n"); break; }
-		case VK_DOWN: {g_Players[sock_info->id]->bBackKeyDown = KeyDown; printf("아래 방향키 입력\n"); break; }
+		// 화살표 키 (이동)
+		case VK_LEFT: {g_Players[sock_info->id]->bLeftKeyDown = KeyDown; printf("왼쪽 방향키 입력\n");
+			// ### 테스트용
+			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
+				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
+			break; }
+
+		case VK_RIGHT: {g_Players[sock_info->id]->bRightKeyDown = KeyDown; printf("오른쪽 방향키 입력\n");
+			// ### 테스트용
+			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
+				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
+			break; }
+
+		case VK_UP: {g_Players[sock_info->id]->bForwardKeyDown = KeyDown; printf("위 방향키 입력\n");
+			// ### 테스트용
+			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
+				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
+			break; }
+
+		case VK_DOWN: {g_Players[sock_info->id]->bBackKeyDown = KeyDown; printf("아래 방향키 입력\n");
+			// ### 테스트용
+			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
+				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
+			break; }
+
+		// 스페이스바 (점프)
+		case VK_SPACE: {g_Players[sock_info->id]->bBackKeyDown = KeyDown; printf("점프 키 (스페이스바) 입력\n"); 
+			// ### 테스트용
+			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
+				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
+			break; }
 	}
 }
 
@@ -87,6 +114,33 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	{
 		// 플레이어 정보 업데이트
 		UpdatePlayer(); 
+
+		// 각 클라이언트의 데이터 보내기
+		for (const auto& client : ClientList) {
+
+			// 패킷 생성
+			SEND_PLAYER* packet_sendP = new SEND_PLAYER;
+			packet_sendP->type = SC_SEND_PLAYER;
+			packet_sendP->id = sock_info->id;
+
+			// 패킷에 값 지정
+			MOVE_PACKET* packet_tr = new MOVE_PACKET;
+			packet_tr->type = SC_PLAYER_MOVE;
+			packet_tr->fx = g_Players[sock_info->id]->fPos[0];
+			packet_tr->fy = g_Players[sock_info->id]->fPos[1];
+			packet_tr->fz = g_Players[sock_info->id]->fPos[2];
+			packet_tr->rot = g_Players[sock_info->id]->fRotate[1];
+
+			// 패킷 보내기
+			send(client.socket, reinterpret_cast<char*>(packet_sendP), sizeof(SEND_PLAYER), 0);
+			send(client.socket, reinterpret_cast<char*>(packet_tr), sizeof(MOVE_PACKET), 0);
+
+			// 패킷 지우기
+			delete packet_sendP;
+			delete packet_tr;
+
+			printf("### 클라이언트 Process - 데이터 전송 완료\n");
+		}
 
 		// 데이터 받기
 		iRetval = recv(client_sock, buf, BUFSIZE, 0);
@@ -162,12 +216,18 @@ int main(int argc, char* argv[])
 			break;
 		}
 
-		// 클라이언트 뮤텍스 잠그기
+		// 클라이언트 뮤텍스 잠그기 (동시접근 방지)
 		lock_guard<mutex> lock(clientListMutex);
 
 		// 플레이어 id 지정
 		Clients[iPlayerNum].client_sock = client_sock;
 		Clients[iPlayerNum].id = iPlayerNum;
+
+		// 클라이언트 추가
+		ClientInfo newClient;
+		newClient.socket = Clients->client_sock;
+		newClient.id = Clients->id;
+		ClientList.push_back(newClient);
 
 		// 플레이어 추가
 		g_cPlayer* newPlayer = new g_cPlayer;

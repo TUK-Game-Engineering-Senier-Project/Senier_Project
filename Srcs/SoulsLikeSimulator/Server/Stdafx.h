@@ -65,7 +65,7 @@ struct INPUT_PACKET {
 struct MOVE_PACKET {
 	char type;
 	float fx, fy, fz;
-	float fro;
+	float rot;
 };
 
 // 회전 패킷

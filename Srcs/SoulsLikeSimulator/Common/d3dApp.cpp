@@ -2,15 +2,11 @@
 // d3dApp.cpp by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 
-// 오류 나서 찾아보니까 winsock.h(가 포함된) 헤더를
-// Windows.h 위에 달아줘야 한다고 하여 위치 변경함
-#include <winsock2.h> // 윈속2 메인 헤더
-#include <ws2tcpip.h> // 윈속2 확장 헤더
-#include <WindowsX.h>
+// ----- 실제로 게임 수행하는 코드는 이 파일에 있음 -----
+
+#include "..\Client\GameData.h" // 게임 데이터 모음 헤더
 #include "d3dApp.h"
 
-// 오브젝트 관련 헤더
-// #include "..\Client/Objects.h" 
 
 using Microsoft::WRL::ComPtr;
 using namespace std;
@@ -25,53 +21,6 @@ mt19937 gen{ rd() };
 char* SERVERIP = (char*)"127.0.0.1"; // 서버 IP 주소
 #define SERVERPORT 9000 // 서버 포트 번호
 #define BUFSIZE    512  // 버퍼 크기
-
-// 클라이언트 정보
-struct g_clientInfo 
-{
-	SOCKET sock; // 소켓
-	int id; // 소켓 ID
-};
-
-// 소켓 정보
-struct g_sockInfo 
-{
-	SOCKET sock; // 소켓
-	int id; // 소켓 ID
-
-	// 소켓 정보 리턴 함수
-	g_sockInfo* GetSockInfo() { return this; }
-};
-
-int g_iId;
-g_sockInfo* siSockInfo;
-SOCKET sock;
-
-constexpr char SC_PLAYER_MOVE = 0;
-constexpr char SC_KEY_INPUT = 1;
-constexpr char SC_PLAYER_ROTATE = 2;
-constexpr char SC_SEND_PLAYER = 3;
-
-// 입력 패킷
-struct INPUT_PACKET {
-	char type;
-	bool bKeyDown;
-	char input;
-};
-
-// 소켓 함수 오류 출력 후 종료
-void err_quit(const char* msg)
-{
-	LPVOID lpMsgBuf;
-	FormatMessageA(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL, WSAGetLastError(),
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(char*)&lpMsgBuf, 0, NULL);
-	MessageBoxA(NULL, (const char*)lpMsgBuf, msg, MB_ICONERROR);
-	LocalFree(lpMsgBuf);
-	exit(1);
-}
 
 // 패킷에 키보드 누른 입력값을 전송
 void KeyBoardDown(unsigned char key, int x, int y)
@@ -113,32 +62,98 @@ void KeyBoardUp(unsigned char key, int x, int y)
 	INPUT_PACKET* packet = new INPUT_PACKET;
 	switch (key)
 	{
-	case VK_LEFT:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_LEFT;
-		packet->bKeyDown = false;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_RIGHT:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_RIGHT;
-		packet->bKeyDown = false;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_UP:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_UP;
-		packet->bKeyDown = false;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_DOWN:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_DOWN;
-		packet->bKeyDown = false;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
+		// 이동
+		case VK_LEFT:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_LEFT;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_RIGHT:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_RIGHT;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_UP:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_UP;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_DOWN:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_DOWN;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+
+		// 점프
+		case VK_SPACE:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_SPACE;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
 	}
 	delete packet;
+}
+
+// 클라이언트 통신
+DWORD WINAPI ProcessClient(LPVOID arg)
+{
+	int retval;
+	g_sockInfo* siSockInfo = reinterpret_cast<g_sockInfo*> (arg);
+
+	SOCKET server_sock = siSockInfo->sock;
+	struct sockaddr_in clientaddr;
+	char addr[INET_ADDRSTRLEN];
+	int addrlen;
+	char buf[BUFSIZE + 1];
+	int id{};
+
+	while (1) {
+		// 소켓 데이터 받기
+		retval = recv(server_sock, buf, BUFSIZE, 0);
+		if (retval == SOCKET_ERROR) {
+			err_quit("Error: 소켓 recv()");
+			break;
+		}
+
+		switch (buf[0]) {
+		case SC_SEND_PLAYER:
+		{
+			SEND_PLAYER* packet_sp = reinterpret_cast<SEND_PLAYER*>(buf);
+			id = packet_sp->id;
+			break;
+		}
+		case SC_PLAYER_MOVE:
+		{
+			// ### 현재 여기는 정상적으로 작동됨
+			// info_show("### buf[0]", "플레이어 이동");
+
+			MOVE_PACKET* packet_tr = reinterpret_cast<MOVE_PACKET*>(buf);
+			player[id].trans_x = packet_tr->fx;
+			player[id].trans_y = packet_tr->fy;
+			player[id].trans_z = packet_tr->fz;
+			player[id].rotate_y = packet_tr->rot;
+
+			break;
+		}
+		case SC_PLAYER_ROTATE:
+		{
+			ROTATE_PACKET* packet_ro = reinterpret_cast<ROTATE_PACKET*>(buf);
+			player[id].rotate_y = packet_ro->fy;
+			break;
+		}
+		}
+	}
+
+	// 소켓 닫기
+	delete siSockInfo;
+	closesocket(server_sock);
+
+	return 0;
 }
 
 // ----- 추가한 내용 완료 부분 ----- //
@@ -233,6 +248,15 @@ int D3DApp::Run()
 	if (retval == SOCKET_ERROR) err_quit("connect()");
 	siSockInfo->sock = sock;
 
+	// 스레드 생성
+	HANDLE hThread;
+	hThread = CreateThread(NULL, 0, ProcessClient,
+		reinterpret_cast<LPVOID*>(siSockInfo->GetSockInfo()), 0, NULL);
+	if (hThread == NULL) { closesocket(sock); }
+	else { CloseHandle(hThread); }
+
+
+
 	// ----- 클라이언트 루프 시작 ----- //
 	while(msg.message != WM_QUIT)
 	{
@@ -256,8 +280,7 @@ int D3DApp::Run()
 				Update(mTimer);
 				Draw(mTimer);
 
-				// KeyBoardDown(? ? ? ? ? ? );
-				// KeyBoardUp(? ? ? ? ? ? );
+				
 			}
 
 			// 앱이 중단된 경우
@@ -526,15 +549,24 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
-    case WM_KEYUP:
-        if(wParam == VK_ESCAPE)
-        {
-            PostQuitMessage(0);
-        }
-        else if((int)wParam == VK_F2)
-            Set4xMsaaState(!m4xMsaaState);
 
-        return 0;
+
+	// 키 눌린 경우
+	case WM_KEYDOWN:
+		KeyBoardDown(static_cast<unsigned char>(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+
+	// 키 뗀 경우
+	case WM_KEYUP:
+		if (wParam == VK_ESCAPE)
+		{
+			PostQuitMessage(0);
+		}
+		else
+		{
+			KeyBoardUp(static_cast<unsigned char>(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		}
+		return 0;
 	}
 
 	return DefWindowProc(hwnd, msg, wParam, lParam);
