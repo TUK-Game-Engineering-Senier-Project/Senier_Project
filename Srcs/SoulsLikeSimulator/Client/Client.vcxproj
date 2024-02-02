@@ -140,7 +140,6 @@
     <ClInclude Include="..\Common\GameTimer.h" />
     <ClInclude Include="..\Common\MathHelper.h" />
     <ClInclude Include="..\Common\UploadBuffer.h" />
-    <ClInclude Include="GameData.h" />
     <ClInclude Include="Objects.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>
@@ -150,6 +149,7 @@
     <ClCompile Include="..\Common\GameTimer.cpp" />
     <ClCompile Include="..\Common\MathHelper.cpp" />
     <ClCompile Include="ClientMain.cpp" />
+    <ClCompile Include="Objects.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\color.hlsl" />

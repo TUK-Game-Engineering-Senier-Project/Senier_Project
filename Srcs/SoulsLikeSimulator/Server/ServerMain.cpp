@@ -13,6 +13,10 @@ random_device rd;
 mt19937 gen{ rd() };
 // uniform_int_distribution<int> uid{ 0,2000 };
 
+float g_fPlayerSpd = 0.08f;  // 이동 속도
+float g_fJumpSpd = 0.00012f; // 점프 속도
+
+constexpr auto ZKEY = 0x5A; // z키
 
 // 소켓 함수 오류 출력 후 종료
 void err_quit(const char* msg)
@@ -28,8 +32,8 @@ void err_quit(const char* msg)
 	exit(1);
 }
 
-// 플레이어 이동 전달 함수
-void SendPlayerMove(SOCK_INFO* sock_info, char input, bool KeyDown) 
+// 버튼 입력 전달 함수
+void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 {
 	switch (input) 
 	{
@@ -58,8 +62,8 @@ void SendPlayerMove(SOCK_INFO* sock_info, char input, bool KeyDown)
 				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
 			break; }
 
-		// 스페이스바 (점프)
-		case VK_SPACE: {g_Players[sock_info->id]->bBackKeyDown = KeyDown; printf("점프 키 (스페이스바) 입력\n"); 
+		// z키 (점프)
+		case ZKEY: {g_Players[sock_info->id]->bZDown = KeyDown; printf("점프 키 (스페이스바) 입력\n");
 			// ### 테스트용
 			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
 				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
@@ -75,19 +79,32 @@ void UpdatePlayer()
 
 		// 입력된 키에 따라 동작 수행하기
 
-		if (g_Players[id]->bForwardKeyDown) {
-			g_Players[id]->fPos[0] -= 0.03f * sin(g_Players[id]->fRotate[1] * atan(1) * 4 / 180);
-			g_Players[id]->fPos[2] -= 0.03f * cos(g_Players[id]->fRotate[1] * atan(1) * 4 / 180);
+		if (g_Players[id]->bForwardKeyDown) { g_Players[id]->fPos[2] += g_fPlayerSpd; }
+		if (g_Players[id]->bBackKeyDown) { g_Players[id]->fPos[2] -= g_fPlayerSpd; }
+		if (g_Players[id]->bLeftKeyDown) { g_Players[id]->fPos[0] -= g_fPlayerSpd; }
+		if (g_Players[id]->bRightKeyDown) { g_Players[id]->fPos[0] += g_fPlayerSpd; }
+		
+		if (g_Players[id]->bZDown)
+		{
+			// 스페이스바 눌렀으면 점프 시작
+			printf("[점프 시작]\n");
+			g_Players[id]->bJumping = true;
+			g_Players[id]->fJumpSpd = 0.022f;
 		}
-		if (g_Players[id]->bBackKeyDown) {
-			g_Players[id]->fPos[0] += 0.03f * sin(g_Players[id]->fRotate[1] * atan(1) * 4 / 180);
-			g_Players[id]->fPos[2] += 0.03f * cos(g_Players[id]->fRotate[1] * atan(1) * 4 / 180);
-		}
-		if (g_Players[id]->bLeftKeyDown) {
-			g_Players[id]->fRotate[1] += 1.f;
-		}
-		if (g_Players[id]->bRightKeyDown) {
-			g_Players[id]->fRotate[1] -= 1.f;
+
+		// 점프 동작
+
+		// 점프 속도에 따른 y좌표 변화
+		g_Players[id]->fPos[1] += g_Players[id]->fJumpSpd;
+		g_Players[id]->fJumpSpd -= 0.006f;
+
+		// 플레이어 y좌표가 0 미만일 경우
+		if (g_Players[id]->fPos[1] < 0.0f)
+		{
+			// y좌표를 0으로 하고 점프를 다시 가능하게 한다
+			g_Players[id]->fPos[1] = 0.0f;
+			g_Players[id]->fJumpSpd = 0.0f;
+			g_Players[id]->bJumping = false;
 		}
 	}
 }
@@ -119,25 +136,24 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		for (const auto& client : ClientList) {
 
 			// 패킷 생성
-			SEND_PLAYER* packet_sendP = new SEND_PLAYER;
-			packet_sendP->type = SC_SEND_PLAYER;
-			packet_sendP->id = sock_info->id;
+			SEND_PLAYER* packet_SP = new SEND_PLAYER;
+			packet_SP->type = SC_SEND_PLAYER;
+			packet_SP->id = sock_info->id;
 
 			// 패킷에 값 지정
-			MOVE_PACKET* packet_tr = new MOVE_PACKET;
-			packet_tr->type = SC_PLAYER_MOVE;
-			packet_tr->fx = g_Players[sock_info->id]->fPos[0];
-			packet_tr->fy = g_Players[sock_info->id]->fPos[1];
-			packet_tr->fz = g_Players[sock_info->id]->fPos[2];
-			packet_tr->rot = g_Players[sock_info->id]->fRotate[1];
+			MOVE_PACKET* packet_MP = new MOVE_PACKET;
+			packet_MP->type = SC_PLAYER_MOVE;
+			packet_MP->fx = g_Players[sock_info->id]->fPos[0];
+			packet_MP->fy = g_Players[sock_info->id]->fPos[1];
+			packet_MP->fz = g_Players[sock_info->id]->fPos[2];
 
 			// 패킷 보내기
-			send(client.socket, reinterpret_cast<char*>(packet_sendP), sizeof(SEND_PLAYER), 0);
-			send(client.socket, reinterpret_cast<char*>(packet_tr), sizeof(MOVE_PACKET), 0);
+			send(client.socket, reinterpret_cast<char*>(packet_SP), sizeof(SEND_PLAYER), 0);
+			send(client.socket, reinterpret_cast<char*>(packet_MP), sizeof(MOVE_PACKET), 0);
 
 			// 패킷 지우기
-			delete packet_sendP;
-			delete packet_tr;
+			delete packet_SP;
+			delete packet_MP;
 
 			printf("### 클라이언트 Process - 데이터 전송 완료\n");
 		}
@@ -154,9 +170,9 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			// 키 입력받는 경우
 			case SC_KEY_INPUT:
 			{
-				// 플레이어 이동 전달하기
+				// 키 입력 전달하기
 				INPUT_PACKET* packet = reinterpret_cast<INPUT_PACKET*>(buf);
-				SendPlayerMove(sock_info, packet->input, packet->bKeyDown);
+				SendPressKey(sock_info, packet->input, packet->bKeyDown);
 				break;
 			}
 		}

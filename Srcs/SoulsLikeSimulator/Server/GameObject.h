@@ -14,11 +14,19 @@ public:
         bForwardKeyDown{ false }, 
         bBackKeyDown{ false }, 
         bLeftKeyDown{ false }, 
-        bRightKeyDown{ false };
+        bRightKeyDown{ false },
 
-    float fPos[3] = { 0.0f, 0.0f, 0.0f };    // 위치
-    float fRotate[3]; // 회전
-    float fScale[3];  // 크기
-    float fColor[3];  // 색상
+        bZDown{ false };
+
+    // 위치
+    float fPos[3] = { 0.0f, 0.0f, 0.0f }; 
+
+    // 점프중 여부
+    bool bJumping = false; 
+    float fJumpSpd = 0.0f;
+
+    // float fRotate[3]; // 회전
+    // float fScale[3];  // 크기
+    // float fColor[3];  // 색상
 };
 

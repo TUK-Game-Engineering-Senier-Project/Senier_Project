@@ -4,7 +4,7 @@
 
 // ----- 실제로 게임 수행하는 코드는 이 파일에 있음 -----
 
-#include "..\Client\GameData.h" // 게임 데이터 모음 헤더
+#include "..\Client\Stdafx.h"
 #include "d3dApp.h"
 
 
@@ -22,36 +22,79 @@ char* SERVERIP = (char*)"127.0.0.1"; // 서버 IP 주소
 #define SERVERPORT 9000 // 서버 포트 번호
 #define BUFSIZE    512  // 버퍼 크기
 
+// 현재 클라이언트 정보
+int g_id;
+g_sockInfo* siSockInfo;
+SOCKET sock;
+Player player[2];
+
+constexpr auto ZKEY = 0x5A; // z키
+
+// 소켓 함수 오류 출력 후 종료
+void err_quit(const char* msg)
+{
+	LPVOID lpMsgBuf;
+	FormatMessageA(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL, WSAGetLastError(),
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(char*)&lpMsgBuf, 0, NULL);
+	MessageBoxA(NULL, (const char*)lpMsgBuf, msg, MB_ICONERROR);
+	LocalFree(lpMsgBuf);
+	exit(1);
+}
+
+// 정보 출력 (제목, 내용)
+void info_show(const char* title, const char* text)
+{
+	HWND hwnd = NULL;
+	LPCSTR lpText = text;
+	LPCSTR lpCaption = title;
+	UINT uType = MB_OK | MB_ICONINFORMATION;
+
+	MessageBoxA(hwnd, lpText, lpCaption, uType);
+}
+
 // 패킷에 키보드 누른 입력값을 전송
 void KeyBoardDown(unsigned char key, int x, int y)
 {
+
 	INPUT_PACKET* packet = new INPUT_PACKET;
 	switch (key)
 	{
-	case VK_LEFT:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_LEFT;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_RIGHT:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_RIGHT;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_UP:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_UP;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_DOWN:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_DOWN;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
+		// 이동
+		case VK_LEFT:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_LEFT;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_RIGHT:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_RIGHT;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_UP:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_UP;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_DOWN:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_DOWN;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+
+		// 점프
+		case ZKEY:
+			packet->type = SC_KEY_INPUT;
+			packet->input = 'z';
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
 	}
 	delete packet;
 }
@@ -89,10 +132,10 @@ void KeyBoardUp(unsigned char key, int x, int y)
 			break;
 
 		// 점프
-		case VK_SPACE:
+		case ZKEY:
 			packet->type = SC_KEY_INPUT;
-			packet->input = VK_SPACE;
-			packet->bKeyDown = false;
+			packet->input = ZKEY;
+			packet->bKeyDown = true;
 			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
 			break;
 	}
@@ -110,7 +153,6 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	char addr[INET_ADDRSTRLEN];
 	int addrlen;
 	char buf[BUFSIZE + 1];
-	int id{};
 
 	while (1) {
 		// 소켓 데이터 받기
@@ -120,32 +162,21 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			break;
 		}
 
-		switch (buf[0]) {
-		case SC_SEND_PLAYER:
-		{
-			SEND_PLAYER* packet_sp = reinterpret_cast<SEND_PLAYER*>(buf);
-			id = packet_sp->id;
-			break;
-		}
-		case SC_PLAYER_MOVE:
-		{
-			// ### 현재 여기는 정상적으로 작동됨
-			// info_show("### buf[0]", "플레이어 이동");
+		// 플레이어 데이터 갱신
+		MOVE_PACKET* packet_tr = reinterpret_cast<MOVE_PACKET*>(buf);
+		player[g_id].trans_x = packet_tr->fx;
+		player[g_id].trans_y = packet_tr->fy;
+		player[g_id].trans_z = packet_tr->fz;
 
-			MOVE_PACKET* packet_tr = reinterpret_cast<MOVE_PACKET*>(buf);
-			player[id].trans_x = packet_tr->fx;
-			player[id].trans_y = packet_tr->fy;
-			player[id].trans_z = packet_tr->fz;
-			player[id].rotate_y = packet_tr->rot;
-
-			break;
-		}
-		case SC_PLAYER_ROTATE:
+		// 버퍼 값에 따른 동작
+		switch (buf[0]) 
 		{
-			ROTATE_PACKET* packet_ro = reinterpret_cast<ROTATE_PACKET*>(buf);
-			player[id].rotate_y = packet_ro->fy;
-			break;
-		}
+			case SC_SEND_PLAYER:
+			{
+				SEND_PLAYER* packet_sp = reinterpret_cast<SEND_PLAYER*>(buf);
+				g_id = packet_sp->id;
+				break;
+			}
 		}
 	}
 
@@ -280,7 +311,8 @@ int D3DApp::Run()
 				Update(mTimer);
 				Draw(mTimer);
 
-				
+				//INPUT_PACKET* packet = new INPUT_PACKET;
+				//send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
 			}
 
 			// 앱이 중단된 경우

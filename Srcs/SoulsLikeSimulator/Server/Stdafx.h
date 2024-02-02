@@ -35,6 +35,10 @@ constexpr int BUFSIZE = 512;         // 버퍼 크기
 
 // ----- 사용자 정의 값, 클래스 -----
 
+extern float g_fPlayerSpd;  // 이동 속도
+extern float g_fJumpSpd; // 점프 속도
+
+
 // 클라이언트 정보
 struct ClientInfo {
 	SOCKET socket;
