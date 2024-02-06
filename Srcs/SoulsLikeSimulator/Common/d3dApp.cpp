@@ -91,7 +91,7 @@ void KeyBoardDown(unsigned char key, int x, int y)
 		// 점프
 		case ZKEY:
 			packet->type = SC_KEY_INPUT;
-			packet->input = 'z';
+			packet->input = ZKEY;
 			packet->bKeyDown = true;
 			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
 			break;
@@ -135,7 +135,7 @@ void KeyBoardUp(unsigned char key, int x, int y)
 		case ZKEY:
 			packet->type = SC_KEY_INPUT;
 			packet->input = ZKEY;
-			packet->bKeyDown = true;
+			packet->bKeyDown = false;
 			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
 			break;
 	}
@@ -311,8 +311,10 @@ int D3DApp::Run()
 				Update(mTimer);
 				Draw(mTimer);
 
-				//INPUT_PACKET* packet = new INPUT_PACKET;
-				//send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+				// 패킷 실시간 전송
+				INPUT_PACKET* packet = new INPUT_PACKET;
+				send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+				Sleep(1); // 전송 간격
 			}
 
 			// 앱이 중단된 경우

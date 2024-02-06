@@ -13,8 +13,8 @@ random_device rd;
 mt19937 gen{ rd() };
 // uniform_int_distribution<int> uid{ 0,2000 };
 
-float g_fPlayerSpd = 0.08f;  // 이동 속도
-float g_fJumpSpd = 0.00012f; // 점프 속도
+float g_fPlayerSpd = 0.05f;  // 이동 속도
+float g_fJumpSpd = 0.20f; // 점프 속도
 
 constexpr auto ZKEY = 0x5A; // z키
 
@@ -35,44 +35,26 @@ void err_quit(const char* msg)
 // 버튼 입력 전달 함수
 void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 {
-	switch (input) 
+	switch (input)
 	{
 		// 화살표 키 (이동)
-		case VK_LEFT: {g_Players[sock_info->id]->bLeftKeyDown = KeyDown; printf("왼쪽 방향키 입력\n");
-			// ### 테스트용
-			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
-				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
-			break; }
-
-		case VK_RIGHT: {g_Players[sock_info->id]->bRightKeyDown = KeyDown; printf("오른쪽 방향키 입력\n");
-			// ### 테스트용
-			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
-				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
-			break; }
-
-		case VK_UP: {g_Players[sock_info->id]->bForwardKeyDown = KeyDown; printf("위 방향키 입력\n");
-			// ### 테스트용
-			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
-				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
-			break; }
-
-		case VK_DOWN: {g_Players[sock_info->id]->bBackKeyDown = KeyDown; printf("아래 방향키 입력\n");
-			// ### 테스트용
-			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
-				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
-			break; }
+		case VK_LEFT: {g_Players[sock_info->id]->bLeftKeyDown = KeyDown; printf("왼쪽 방향키 입력\n"); break; }
+		case VK_RIGHT: {g_Players[sock_info->id]->bRightKeyDown = KeyDown; printf("오른쪽 방향키 입력\n"); break; }
+		case VK_UP: {g_Players[sock_info->id]->bForwardKeyDown = KeyDown; printf("위 방향키 입력\n"); break; }
+		case VK_DOWN: {g_Players[sock_info->id]->bBackKeyDown = KeyDown; printf("아래 방향키 입력\n"); break; }
 
 		// z키 (점프)
-		case ZKEY: {g_Players[sock_info->id]->bZDown = KeyDown; printf("점프 키 (스페이스바) 입력\n");
-			// ### 테스트용
-			printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
-				g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
-			break; }
+		case ZKEY: {g_Players[sock_info->id]->bZDown = KeyDown; printf("점프 키 (z키) 입력\n"); break; }
 	}
+
+	// ### 테스트용
+	printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
+		g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
+	printf("### 점프속도 : (%.2f)\n", g_Players[sock_info->id]->fJumpSpd);
 }
 
 // 플레이어 업데이트
-void UpdatePlayer() 
+void UpdatePlayer()
 {
 	// 각 플레이어에 대하여
 	for (int id = 0; id < 1; id++) { // ### 테스트용 - 나중에 id < 2로 수정 예정
@@ -80,32 +62,37 @@ void UpdatePlayer()
 		// 입력된 키에 따라 동작 수행하기
 
 		if (g_Players[id]->bForwardKeyDown) { g_Players[id]->fPos[2] += g_fPlayerSpd; }
-		if (g_Players[id]->bBackKeyDown) { g_Players[id]->fPos[2] -= g_fPlayerSpd; }
-		if (g_Players[id]->bLeftKeyDown) { g_Players[id]->fPos[0] -= g_fPlayerSpd; }
-		if (g_Players[id]->bRightKeyDown) { g_Players[id]->fPos[0] += g_fPlayerSpd; }
-		
-		if (g_Players[id]->bZDown)
+		else if (g_Players[id]->bBackKeyDown) { g_Players[id]->fPos[2] -= g_fPlayerSpd; }
+		else if (g_Players[id]->bLeftKeyDown) { g_Players[id]->fPos[0] -= g_fPlayerSpd; }
+		else if (g_Players[id]->bRightKeyDown) { g_Players[id]->fPos[0] += g_fPlayerSpd; }
+		else if (g_Players[id]->bZDown)
 		{
 			// 스페이스바 눌렀으면 점프 시작
 			printf("[점프 시작]\n");
+			g_Players[id]->fPos[1] = 0.01f;
 			g_Players[id]->bJumping = true;
-			g_Players[id]->fJumpSpd = 0.022f;
+			g_Players[id]->fJumpSpd = g_fJumpSpd;
 		}
 
 		// 점프 동작
-
-		// 점프 속도에 따른 y좌표 변화
-		g_Players[id]->fPos[1] += g_Players[id]->fJumpSpd;
-		g_Players[id]->fJumpSpd -= 0.006f;
-
-		// 플레이어 y좌표가 0 미만일 경우
-		if (g_Players[id]->fPos[1] < 0.0f)
+		if (g_Players[id]->bJumping)
 		{
-			// y좌표를 0으로 하고 점프를 다시 가능하게 한다
-			g_Players[id]->fPos[1] = 0.0f;
-			g_Players[id]->fJumpSpd = 0.0f;
-			g_Players[id]->bJumping = false;
+			printf("[점프중]\n");
+
+			// 점프 속도에 따른 y좌표 변화
+			g_Players[id]->fPos[1] += g_Players[id]->fJumpSpd;
+			g_Players[id]->fJumpSpd -= 0.006f;
+
+			// 플레이어 y좌표가 0 미만일 경우
+			if (g_Players[id]->fPos[1] < 0.0f)
+			{
+				// y좌표를 0으로 하고 점프를 다시 가능하게 한다
+				g_Players[id]->fPos[1] = 0.0f;
+				g_Players[id]->fJumpSpd = 0.0f;
+				g_Players[id]->bJumping = false;
+			}
 		}
+
 	}
 }
 
@@ -127,10 +114,10 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
 
 	// ----- 클라이언트 Process 루프 시작 ----- //
-	while (1) 
+	while (1)
 	{
 		// 플레이어 정보 업데이트
-		UpdatePlayer(); 
+		UpdatePlayer();
 
 		// 각 클라이언트의 데이터 보내기
 		for (const auto& client : ClientList) {
@@ -155,7 +142,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			delete packet_SP;
 			delete packet_MP;
 
-			printf("### 클라이언트 Process - 데이터 전송 완료\n");
+			// printf("### 클라이언트 Process - 데이터 전송 완료\n");
 		}
 
 		// 데이터 받기
@@ -164,17 +151,17 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			err_quit("recv()");
 			break;
 		}
-		
+
 		// 버퍼 값에 따라 동작 수행
 		switch (buf[0]) {
 			// 키 입력받는 경우
-			case SC_KEY_INPUT:
-			{
-				// 키 입력 전달하기
-				INPUT_PACKET* packet = reinterpret_cast<INPUT_PACKET*>(buf);
-				SendPressKey(sock_info, packet->input, packet->bKeyDown);
-				break;
-			}
+		case SC_KEY_INPUT:
+		{
+			// 키 입력 전달하기
+			INPUT_PACKET* packet = reinterpret_cast<INPUT_PACKET*>(buf);
+			SendPressKey(sock_info, packet->input, packet->bKeyDown);
+			break;
+		}
 		}
 	}
 	// ----- 클라이언트 Process 루프 종료 ----- //
