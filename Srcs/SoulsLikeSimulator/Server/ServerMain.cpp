@@ -19,7 +19,7 @@ float g_fJumpSpd = 0.20f; // 점프 속도
 constexpr auto ZKEY = 0x5A; // z키
 
 // 소켓 함수 오류 출력 후 종료
-void err_quit(const char* msg)
+void ErrorQuit(const char* msg)
 {
 	LPVOID lpMsgBuf;
 	FormatMessageA(
@@ -35,6 +35,9 @@ void err_quit(const char* msg)
 // 버튼 입력 전달 함수
 void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 {
+
+
+
 	switch (input)
 	{
 		// 화살표 키 (이동)
@@ -59,13 +62,16 @@ void UpdatePlayer()
 	// 각 플레이어에 대하여
 	for (int id = 0; id < 1; id++) { // ### 테스트용 - 나중에 id < 2로 수정 예정
 
-		// 입력된 키에 따라 동작 수행하기
+		// ----- 입력한 키에 따른 동작 수행 ----- //
 
+		// 입력한 화살표키에 따라 이동
 		if (g_Players[id]->bForwardKeyDown) { g_Players[id]->fPos[2] += g_fPlayerSpd; }
-		else if (g_Players[id]->bBackKeyDown) { g_Players[id]->fPos[2] -= g_fPlayerSpd; }
-		else if (g_Players[id]->bLeftKeyDown) { g_Players[id]->fPos[0] -= g_fPlayerSpd; }
-		else if (g_Players[id]->bRightKeyDown) { g_Players[id]->fPos[0] += g_fPlayerSpd; }
-		else if (g_Players[id]->bZDown)
+		if (g_Players[id]->bBackKeyDown) { g_Players[id]->fPos[2] -= g_fPlayerSpd; }
+		if (g_Players[id]->bLeftKeyDown) { g_Players[id]->fPos[0] -= g_fPlayerSpd; }
+		if (g_Players[id]->bRightKeyDown) { g_Players[id]->fPos[0] += g_fPlayerSpd; }
+
+		// z키 누르면 점프 시작하기
+		if ((g_Players[id]->bZDown) && (!g_Players[id]->bJumping)) // z키 눌렀고 점프중이 아니면
 		{
 			// 스페이스바 눌렀으면 점프 시작
 			printf("[점프 시작]\n");
@@ -148,7 +154,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		// 데이터 받기
 		iRetval = recv(client_sock, buf, BUFSIZE, 0);
 		if (iRetval == SOCKET_ERROR) {
-			err_quit("recv()");
+			ErrorQuit("데이터 recv()");
 			break;
 		}
 
@@ -182,7 +188,7 @@ int main(int argc, char* argv[])
 
 	// 소켓 생성
 	listen_sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (listen_sock == INVALID_SOCKET) err_quit("Error: 소켓 생성");
+	if (listen_sock == INVALID_SOCKET) ErrorQuit("Error: 소켓 생성");
 
 	// 소켓 bind()
 	struct sockaddr_in serveraddr;
@@ -191,11 +197,11 @@ int main(int argc, char* argv[])
 	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	serveraddr.sin_port = htons(SERVERPORT);
 	retval = bind(listen_sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
-	if (retval == SOCKET_ERROR) err_quit("Error: 소켓 bind()");
+	if (retval == SOCKET_ERROR) ErrorQuit("Error: 소켓 bind()");
 
 	// 소켓 listen()
 	retval = listen(listen_sock, SOMAXCONN);
-	if (retval == SOCKET_ERROR) err_quit("Error: 소켓 listen()");
+	if (retval == SOCKET_ERROR) ErrorQuit("Error: 소켓 listen()");
 
 	// 데이터 통신에 사용할 변수
 	SOCK_INFO* Clients = new SOCK_INFO[2]; // 플레이어 2명 (1 대 1 PVP)
@@ -215,7 +221,7 @@ int main(int argc, char* argv[])
 		client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
 		if (listen_sock == 0)break;
 		if (client_sock == INVALID_SOCKET) {
-			err_quit("Error: 소켓 accept()");
+			ErrorQuit("Error: 소켓 accept()");
 			break;
 		}
 
