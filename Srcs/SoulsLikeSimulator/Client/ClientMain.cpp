@@ -17,7 +17,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 #endif
     try
     {
-        BoxApp theApp(hInstance);
+        SoulSimul theApp(hInstance);
         if (!theApp.Initialize())
             return 0;
 

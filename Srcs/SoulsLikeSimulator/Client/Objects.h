@@ -4,10 +4,9 @@
 
 #include "Stdafx.h" // 사용자 정의 헤더
 
-#include "../Common/d3dApp.h"
+#include "../Common/GameApp.h"
 #include "../Common/MathHelper.h"
 #include "../Common/UploadBuffer.h"
-
 
 
 using Microsoft::WRL::ComPtr;
@@ -28,13 +27,13 @@ struct ObjectConstants
 };
 
 // 프로그램 실행
-class BoxApp : public D3DApp
+class SoulSimul : public GameApp
 {
 public:
-    BoxApp(HINSTANCE hInstance);
-    BoxApp(const BoxApp& rhs) = delete;
-    BoxApp& operator=(const BoxApp& rhs) = delete;
-    ~BoxApp();
+    SoulSimul(HINSTANCE hInstance);
+    SoulSimul(const SoulSimul& rhs) = delete;
+    SoulSimul& operator=(const SoulSimul& rhs) = delete;
+    ~SoulSimul();
 
     virtual bool Initialize()override;
 

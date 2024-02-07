@@ -1,5 +1,5 @@
 //***************************************************************************************
-// d3dApp.h by Frank Luna (C) 2015 All Rights Reserved.
+// GameApp.h by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 
 #pragma once
@@ -17,18 +17,18 @@
 #pragma comment(lib, "D3D12.lib")
 #pragma comment(lib, "dxgi.lib")
 
-class D3DApp
+class GameApp
 {
 protected:
 
-    D3DApp(HINSTANCE hInstance);
-    D3DApp(const D3DApp& rhs) = delete;
-    D3DApp& operator=(const D3DApp& rhs) = delete;
-    virtual ~D3DApp();
+    GameApp(HINSTANCE hInstance);
+    GameApp(const GameApp& rhs) = delete;
+    GameApp& operator=(const GameApp& rhs) = delete;
+    virtual ~GameApp();
 
 public:
 
-    static D3DApp* GetApp();
+    static GameApp* GetApp();
     
 	HINSTANCE AppInst()const;
 	HWND      MainWnd()const;
@@ -74,7 +74,7 @@ protected:
 
 protected:
 
-    static D3DApp* mApp;
+    static GameApp* mApp;
 
     HINSTANCE mhAppInst = nullptr; // application instance handle
     HWND      mhMainWnd = nullptr; // main window handle

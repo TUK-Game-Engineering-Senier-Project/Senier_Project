@@ -2,18 +2,18 @@
 
 // ----- 오브젝트 관련 내용 cpp 파일 -----
 
-BoxApp::BoxApp(HINSTANCE hInstance)
-    : D3DApp(hInstance)
+SoulSimul::SoulSimul(HINSTANCE hInstance)
+    : GameApp(hInstance)
 {
 }
 
-BoxApp::~BoxApp()
+SoulSimul::~SoulSimul()
 {
 }
 
-bool BoxApp::Initialize()
+bool SoulSimul::Initialize()
 {
-    if (!D3DApp::Initialize())
+    if (!GameApp::Initialize())
         return false;
 
     // Reset the command list to prep for initialization commands.
@@ -37,16 +37,16 @@ bool BoxApp::Initialize()
     return true;
 }
 
-void BoxApp::OnResize()
+void SoulSimul::OnResize()
 {
-    D3DApp::OnResize();
+    GameApp::OnResize();
 
     // The window resized, so update the aspect ratio and recompute the projection matrix.
     XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
     XMStoreFloat4x4(&mProj, P);
 }
 
-void BoxApp::Update(const GameTimer& gt)
+void SoulSimul::Update(const GameTimer& gt)
 {
     // Convert Spherical to Cartesian coordinates.
     float x = mRadius * sinf(mPhi) * cosf(mTheta);
@@ -81,7 +81,7 @@ void BoxApp::Update(const GameTimer& gt)
     mObjectCB->CopyData(0, objConstants);
 }
 
-void BoxApp::Draw(const GameTimer& gt)
+void SoulSimul::Draw(const GameTimer& gt)
 {
     // Reuse the memory associated with command recording.
     // We can only reset when the associated command lists have finished execution on the GPU.
@@ -141,7 +141,7 @@ void BoxApp::Draw(const GameTimer& gt)
     FlushCommandQueue();
 }
 
-void BoxApp::OnMouseDown(WPARAM btnState, int x, int y)
+void SoulSimul::OnMouseDown(WPARAM btnState, int x, int y)
 {
     mLastMousePos.x = x;
     mLastMousePos.y = y;
@@ -149,12 +149,12 @@ void BoxApp::OnMouseDown(WPARAM btnState, int x, int y)
     SetCapture(mhMainWnd);
 }
 
-void BoxApp::OnMouseUp(WPARAM btnState, int x, int y)
+void SoulSimul::OnMouseUp(WPARAM btnState, int x, int y)
 {
     ReleaseCapture();
 }
 
-void BoxApp::OnMouseMove(WPARAM btnState, int x, int y)
+void SoulSimul::OnMouseMove(WPARAM btnState, int x, int y)
 {
     if ((btnState & MK_LBUTTON) != 0)
     {
@@ -186,7 +186,7 @@ void BoxApp::OnMouseMove(WPARAM btnState, int x, int y)
     mLastMousePos.y = y;
 }
 
-void BoxApp::BuildDescriptorHeaps()
+void SoulSimul::BuildDescriptorHeaps()
 {
     D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
     cbvHeapDesc.NumDescriptors = 1;
@@ -197,7 +197,7 @@ void BoxApp::BuildDescriptorHeaps()
         IID_PPV_ARGS(&mCbvHeap)));
 }
 
-void BoxApp::BuildConstantBuffers()
+void SoulSimul::BuildConstantBuffers()
 {
     mObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice.Get(), 1, true);
 
@@ -217,7 +217,7 @@ void BoxApp::BuildConstantBuffers()
         mCbvHeap->GetCPUDescriptorHandleForHeapStart());
 }
 
-void BoxApp::BuildRootSignature()
+void SoulSimul::BuildRootSignature()
 {
     // Shader programs typically require resources as input (constant buffers,
     // textures, samplers).  The root signature defines the resources the shader
@@ -256,7 +256,7 @@ void BoxApp::BuildRootSignature()
         IID_PPV_ARGS(&mRootSignature)));
 }
 
-void BoxApp::BuildShadersAndInputLayout()
+void SoulSimul::BuildShadersAndInputLayout()
 {
     HRESULT hr = S_OK;
 
@@ -270,7 +270,7 @@ void BoxApp::BuildShadersAndInputLayout()
     };
 }
 
-void BoxApp::BuildBoxGeometry()
+void SoulSimul::BuildBoxGeometry()
 {
     // ### 여기도 scale_x (y, z)로 수정해야 함
     float fBoxSize = 0.6f;
@@ -345,7 +345,7 @@ void BoxApp::BuildBoxGeometry()
     mBoxGeo->DrawArgs["box"] = submesh;
 }
 
-void BoxApp::BuildPSO()
+void SoulSimul::BuildPSO()
 {
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
     ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
