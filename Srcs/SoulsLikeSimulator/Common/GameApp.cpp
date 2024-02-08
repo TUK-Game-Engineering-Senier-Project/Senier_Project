@@ -23,11 +23,11 @@ char* SERVERIP = (char*)"127.0.0.1"; // 서버 IP 주소
 #define BUFSIZE    512  // 버퍼 크기
 
 // 현재 클라이언트 정보
-int g_id;
 g_sockInfo* siSockInfo;
 SOCKET sock;
-Pla
-yer player[2];
+int g_id; // 플레이어 ID
+Player player[2];// 플레이어 2인
+PlayerLookDir playerLookDir[2]; // 플레이어 각자 보는 방향
 
 constexpr auto ZKEY = 0x5A; // z키
 
@@ -167,6 +167,11 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		player[g_id].trans_x = packet_tr->fx;
 		player[g_id].trans_y = packet_tr->fy;
 		player[g_id].trans_z = packet_tr->fz;
+
+		// ### 플레이어 바라보는 위치 (임시)
+		playerLookDir[g_id].trans_x = 1.0f;
+		playerLookDir[g_id].trans_y = 0.0f;
+		playerLookDir[g_id].trans_z = 1.0f;
 
 		// 버퍼 값에 따른 동작
 		switch (buf[0]) 

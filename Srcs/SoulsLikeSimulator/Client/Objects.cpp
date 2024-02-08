@@ -23,7 +23,9 @@ bool SoulSimul::Initialize()
     BuildConstantBuffers();
     BuildRootSignature();
     BuildShadersAndInputLayout();
-    BuildBoxGeometry();
+    
+    BuildPlayerGeometry(); // 플레이어 그리기
+
     BuildPSO();
 
     // Execute the initialization commands.
@@ -66,7 +68,6 @@ void SoulSimul::Update(const GameTimer& gt)
     XMMATRIX translation = XMMatrixTranslation
     (
         player[g_id].trans_x, player[g_id].trans_y, player[g_id].trans_z
-        // player[0].trans_x, player[0].trans_y, player[0].trans_z
     );
     XMMATRIX world = translation;
     XMMATRIX proj = XMLoadFloat4x4(&mProj);
@@ -76,9 +77,8 @@ void SoulSimul::Update(const GameTimer& gt)
     ObjectConstants objConstants;
     XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
 
-
     // 상수 데이터 복사
-    mObjectCB->CopyData(0, objConstants);
+    mPlayerCB->CopyData(0, objConstants);
 }
 
 void SoulSimul::Draw(const GameTimer& gt)
@@ -110,15 +110,19 @@ void SoulSimul::Draw(const GameTimer& gt)
 
     mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
-    mCommandList->IASetVertexBuffers(0, 1, &mBoxGeo->VertexBufferView());
-    mCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());
+    // 플레이어 그리기
+    mCommandList->IASetVertexBuffers(0, 1, &mPlayer->VertexBufferView());
+    mCommandList->IASetIndexBuffer(&mPlayer->IndexBufferView());
     mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
     mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+    mCommandList->DrawIndexedInstanced( mPlayer->DrawArgs["player"].IndexCount, 1, 0, 0, 0);
 
-    mCommandList->DrawIndexedInstanced(
-        mBoxGeo->DrawArgs["box"].IndexCount,
-        1, 0, 0, 0);
+    // 플레이어 바라보는 방향 그리기
+    mCommandList->IASetVertexBuffers(0, 1, &mPlayer->VertexBufferView());
+    mCommandList->IASetIndexBuffer(&mPlayer->IndexBufferView());
+    mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+    mCommandList->DrawIndexedInstanced(mPlayer->DrawArgs["playerLookDir"].IndexCount, 1, 0, 0, 0);
 
     // Indicate a state transition on the resource usage.
     mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -199,11 +203,11 @@ void SoulSimul::BuildDescriptorHeaps()
 
 void SoulSimul::BuildConstantBuffers()
 {
-    mObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice.Get(), 1, true);
+    mPlayerCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice.Get(), 1, true);
 
     UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 
-    D3D12_GPU_VIRTUAL_ADDRESS cbAddress = mObjectCB->Resource()->GetGPUVirtualAddress();
+    D3D12_GPU_VIRTUAL_ADDRESS cbAddress = mPlayerCB->Resource()->GetGPUVirtualAddress();
     // Offset to the ith object constant buffer in the buffer.
     int boxCBufIndex = 0;
     cbAddress += boxCBufIndex * objCBByteSize;
@@ -270,7 +274,7 @@ void SoulSimul::BuildShadersAndInputLayout()
     };
 }
 
-void SoulSimul::BuildBoxGeometry()
+void SoulSimul::BuildPlayerGeometry()
 {
     // 여기도 scale_x (y, z)로 수정함
     float fxScale = player[g_id].scale_x;
@@ -319,32 +323,32 @@ void SoulSimul::BuildBoxGeometry()
     const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
     const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
-    mBoxGeo = std::make_unique<MeshGeometry>();
-    mBoxGeo->Name = "boxGeo";
+    mPlayer = std::make_unique<MeshGeometry>();
+    mPlayer->Name = "playerGeo";
 
-    ThrowIfFailed(D3DCreateBlob(vbByteSize, &mBoxGeo->VertexBufferCPU));
-    CopyMemory(mBoxGeo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+    ThrowIfFailed(D3DCreateBlob(vbByteSize, &mPlayer->VertexBufferCPU));
+    CopyMemory(mPlayer->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
 
-    ThrowIfFailed(D3DCreateBlob(ibByteSize, &mBoxGeo->IndexBufferCPU));
-    CopyMemory(mBoxGeo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+    ThrowIfFailed(D3DCreateBlob(ibByteSize, &mPlayer->IndexBufferCPU));
+    CopyMemory(mPlayer->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
 
-    mBoxGeo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-        mCommandList.Get(), vertices.data(), vbByteSize, mBoxGeo->VertexBufferUploader);
+    mPlayer->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), vertices.data(), vbByteSize, mPlayer->VertexBufferUploader);
 
-    mBoxGeo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-        mCommandList.Get(), indices.data(), ibByteSize, mBoxGeo->IndexBufferUploader);
+    mPlayer->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), indices.data(), ibByteSize, mPlayer->IndexBufferUploader);
 
-    mBoxGeo->VertexByteStride = sizeof(Vertex);
-    mBoxGeo->VertexBufferByteSize = vbByteSize;
-    mBoxGeo->IndexFormat = DXGI_FORMAT_R16_UINT;
-    mBoxGeo->IndexBufferByteSize = ibByteSize;
+    mPlayer->VertexByteStride = sizeof(Vertex);
+    mPlayer->VertexBufferByteSize = vbByteSize;
+    mPlayer->IndexFormat = DXGI_FORMAT_R16_UINT;
+    mPlayer->IndexBufferByteSize = ibByteSize;
 
     SubmeshGeometry submesh;
     submesh.IndexCount = (UINT)indices.size();
     submesh.StartIndexLocation = 0;
     submesh.BaseVertexLocation = 0;
 
-    mBoxGeo->DrawArgs["box"] = submesh;
+    mPlayer->DrawArgs["player"] = submesh;
 }
 
 void SoulSimul::BuildPSO()
