@@ -26,7 +26,8 @@ char* SERVERIP = (char*)"127.0.0.1"; // 서버 IP 주소
 int g_id;
 g_sockInfo* siSockInfo;
 SOCKET sock;
-Player player[2];
+Pla
+yer player[2];
 
 constexpr auto ZKEY = 0x5A; // z키
 

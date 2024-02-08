@@ -272,19 +272,21 @@ void SoulSimul::BuildShadersAndInputLayout()
 
 void SoulSimul::BuildBoxGeometry()
 {
-    // ### 여기도 scale_x (y, z)로 수정해야 함
-    float fBoxSize = 0.6f;
+    // 여기도 scale_x (y, z)로 수정함
+    float fxScale = player[g_id].scale_x;
+    float fyScale = player[g_id].scale_y;
+    float fzScale = player[g_id].scale_z;
 
     std::array<Vertex, 8> vertices =
     {
-        Vertex({ XMFLOAT3(-fBoxSize, -fBoxSize, -fBoxSize), XMFLOAT4(Colors::White) }),
-        Vertex({ XMFLOAT3(-fBoxSize, +fBoxSize, -fBoxSize), XMFLOAT4(Colors::Black) }),
-        Vertex({ XMFLOAT3(+fBoxSize, +fBoxSize, -fBoxSize), XMFLOAT4(Colors::Red) }),
-        Vertex({ XMFLOAT3(+fBoxSize, -fBoxSize, -fBoxSize), XMFLOAT4(Colors::Green) }),
-        Vertex({ XMFLOAT3(-fBoxSize, -fBoxSize, +fBoxSize), XMFLOAT4(Colors::Blue) }),
-        Vertex({ XMFLOAT3(-fBoxSize, +fBoxSize, +fBoxSize), XMFLOAT4(Colors::Yellow) }),
-        Vertex({ XMFLOAT3(+fBoxSize, +fBoxSize, +fBoxSize), XMFLOAT4(Colors::Cyan) }),
-        Vertex({ XMFLOAT3(+fBoxSize, -fBoxSize, +fBoxSize), XMFLOAT4(Colors::Magenta) })
+        Vertex({ XMFLOAT3(-fxScale, -fyScale, -fzScale), XMFLOAT4(Colors::White) }),
+        Vertex({ XMFLOAT3(-fxScale, +fyScale, -fzScale), XMFLOAT4(Colors::Black) }),
+        Vertex({ XMFLOAT3(+fxScale, +fyScale, -fzScale), XMFLOAT4(Colors::Red) }),
+        Vertex({ XMFLOAT3(+fxScale, -fyScale, -fzScale), XMFLOAT4(Colors::Green) }),
+        Vertex({ XMFLOAT3(-fxScale, -fyScale, +fzScale), XMFLOAT4(Colors::Blue) }),
+        Vertex({ XMFLOAT3(-fxScale, +fyScale, +fzScale), XMFLOAT4(Colors::Yellow) }),
+        Vertex({ XMFLOAT3(+fxScale, +fyScale, +fzScale), XMFLOAT4(Colors::Cyan) }),
+        Vertex({ XMFLOAT3(+fxScale, -fyScale, +fzScale), XMFLOAT4(Colors::Magenta) })
     };
 
     std::array<std::uint16_t, 36> indices =

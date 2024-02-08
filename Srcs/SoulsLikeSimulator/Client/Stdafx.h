@@ -80,8 +80,8 @@ extern struct SEND_PLAYER {
 extern struct Player
 {
 	float trans_x{}, trans_y{}, trans_z{};
-	float rotate_x{}, rotate_y{}, rotate_z{};
-	float scale_x{ 1.0f }, scale_y{ 1.0f }, scale_z{ 1.0f };
+	float scale_x{ 0.5f }, scale_y{ 1.0f }, scale_z{ 0.5f };
+	// float rotate_x{}, rotate_y{}, rotate_z{};
 	// float color_r{}, color_g{}, color_b{};
 };
 

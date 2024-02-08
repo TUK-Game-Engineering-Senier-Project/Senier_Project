@@ -36,8 +36,6 @@ void ErrorQuit(const char* msg)
 void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 {
 
-
-
 	switch (input)
 	{
 		// 화살표 키 (이동)
