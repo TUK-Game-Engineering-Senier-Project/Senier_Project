@@ -24,7 +24,8 @@ bool SoulSimul::Initialize()
     BuildRootSignature();
     BuildShadersAndInputLayout();
     
-    BuildPlayerGeometry(); // 플레이어 그리기
+    BuildPlayerGeometry(); // 플레이어
+    BuildPlayerLookGeometry(); // 플레이어 시선
 
     BuildPSO();
 
@@ -69,16 +70,23 @@ void SoulSimul::Update(const GameTimer& gt)
     (
         player[g_id].trans_x, player[g_id].trans_y, player[g_id].trans_z
     );
-    XMMATRIX world = translation;
     XMMATRIX proj = XMLoadFloat4x4(&mProj);
-    XMMATRIX worldViewProj = world * view * proj;
+    XMMATRIX playerViewProj = translation * view * proj;
+    ObjectConstants objPlayerConstants;
+    XMStoreFloat4x4(&objPlayerConstants.WorldViewProj, XMMatrixTranspose(playerViewProj));
 
-    // Update the constant buffer with the latest worldViewProj matrix.
-    ObjectConstants objConstants;
-    XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
+    mPlayerCB->CopyData(0, objPlayerConstants); // 상수 데이터 복사
 
-    // 상수 데이터 복사
-    mPlayerCB->CopyData(0, objConstants);
+    // 플레이어 시선 
+    XMMATRIX playerLook = XMMatrixTranslation
+    (
+        2.0f, 0.0f, 0.0f
+    );
+    XMMATRIX playerLookViewProj = playerViewProj * playerLook;
+    ObjectConstants objPlayerLookConstants;
+    XMStoreFloat4x4(&objPlayerLookConstants.WorldViewProj, XMMatrixTranspose(playerLookViewProj));
+    
+    // mPlayerLookCB->CopyData(0, objPlayerLookConstants); // 상수 데이터 복사
 }
 
 void SoulSimul::Draw(const GameTimer& gt)
@@ -105,24 +113,26 @@ void SoulSimul::Draw(const GameTimer& gt)
     // Specify the buffers we are going to render to.
     mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 
+    mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
+
     ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap.Get() };
     mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-    mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
-
     // 플레이어 그리기
+
     mCommandList->IASetVertexBuffers(0, 1, &mPlayer->VertexBufferView());
     mCommandList->IASetIndexBuffer(&mPlayer->IndexBufferView());
-    mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
     mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-    mCommandList->DrawIndexedInstanced( mPlayer->DrawArgs["player"].IndexCount, 1, 0, 0, 0);
+    mCommandList->DrawIndexedInstanced(mPlayer->DrawArgs["player"].IndexCount, 1, 0, 0, 0);
 
     // 플레이어 바라보는 방향 그리기
-    mCommandList->IASetVertexBuffers(0, 1, &mPlayer->VertexBufferView());
-    mCommandList->IASetIndexBuffer(&mPlayer->IndexBufferView());
+
+    mCommandList->IASetVertexBuffers(0, 1, &mPlayerLook->VertexBufferView());
+    mCommandList->IASetIndexBuffer(&mPlayerLook->IndexBufferView());
     mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-    mCommandList->DrawIndexedInstanced(mPlayer->DrawArgs["playerLookDir"].IndexCount, 1, 0, 0, 0);
+    mCommandList->DrawIndexedInstanced(mPlayerLook->DrawArgs["playerLook"].IndexCount, 1, 0, 0, 0);
 
     // Indicate a state transition on the resource usage.
     mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -194,31 +204,54 @@ void SoulSimul::BuildDescriptorHeaps()
 {
     D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
     cbvHeapDesc.NumDescriptors = 1;
+    cbvHeapDesc.NodeMask = 0;
     cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-    cbvHeapDesc.NodeMask = 0;
-    ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&cbvHeapDesc,
-        IID_PPV_ARGS(&mCbvHeap)));
+
+    D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc2;
+    cbvHeapDesc2.NumDescriptors = 2;
+    cbvHeapDesc2.NodeMask = 1;
+    cbvHeapDesc2.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    cbvHeapDesc2.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+    ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
+    //ThrowIfFailed(md3dDevice2->CreateDescriptorHeap(&cbvHeapDesc2, IID_PPV_ARGS(&mCbvHeap2)));
 }
 
 void SoulSimul::BuildConstantBuffers()
 {
     mPlayerCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice.Get(), 1, true);
+    //mPlayerLookCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice2.Get(), 1, true);
 
     UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 
-    D3D12_GPU_VIRTUAL_ADDRESS cbAddress = mPlayerCB->Resource()->GetGPUVirtualAddress();
-    // Offset to the ith object constant buffer in the buffer.
     int boxCBufIndex = 0;
-    cbAddress += boxCBufIndex * objCBByteSize;
 
-    D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-    cbvDesc.BufferLocation = cbAddress;
-    cbvDesc.SizeInBytes = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+    // 플레이어
 
-    md3dDevice->CreateConstantBufferView(
-        &cbvDesc,
-        mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+    D3D12_GPU_VIRTUAL_ADDRESS cbPlayerAddress = mPlayerCB->Resource()->GetGPUVirtualAddress();
+    // Offset to the ith object constant buffer in the buffer.
+    
+    cbPlayerAddress += boxCBufIndex * objCBByteSize;
+
+    D3D12_CONSTANT_BUFFER_VIEW_DESC cbvPlayerDesc;
+    cbvPlayerDesc.BufferLocation = cbPlayerAddress;
+    cbvPlayerDesc.SizeInBytes = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+    md3dDevice->CreateConstantBufferView(&cbvPlayerDesc, mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+
+    // 플레이어 시선
+
+    /*
+    D3D12_GPU_VIRTUAL_ADDRESS cbPlayerLookAddress = mPlayerLookCB->Resource()->GetGPUVirtualAddress();
+    // Offset to the ith object constant buffer in the buffer.
+
+    cbPlayerLookAddress += boxCBufIndex * objCBByteSize;
+
+    D3D12_CONSTANT_BUFFER_VIEW_DESC cbvPlayerLookDesc;
+    cbvPlayerLookDesc.BufferLocation = cbPlayerLookAddress;
+    cbvPlayerLookDesc.SizeInBytes = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+    md3dDevice2->CreateConstantBufferView(&cbvPlayerLookDesc, mCbvHeap2->GetCPUDescriptorHandleForHeapStart());
+    */
 }
 
 void SoulSimul::BuildRootSignature()
@@ -258,6 +291,14 @@ void SoulSimul::BuildRootSignature()
         serializedRootSig->GetBufferPointer(),
         serializedRootSig->GetBufferSize(),
         IID_PPV_ARGS(&mRootSignature)));
+
+    /*
+    ThrowIfFailed(md3dDevice2->CreateRootSignature(
+        0,
+        serializedRootSig->GetBufferPointer(),
+        serializedRootSig->GetBufferSize(),
+        IID_PPV_ARGS(&mRootSignature)));
+    */
 }
 
 void SoulSimul::BuildShadersAndInputLayout()
@@ -272,6 +313,37 @@ void SoulSimul::BuildShadersAndInputLayout()
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
         { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
     };
+}
+
+void SoulSimul::BuildPSO()
+{
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
+    ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+    psoDesc.InputLayout = { mInputLayout.data(), (UINT)mInputLayout.size() };
+    psoDesc.pRootSignature = mRootSignature.Get();
+    psoDesc.VS =
+    {
+        reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
+        mvsByteCode->GetBufferSize()
+    };
+    psoDesc.PS =
+    {
+        reinterpret_cast<BYTE*>(mpsByteCode->GetBufferPointer()),
+        mpsByteCode->GetBufferSize()
+    };
+    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    psoDesc.SampleMask = UINT_MAX;
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    psoDesc.NumRenderTargets = 1;
+    psoDesc.RTVFormats[0] = mBackBufferFormat;
+    psoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
+    psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
+    psoDesc.DSVFormat = mDepthStencilFormat;
+
+    ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO)));
+    // ThrowIfFailed(md3dDevice2->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO)));
 }
 
 void SoulSimul::BuildPlayerGeometry()
@@ -351,31 +423,78 @@ void SoulSimul::BuildPlayerGeometry()
     mPlayer->DrawArgs["player"] = submesh;
 }
 
-void SoulSimul::BuildPSO()
+void SoulSimul::BuildPlayerLookGeometry()
 {
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
-    ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
-    psoDesc.InputLayout = { mInputLayout.data(), (UINT)mInputLayout.size() };
-    psoDesc.pRootSignature = mRootSignature.Get();
-    psoDesc.VS =
+    float fxScale = 0.2f;
+    float fyScale = 0.2f;
+    float fzScale = 0.2f;
+
+    std::array<Vertex, 8> vertices =
     {
-        reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
-        mvsByteCode->GetBufferSize()
+        Vertex({ XMFLOAT3(-fxScale, -fyScale, -fzScale), XMFLOAT4(Colors::White) }),
+        Vertex({ XMFLOAT3(-fxScale, +fyScale, -fzScale), XMFLOAT4(Colors::Black) }),
+        Vertex({ XMFLOAT3(+fxScale, +fyScale, -fzScale), XMFLOAT4(Colors::White) }),
+        Vertex({ XMFLOAT3(+fxScale, -fyScale, -fzScale), XMFLOAT4(Colors::Black) }),
+        Vertex({ XMFLOAT3(-fxScale, -fyScale, +fzScale), XMFLOAT4(Colors::White) }),
+        Vertex({ XMFLOAT3(-fxScale, +fyScale, +fzScale), XMFLOAT4(Colors::Black) }),
+        Vertex({ XMFLOAT3(+fxScale, +fyScale, +fzScale), XMFLOAT4(Colors::White) }),
+        Vertex({ XMFLOAT3(+fxScale, -fyScale, +fzScale), XMFLOAT4(Colors::Black) })
     };
-    psoDesc.PS =
+
+    std::array<std::uint16_t, 36> indices =
     {
-        reinterpret_cast<BYTE*>(mpsByteCode->GetBufferPointer()),
-        mpsByteCode->GetBufferSize()
+        // front face
+        0, 1, 2,
+        0, 2, 3,
+
+        // back face
+        4, 6, 5,
+        4, 7, 6,
+
+        // left face
+        4, 5, 1,
+        4, 1, 0,
+
+        // right face
+        3, 2, 6,
+        3, 6, 7,
+
+        // top face
+        1, 5, 6,
+        1, 6, 2,
+
+        // bottom face
+        4, 0, 3,
+        4, 3, 7
     };
-    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-    psoDesc.SampleMask = UINT_MAX;
-    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    psoDesc.NumRenderTargets = 1;
-    psoDesc.RTVFormats[0] = mBackBufferFormat;
-    psoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
-    psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
-    psoDesc.DSVFormat = mDepthStencilFormat;
-    ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO)));
+
+    const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+    const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+
+    mPlayerLook = std::make_unique<MeshGeometry>();
+    mPlayerLook->Name = "playerLookGeo";
+
+    ThrowIfFailed(D3DCreateBlob(vbByteSize, &mPlayerLook->VertexBufferCPU));
+    CopyMemory(mPlayerLook->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+
+    ThrowIfFailed(D3DCreateBlob(ibByteSize, &mPlayerLook->IndexBufferCPU));
+    CopyMemory(mPlayerLook->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+
+    mPlayerLook->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), vertices.data(), vbByteSize, mPlayerLook->VertexBufferUploader);
+
+    mPlayerLook->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), indices.data(), ibByteSize, mPlayerLook->IndexBufferUploader);
+
+    mPlayerLook->VertexByteStride = sizeof(Vertex);
+    mPlayerLook->VertexBufferByteSize = vbByteSize;
+    mPlayerLook->IndexFormat = DXGI_FORMAT_R16_UINT;
+    mPlayerLook->IndexBufferByteSize = ibByteSize;
+
+    SubmeshGeometry submesh;
+    submesh.IndexCount = (UINT)indices.size();
+    submesh.StartIndexLocation = 0;
+    submesh.BaseVertexLocation = 0;
+
+    mPlayerLook->DrawArgs["playerLook"] = submesh;
 }

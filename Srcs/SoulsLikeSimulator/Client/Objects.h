@@ -37,11 +37,6 @@ public:
 
     virtual bool Initialize()override;
 
-    // 플레이어 위치
-    XMFLOAT3 m_fPos = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    // 회전 각도
-    float m_fRot = 0.0f;
-
 private:
     virtual void OnResize()override;
     virtual void Update(const GameTimer& gt)override;
@@ -57,17 +52,24 @@ private:
     void BuildShadersAndInputLayout();
 
     void BuildPlayerGeometry(); // 플레이어
+    void BuildPlayerLookGeometry(); // 플레이어 시선
 
     void BuildPSO();
 
 private:
 
     ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
+    
     ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;
-
-    std::unique_ptr<UploadBuffer<ObjectConstants>> mPlayerCB = nullptr;
+    ComPtr<ID3D12DescriptorHeap> mCbvHeap2 = nullptr;
 
     std::unique_ptr<MeshGeometry> mPlayer = nullptr; // 플레이어
+    std::unique_ptr<MeshGeometry> mPlayerLook = nullptr; // 플레이어 시선
+
+    std::unique_ptr<UploadBuffer<ObjectConstants>> mPlayerCB = nullptr;
+    std::unique_ptr<UploadBuffer<ObjectConstants>> mPlayerLookCB = nullptr;
+
+
 
     ComPtr<ID3DBlob> mvsByteCode = nullptr;
     ComPtr<ID3DBlob> mpsByteCode = nullptr;

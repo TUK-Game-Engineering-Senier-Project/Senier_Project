@@ -85,18 +85,9 @@ extern struct Player
 	// float color_r{}, color_g{}, color_b{};
 };
 
-// 플레이어 구조체
-extern struct PlayerLookDir
-{
-	float trans_x{}, trans_y{}, trans_z{};
-	float scale_x{ 0.1f }, scale_y{ 0.1 }, scale_z{ 0.1f };
-	// float rotate_x{}, rotate_y{}, rotate_z{};
-	// float color_r{}, color_g{}, color_b{};
-};
-
 extern int g_id; // 플레이어 ID
 extern Player player[2]; // 플레이어 2인
-extern PlayerLookDir playerLookDir[2]; // 플레이어 각자 보는 방향
+extern Player playerLookDir[2]; // 플레이어 각자 보는 방향
 
 #endif 
 
