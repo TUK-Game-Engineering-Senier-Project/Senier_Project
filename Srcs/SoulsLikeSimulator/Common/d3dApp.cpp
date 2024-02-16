@@ -1,22 +1,15 @@
 //***************************************************************************************
-// GameApp.cpp by Frank Luna (C) 2015 All Rights Reserved.
+// d3dApp.cpp by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 
-// ----- 실제로 게임 수행하는 코드는 이 파일에 있음 -----
-
-#include "..\Client\Stdafx.h"
-#include "GameApp.h"
-
+#include "d3dApp.h"
+#include <WindowsX.h>
 
 using Microsoft::WRL::ComPtr;
 using namespace std;
 using namespace DirectX;
 
 // ----- 추가한 내용 시작 부분 ----- //
-
-#include <random>
-random_device rd;
-mt19937 gen{ rd() };
 
 char* SERVERIP = (char*)"127.0.0.1"; // 서버 IP 주소
 #define SERVERPORT 9000 // 서버 포트 번호
@@ -27,8 +20,7 @@ g_sockInfo* siSockInfo;
 SOCKET sock;
 int g_id; // 플레이어 ID
 
-Player player[2];     // 플레이어 2인
-Player playerLook[2]; // 플레이어 각자 보는 방향
+Player player[2]; // 플레이어 2인
 
 constexpr auto ZKEY = 0x5A; // z키
 
@@ -41,6 +33,7 @@ void err_quit(const char* msg)
 		NULL, WSAGetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(char*)&lpMsgBuf, 0, NULL);
+
 	MessageBoxA(NULL, (const char*)lpMsgBuf, msg, MB_ICONERROR);
 	LocalFree(lpMsgBuf);
 	exit(1);
@@ -64,38 +57,38 @@ void KeyBoardDown(unsigned char key, int x, int y)
 	switch (key)
 	{
 		// 이동
-		case VK_LEFT:
-			packet->type = SC_KEY_INPUT;
-			packet->input = VK_LEFT;
-			packet->bKeyDown = true;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
-		case VK_RIGHT:
-			packet->type = SC_KEY_INPUT;
-			packet->input = VK_RIGHT;
-			packet->bKeyDown = true;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
-		case VK_UP:
-			packet->type = SC_KEY_INPUT;
-			packet->input = VK_UP;
-			packet->bKeyDown = true;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
-		case VK_DOWN:
-			packet->type = SC_KEY_INPUT;
-			packet->input = VK_DOWN;
-			packet->bKeyDown = true;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
+	case VK_LEFT:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_LEFT;
+		packet->bKeyDown = true;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
+	case VK_RIGHT:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_RIGHT;
+		packet->bKeyDown = true;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
+	case VK_UP:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_UP;
+		packet->bKeyDown = true;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
+	case VK_DOWN:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_DOWN;
+		packet->bKeyDown = true;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
 
 		// 점프
-		case ZKEY:
-			packet->type = SC_KEY_INPUT;
-			packet->input = ZKEY;
-			packet->bKeyDown = true;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
+	case ZKEY:
+		packet->type = SC_KEY_INPUT;
+		packet->input = ZKEY;
+		packet->bKeyDown = true;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
 	}
 	delete packet;
 }
@@ -107,38 +100,38 @@ void KeyBoardUp(unsigned char key, int x, int y)
 	switch (key)
 	{
 		// 이동
-		case VK_LEFT:
-			packet->type = SC_KEY_INPUT;
-			packet->input = VK_LEFT;
-			packet->bKeyDown = false;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
-		case VK_RIGHT:
-			packet->type = SC_KEY_INPUT;
-			packet->input = VK_RIGHT;
-			packet->bKeyDown = false;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
-		case VK_UP:
-			packet->type = SC_KEY_INPUT;
-			packet->input = VK_UP;
-			packet->bKeyDown = false;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
-		case VK_DOWN:
-			packet->type = SC_KEY_INPUT;
-			packet->input = VK_DOWN;
-			packet->bKeyDown = false;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
+	case VK_LEFT:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_LEFT;
+		packet->bKeyDown = false;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
+	case VK_RIGHT:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_RIGHT;
+		packet->bKeyDown = false;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
+	case VK_UP:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_UP;
+		packet->bKeyDown = false;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
+	case VK_DOWN:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_DOWN;
+		packet->bKeyDown = false;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
 
 		// 점프
-		case ZKEY:
-			packet->type = SC_KEY_INPUT;
-			packet->input = ZKEY;
-			packet->bKeyDown = false;
-			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-			break;
+	case ZKEY:
+		packet->type = SC_KEY_INPUT;
+		packet->input = ZKEY;
+		packet->bKeyDown = false;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
 	}
 	delete packet;
 }
@@ -169,13 +162,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		player[g_id].trans_y = packet_tr->fy;
 		player[g_id].trans_z = packet_tr->fz;
 
-		// ### 플레이어 바라보는 위치 (임시)
-		playerLook[g_id].trans_x = 1.0f;
-		playerLook[g_id].trans_y = 0.0f;
-		playerLook[g_id].trans_z = 1.0f;
-
 		// 버퍼 값에 따른 동작
-		switch (buf[0]) 
+		switch (buf[0])
 		{
 			case SC_SEND_PLAYER:
 			{
@@ -200,50 +188,50 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
 	// before CreateWindow returns, and thus before mhMainWnd is valid.
-    return GameApp::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
+    return D3DApp::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
 }
 
-GameApp* GameApp::mApp = nullptr;
-GameApp* GameApp::GetApp()
+D3DApp* D3DApp::mApp = nullptr;
+D3DApp* D3DApp::GetApp()
 {
     return mApp;
 }
 
-GameApp::GameApp(HINSTANCE hInstance)
+D3DApp::D3DApp(HINSTANCE hInstance)
 :	mhAppInst(hInstance)
 {
-    // Only one GameApp can be constructed.
+    // Only one D3DApp can be constructed.
     assert(mApp == nullptr);
     mApp = this;
 }
 
-GameApp::~GameApp()
+D3DApp::~D3DApp()
 {
 	if(md3dDevice != nullptr)
 		FlushCommandQueue();
 }
 
-HINSTANCE GameApp::AppInst()const
+HINSTANCE D3DApp::AppInst()const
 {
 	return mhAppInst;
 }
 
-HWND GameApp::MainWnd()const
+HWND D3DApp::MainWnd()const
 {
 	return mhMainWnd;
 }
 
-float GameApp::AspectRatio()const
+float D3DApp::AspectRatio()const
 {
 	return static_cast<float>(mClientWidth) / mClientHeight;
 }
 
-bool GameApp::Get4xMsaaState()const
+bool D3DApp::Get4xMsaaState()const
 {
     return m4xMsaaState;
 }
 
-void GameApp::Set4xMsaaState(bool value)
+void D3DApp::Set4xMsaaState(bool value)
 {
     if(m4xMsaaState != value)
     {
@@ -255,11 +243,9 @@ void GameApp::Set4xMsaaState(bool value)
     }
 }
 
-// ----- 클라이언트 실행 시작 ------ //
-
-int GameApp::Run()
+int D3DApp::Run()
 {
-	MSG msg = {0};
+	MSG msg = { 0 };
 	mTimer.Reset();
 
 	int retval;
@@ -292,23 +278,21 @@ int GameApp::Run()
 	if (hThread == NULL) { closesocket(sock); }
 	else { CloseHandle(hThread); }
 
-
-
 	// ----- 클라이언트 루프 시작 ----- //
-	while(msg.message != WM_QUIT)
+	while (msg.message != WM_QUIT)
 	{
 		// 윈도우 메시지가 있으면 처리
-		if(PeekMessage( &msg, 0, 0, 0, PM_REMOVE ))
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
-            TranslateMessage( &msg );
-            DispatchMessage( &msg );
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
 
 		// 그 외
 		else
-        {	
+		{
 			// 시간 갱신
-			mTimer.Tick(); 
+			mTimer.Tick();
 
 			// 앱이 실행중인 경우
 			if (!mAppPaused)
@@ -325,8 +309,8 @@ int GameApp::Run()
 
 			// 앱이 중단된 경우
 			else { Sleep(100); }
-        }
-    }
+		}
+	}
 	// ----- 클라이언트 루프 종료 ----- //
 
 	closesocket(sock); // 소켓 종료
@@ -335,7 +319,7 @@ int GameApp::Run()
 	return (int)msg.wParam;
 }
 
-bool GameApp::Initialize()
+bool D3DApp::Initialize()
 {
 	if(!InitMainWindow())
 		return false;
@@ -349,7 +333,7 @@ bool GameApp::Initialize()
 	return true;
 }
  
-void GameApp::CreateRtvAndDsvDescriptorHeaps()
+void D3DApp::CreateRtvAndDsvDescriptorHeaps()
 {
     D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
     rtvHeapDesc.NumDescriptors = SwapChainBufferCount;
@@ -369,7 +353,7 @@ void GameApp::CreateRtvAndDsvDescriptorHeaps()
         &dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
 }
 
-void GameApp::OnResize()
+void D3DApp::OnResize()
 {
 	assert(md3dDevice);
 	assert(mSwapChain);
@@ -466,7 +450,7 @@ void GameApp::OnResize()
     mScissorRect = { 0, 0, mClientWidth, mClientHeight };
 }
  
-LRESULT GameApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch( msg )
 	{
@@ -590,7 +574,6 @@ LRESULT GameApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 
-
 	// 키 눌린 경우
 	case WM_KEYDOWN:
 		KeyBoardDown(static_cast<unsigned char>(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
@@ -612,7 +595,7 @@ LRESULT GameApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-bool GameApp::InitMainWindow()
+bool D3DApp::InitMainWindow()
 {
 	WNDCLASS wc;
 	wc.style         = CS_HREDRAW | CS_VREDRAW;
@@ -652,7 +635,7 @@ bool GameApp::InitMainWindow()
 	return true;
 }
 
-bool GameApp::InitDirect3D()
+bool D3DApp::InitDirect3D()
 {
 #if defined(DEBUG) || defined(_DEBUG) 
 	// Enable the D3D12 debug layer.
@@ -718,7 +701,7 @@ bool GameApp::InitDirect3D()
 	return true;
 }
 
-void GameApp::CreateCommandObjects()
+void D3DApp::CreateCommandObjects()
 {
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -742,7 +725,7 @@ void GameApp::CreateCommandObjects()
 	mCommandList->Close();
 }
 
-void GameApp::CreateSwapChain()
+void D3DApp::CreateSwapChain()
 {
     // Release the previous swapchain we will be recreating.
     mSwapChain.Reset();
@@ -771,7 +754,7 @@ void GameApp::CreateSwapChain()
 		mSwapChain.GetAddressOf()));
 }
 
-void GameApp::FlushCommandQueue()
+void D3DApp::FlushCommandQueue()
 {
 	// Advance the fence value to mark commands up to this fence point.
     mCurrentFence++;
@@ -795,12 +778,12 @@ void GameApp::FlushCommandQueue()
 	}
 }
 
-ID3D12Resource* GameApp::CurrentBackBuffer()const
+ID3D12Resource* D3DApp::CurrentBackBuffer()const
 {
 	return mSwapChainBuffer[mCurrBackBuffer].Get();
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE GameApp::CurrentBackBufferView()const
+D3D12_CPU_DESCRIPTOR_HANDLE D3DApp::CurrentBackBufferView()const
 {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		mRtvHeap->GetCPUDescriptorHandleForHeapStart(),
@@ -808,12 +791,12 @@ D3D12_CPU_DESCRIPTOR_HANDLE GameApp::CurrentBackBufferView()const
 		mRtvDescriptorSize);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE GameApp::DepthStencilView()const
+D3D12_CPU_DESCRIPTOR_HANDLE D3DApp::DepthStencilView()const
 {
 	return mDsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-void GameApp::CalculateFrameStats()
+void D3DApp::CalculateFrameStats()
 {
 	// Code computes the average frames per second, and also the 
 	// average time it takes to render one frame.  These stats 
@@ -845,7 +828,7 @@ void GameApp::CalculateFrameStats()
 	}
 }
 
-void GameApp::LogAdapters()
+void D3DApp::LogAdapters()
 {
     UINT i = 0;
     IDXGIAdapter* adapter = nullptr;
@@ -873,7 +856,7 @@ void GameApp::LogAdapters()
     }
 }
 
-void GameApp::LogAdapterOutputs(IDXGIAdapter* adapter)
+void D3DApp::LogAdapterOutputs(IDXGIAdapter* adapter)
 {
     UINT i = 0;
     IDXGIOutput* output = nullptr;
@@ -895,7 +878,7 @@ void GameApp::LogAdapterOutputs(IDXGIAdapter* adapter)
     }
 }
 
-void GameApp::LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
+void D3DApp::LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
 {
     UINT count = 0;
     UINT flags = 0;
@@ -919,4 +902,3 @@ void GameApp::LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
         ::OutputDebugString(text.c_str());
     }
 }
-

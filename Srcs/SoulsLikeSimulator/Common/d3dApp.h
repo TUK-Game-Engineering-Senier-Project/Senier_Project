@@ -1,5 +1,5 @@
 //***************************************************************************************
-// GameApp.h by Frank Luna (C) 2015 All Rights Reserved.
+// d3dApp.h by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 
 #pragma once
@@ -9,6 +9,8 @@
 #include <crtdbg.h>
 #endif
 
+#include "../Client/Stdafx.h" // 사용자 정의 헤더
+
 #include "d3dUtil.h"
 #include "GameTimer.h"
 
@@ -17,18 +19,18 @@
 #pragma comment(lib, "D3D12.lib")
 #pragma comment(lib, "dxgi.lib")
 
-class GameApp
+class D3DApp
 {
 protected:
 
-    GameApp(HINSTANCE hInstance);
-    GameApp(const GameApp& rhs) = delete;
-    GameApp& operator=(const GameApp& rhs) = delete;
-    virtual ~GameApp();
+    D3DApp(HINSTANCE hInstance);
+    D3DApp(const D3DApp& rhs) = delete;
+    D3DApp& operator=(const D3DApp& rhs) = delete;
+    virtual ~D3DApp();
 
 public:
 
-    static GameApp* GetApp();
+    static D3DApp* GetApp();
     
 	HINSTANCE AppInst()const;
 	HWND      MainWnd()const;
@@ -74,7 +76,7 @@ protected:
 
 protected:
 
-    static GameApp* mApp;
+    static D3DApp* mApp;
 
     HINSTANCE mhAppInst = nullptr; // application instance handle
     HWND      mhMainWnd = nullptr; // main window handle
@@ -93,9 +95,7 @@ protected:
 	
     Microsoft::WRL::ComPtr<IDXGIFactory4> mdxgiFactory;
     Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
-
     Microsoft::WRL::ComPtr<ID3D12Device> md3dDevice;
-    Microsoft::WRL::ComPtr<ID3D12Device> md3dDevice2;
 
     Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
     UINT64 mCurrentFence = 0;

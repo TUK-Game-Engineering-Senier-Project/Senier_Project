@@ -3,23 +3,14 @@
 #ifndef STDAFX_H_
 #define STDAFX_H_
 
-#include <iostream>
-#include <random>
-#include <thread>
-#include <math.h>
+#define _CRT_SECURE_NO_WARNINGS // 구형 C 함수 사용 시 경고 끄기
+#define _WINSOCK_DEPRECATED_NO_WARNINGS // 구형 소켓 API 사용 시 경고 끄기
 
 #include <mutex> // 서버 구성용 뮤텍스 헤더 
-#include <vector> // 벡터 리스트 생성용
 // 오류 나서 찾아보니까 winsock.h(가 포함된) 헤더를
 // Windows.h 위에 달아줘야 한다고 하여 위치 변경함
 #include <winsock2.h> // 윈속2 메인 헤더
 #include <ws2tcpip.h> // 윈속2 확장 헤더
-#include <WindowsX.h>
-
-#include "Objects.h" // 오브젝트 관련 내용 헤더
-
-#define _CRT_SECURE_NO_WARNINGS // 구형 C 함수 사용 시 경고 끄기
-#define _WINSOCK_DEPRECATED_NO_WARNINGS // 구형 소켓 API 사용 시 경고 끄기
 
 #pragma comment(lib, "ws2_32") // ws2_32.lib 링크
 
@@ -40,15 +31,13 @@ struct g_sockInfo
 	g_sockInfo* GetSockInfo() { return this; }
 };
 
-
-
 extern constexpr char SC_PLAYER_MOVE = 0;
 extern constexpr char SC_KEY_INPUT = 1;
 extern constexpr char SC_PLAYER_ROTATE = 2;
 extern constexpr char SC_SEND_PLAYER = 3;
 
 // 입력 패킷
-extern struct INPUT_PACKET
+struct INPUT_PACKET
 {
 	char type;
 	bool bKeyDown;
@@ -56,7 +45,7 @@ extern struct INPUT_PACKET
 };
 
 // 이동 패킷
-extern struct MOVE_PACKET
+struct MOVE_PACKET
 {
 	char type; // 종류
 	float fx, fy, fz; // 위치
@@ -64,14 +53,14 @@ extern struct MOVE_PACKET
 };
 
 // 회전 패킷
-extern struct ROTATE_PACKET
+struct ROTATE_PACKET
 {
 	char type;
 	float fx, fy, fz;
 };
 
 // 플레이어 전송
-extern struct SEND_PLAYER {
+struct SEND_PLAYER {
 	char type;
 	int id;
 };
@@ -79,8 +68,8 @@ extern struct SEND_PLAYER {
 // 플레이어 구조체
 extern struct Player
 {
-	float trans_x{}, trans_y{}, trans_z{};
-	float scale_x{ 0.5f }, scale_y{ 1.0f }, scale_z{ 0.5f };
+	float trans_x{ 0.0f }, trans_y{ 0.0f }, trans_z{ 0.0f }; // 위치
+	float scale_x{ 0.3f }, scale_y{ 0.3f }, scale_z{ 0.3f }; // 크기 배율
 	// float rotate_x{}, rotate_y{}, rotate_z{};
 	// float color_r{}, color_g{}, color_b{};
 };
