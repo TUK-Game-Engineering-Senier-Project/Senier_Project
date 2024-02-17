@@ -17,15 +17,15 @@ public:
         bRightKeyDown{ false },
 
         bZDown{ false };
-
-    // 위치
-    float fPos[3] = { 0.0f, 0.0f, 0.0f }; 
+    
+    float fPos[3] = { 0.0f, 0.0f, 0.0f };    // 위치
+    float fRotate[3] = { 0.0f, 0.0f, 0.0f }; // 회전
 
     // 점프중 여부
     bool bJumping = false; 
     float fJumpSpd = 0.0f;
 
-    // float fRotate[3]; // 회전
+    // 
     // float fScale[3];  // 크기
     // float fColor[3];  // 색상
 };

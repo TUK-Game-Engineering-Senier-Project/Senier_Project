@@ -59,26 +59,31 @@ constexpr char SC_PLAYER_ROTATE = 2;
 constexpr char SC_SEND_PLAYER = 3;
 
 // 입력 패킷
-struct INPUT_PACKET {
+struct INPUT_PACKET 
+{
 	char type;
 	bool bKeyDown;
 	char input;
 };
 
 // 이동 패킷
-struct MOVE_PACKET {
-	char type;
-	float fx, fy, fz;
+struct MOVE_PACKET 
+{
+	char type; // 종류
+	float fPx, fPy, fPz; // 이동
+	float fRx, fRy, fRz; // 회전
 };
 
 // 회전 패킷
-struct ROTATE_PACKET {
+struct ROTATE_PACKET 
+{
 	char type;
 	float fx, fy, fz;
 };
 
 // 플레이어 전송
-struct SEND_PLAYER {
+struct SEND_PLAYER 
+{
 	char type;
 	int id;
 };

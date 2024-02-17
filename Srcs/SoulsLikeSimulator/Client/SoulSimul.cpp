@@ -239,17 +239,28 @@ void SoulSimul::Update(const GameTimer& gt)
 	UpdateMainPassCB(gt);
 }
 
+// 플레이어 업데이트
 void SoulSimul::UpdatePlayer(const GameTimer& gt)
 {
 	// 플레이어 갱신
 	auto skullRitem = std::make_unique<RenderItem>();
 	XMStoreFloat4x4
 	(
-		// 플레이어 배율 및 위치에 맞춰 지정
+		// 플레이어 배율, 위치에 맞춰 지정
 		&skullRitem->World,
 		XMMatrixScaling(player[g_id].scale_x, player[g_id].scale_y, player[g_id].scale_z)
 		* XMMatrixTranslation(player[g_id].trans_x, player[g_id].trans_y, player[g_id].trans_z)
 	);
+
+	// 플레이어 회전
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(player[g_id].rotate_x, player[g_id].rotate_y, player[g_id].rotate_z);
+	XMStoreFloat4x4
+	(
+		// 플레이어 각도에 맞춰 지정
+		&skullRitem->World,
+		rotationMatrix * XMLoadFloat4x4(&skullRitem->World)
+	);
+
 	skullRitem->TexTransform = MathHelper::Identity4x4();
 	skullRitem->ObjCBIndex = INDEXPLAYER; // 플레이어 인덱스
 	skullRitem->Mat = mMaterials["skullMat"].get();
@@ -532,7 +543,7 @@ void SoulSimul::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
 	GeometryGenerator::MeshData box = geoGen.CreateBox(1.5f, 0.5f, 1.5f, 3);
-	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
+	GeometryGenerator::MeshData floor = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 
@@ -543,14 +554,14 @@ void SoulSimul::BuildShapeGeometry()
 
 	// Cache the vertex offsets to each object in the concatenated vertex buffer.
 	UINT boxVertexOffset = 0;
-	UINT gridVertexOffset = (UINT)box.Vertices.size();
-	UINT sphereVertexOffset = gridVertexOffset + (UINT)grid.Vertices.size();
+	UINT floorVertexOffset = (UINT)box.Vertices.size();
+	UINT sphereVertexOffset = floorVertexOffset + (UINT)floor.Vertices.size();
 	UINT cylinderVertexOffset = sphereVertexOffset + (UINT)sphere.Vertices.size();
 
 	// Cache the starting index for each object in the concatenated index buffer.
 	UINT boxIndexOffset = 0;
-	UINT gridIndexOffset = (UINT)box.Indices32.size();
-	UINT sphereIndexOffset = gridIndexOffset + (UINT)grid.Indices32.size();
+	UINT floorIndexOffset = (UINT)box.Indices32.size();
+	UINT sphereIndexOffset = floorIndexOffset + (UINT)floor.Indices32.size();
 	UINT cylinderIndexOffset = sphereIndexOffset + (UINT)sphere.Indices32.size();
 
 	SubmeshGeometry boxSubmesh;
@@ -558,10 +569,10 @@ void SoulSimul::BuildShapeGeometry()
 	boxSubmesh.StartIndexLocation = boxIndexOffset;
 	boxSubmesh.BaseVertexLocation = boxVertexOffset;
 
-	SubmeshGeometry gridSubmesh;
-	gridSubmesh.IndexCount = (UINT)grid.Indices32.size();
-	gridSubmesh.StartIndexLocation = gridIndexOffset;
-	gridSubmesh.BaseVertexLocation = gridVertexOffset;
+	SubmeshGeometry floorSubmesh;
+	floorSubmesh.IndexCount = (UINT)floor.Indices32.size();
+	floorSubmesh.StartIndexLocation = floorIndexOffset;
+	floorSubmesh.BaseVertexLocation = floorVertexOffset;
 
 	SubmeshGeometry sphereSubmesh;
 	sphereSubmesh.IndexCount = (UINT)sphere.Indices32.size();
@@ -580,7 +591,7 @@ void SoulSimul::BuildShapeGeometry()
 
 	auto totalVertexCount =
 		box.Vertices.size() +
-		grid.Vertices.size() +
+		floor.Vertices.size() +
 		sphere.Vertices.size() +
 		cylinder.Vertices.size();
 
@@ -593,10 +604,10 @@ void SoulSimul::BuildShapeGeometry()
 		vertices[k].Normal = box.Vertices[i].Normal;
 	}
 
-	for(size_t i = 0; i < grid.Vertices.size(); ++i, ++k)
+	for(size_t i = 0; i < floor.Vertices.size(); ++i, ++k)
 	{
-		vertices[k].Pos = grid.Vertices[i].Position;
-		vertices[k].Normal = grid.Vertices[i].Normal;
+		vertices[k].Pos = floor.Vertices[i].Position;
+		vertices[k].Normal = floor.Vertices[i].Normal;
 	}
 
 	for(size_t i = 0; i < sphere.Vertices.size(); ++i, ++k)
@@ -613,7 +624,7 @@ void SoulSimul::BuildShapeGeometry()
 
 	std::vector<std::uint16_t> indices;
 	indices.insert(indices.end(), std::begin(box.GetIndices16()), std::end(box.GetIndices16()));
-	indices.insert(indices.end(), std::begin(grid.GetIndices16()), std::end(grid.GetIndices16()));
+	indices.insert(indices.end(), std::begin(floor.GetIndices16()), std::end(floor.GetIndices16()));
 	indices.insert(indices.end(), std::begin(sphere.GetIndices16()), std::end(sphere.GetIndices16()));
 	indices.insert(indices.end(), std::begin(cylinder.GetIndices16()), std::end(cylinder.GetIndices16()));
 
@@ -641,7 +652,7 @@ void SoulSimul::BuildShapeGeometry()
 	geo->IndexBufferByteSize = ibByteSize;
 
 	geo->DrawArgs["box"] = boxSubmesh;
-	geo->DrawArgs["grid"] = gridSubmesh;
+	geo->DrawArgs["floor"] = floorSubmesh;
 	geo->DrawArgs["sphere"] = sphereSubmesh;
 	geo->DrawArgs["cylinder"] = cylinderSubmesh;
 
@@ -767,6 +778,7 @@ void SoulSimul::BuildFrameResources()
 
 void SoulSimul::BuildMaterials()
 {
+	// (현재 안 씀)
 	auto bricks0 = std::make_unique<Material>();
 	bricks0->Name = "bricks0";
 	bricks0->MatCBIndex = 0;
@@ -775,6 +787,7 @@ void SoulSimul::BuildMaterials()
 	bricks0->FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
 	bricks0->Roughness = 0.1f;
 
+	// (현재 안 씀)
 	auto stone0 = std::make_unique<Material>();
 	stone0->Name = "stone0";
 	stone0->MatCBIndex = 1;
@@ -783,25 +796,27 @@ void SoulSimul::BuildMaterials()
 	stone0->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
 	stone0->Roughness = 0.3f;
  
-	auto tile0 = std::make_unique<Material>();
-	tile0->Name = "tile0";
-	tile0->MatCBIndex = 2;
-	tile0->DiffuseSrvHeapIndex = 2;
-	tile0->DiffuseAlbedo = XMFLOAT4(Colors::LightGray);
-	tile0->FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
-	tile0->Roughness = 0.2f;
+	// 바닥
+	auto floor = std::make_unique<Material>();
+	floor->Name = "floor";
+	floor->MatCBIndex = 2;
+	floor->DiffuseSrvHeapIndex = 2;
+	floor->DiffuseAlbedo = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	floor->FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
+	floor->Roughness = 0.2f;
 
+	// 플레이어
 	auto skullMat = std::make_unique<Material>();
 	skullMat->Name = "skullMat";
 	skullMat->MatCBIndex = 3;
 	skullMat->DiffuseSrvHeapIndex = 3;
-	skullMat->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	skullMat->DiffuseAlbedo = XMFLOAT4(0.5f, 1.0f, 0.5f, 1.0f);
 	skullMat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05);
 	skullMat->Roughness = 0.3f;
 	
 	mMaterials["bricks0"] = std::move(bricks0);
 	mMaterials["stone0"] = std::move(stone0);
-	mMaterials["tile0"] = std::move(tile0);
+	mMaterials["floor"] = std::move(floor);
 	mMaterials["skullMat"] = std::move(skullMat);
 }
 
@@ -811,10 +826,11 @@ void SoulSimul::BuildRenderItems()
 	auto skullRitem = std::make_unique<RenderItem>();
 	XMStoreFloat4x4
 	(
-		// 플레이어 배율 및 위치에 맞춰 지정
+		// 플레이어 배율, 위치, 각도에 맞춰 지정
 		&skullRitem->World,
 		XMMatrixScaling(player[g_id].scale_x, player[g_id].scale_y, player[g_id].scale_z)
 		* XMMatrixTranslation(player[g_id].trans_x, player[g_id].trans_y, player[g_id].trans_z)
+		* XMMatrixRotationRollPitchYaw(player[g_id].rotate_x, player[g_id].rotate_y, player[g_id].rotate_z)
 	);
 	skullRitem->TexTransform = MathHelper::Identity4x4();
 	skullRitem->ObjCBIndex = INDEXPLAYER;
@@ -827,17 +843,17 @@ void SoulSimul::BuildRenderItems()
 	mAllRitems.push_back(std::move(skullRitem));
 
 	// 바닥 격자 그리기
-    auto gridRitem = std::make_unique<RenderItem>();
-    gridRitem->World = MathHelper::Identity4x4();
-	XMStoreFloat4x4(&gridRitem->TexTransform, XMMatrixScaling(8.0f, 8.0f, 1.0f));
-	gridRitem->ObjCBIndex = INDEXFLOOR;
-	gridRitem->Mat = mMaterials["tile0"].get();
-	gridRitem->Geo = mGeometries["shapeGeo"].get();
-	gridRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
-    gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
-    gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
-	mAllRitems.push_back(std::move(gridRitem));
+    auto floorRitem = std::make_unique<RenderItem>();
+	floorRitem->World = MathHelper::Identity4x4();
+	XMStoreFloat4x4(&floorRitem->TexTransform, XMMatrixScaling(8.0f, 8.0f, 1.0f));
+	floorRitem->ObjCBIndex = INDEXFLOOR;
+	floorRitem->Mat = mMaterials["floor"].get();
+	floorRitem->Geo = mGeometries["shapeGeo"].get();
+	floorRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	floorRitem->IndexCount = floorRitem->Geo->DrawArgs["floor"].IndexCount;
+	floorRitem->StartIndexLocation = floorRitem->Geo->DrawArgs["floor"].StartIndexLocation;
+	floorRitem->BaseVertexLocation = floorRitem->Geo->DrawArgs["floor"].BaseVertexLocation;
+	mAllRitems.push_back(std::move(floorRitem));
 
 
 

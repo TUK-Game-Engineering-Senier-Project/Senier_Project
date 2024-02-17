@@ -63,10 +63,25 @@ void UpdatePlayer()
 		// ----- 입력한 키에 따른 동작 수행 ----- //
 
 		// 입력한 화살표키에 따라 이동
-		if (g_Players[id]->bForwardKeyDown) { g_Players[id]->fPos[2] += g_fPlayerSpd; }
-		if (g_Players[id]->bBackKeyDown) { g_Players[id]->fPos[2] -= g_fPlayerSpd; }
-		if (g_Players[id]->bLeftKeyDown) { g_Players[id]->fPos[0] -= g_fPlayerSpd; }
-		if (g_Players[id]->bRightKeyDown) { g_Players[id]->fPos[0] += g_fPlayerSpd; }
+		if (g_Players[id]->bForwardKeyDown) 
+		{ 
+			g_Players[id]->fRotate[1] = 3.0f;
+			g_Players[id]->fPos[2] += g_fPlayerSpd; 
+		}
+		if (g_Players[id]->bBackKeyDown) { 
+			g_Players[id]->fRotate[1] = 0.0f;
+			g_Players[id]->fPos[2] -= g_fPlayerSpd; 
+		}
+		if (g_Players[id]->bLeftKeyDown) 
+		{ 
+			g_Players[id]->fRotate[1] = 1.5f;
+			g_Players[id]->fPos[0] -= g_fPlayerSpd; 
+		}
+		if (g_Players[id]->bRightKeyDown) 
+		{ 
+			g_Players[id]->fRotate[1] = 4.5f;
+			g_Players[id]->fPos[0] += g_fPlayerSpd; 
+		}
 
 		// z키 누르면 점프 시작하기
 		if ((g_Players[id]->bZDown) && (!g_Players[id]->bJumping)) // z키 눌렀고 점프중이 아니면
@@ -134,9 +149,12 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			// 패킷에 값 지정
 			MOVE_PACKET* packet_MP = new MOVE_PACKET;
 			packet_MP->type = SC_PLAYER_MOVE;
-			packet_MP->fx = g_Players[sock_info->id]->fPos[0];
-			packet_MP->fy = g_Players[sock_info->id]->fPos[1];
-			packet_MP->fz = g_Players[sock_info->id]->fPos[2];
+			packet_MP->fPx = g_Players[sock_info->id]->fPos[0];
+			packet_MP->fPy = g_Players[sock_info->id]->fPos[1];
+			packet_MP->fPz = g_Players[sock_info->id]->fPos[2];
+			packet_MP->fRx = g_Players[sock_info->id]->fRotate[0];
+			packet_MP->fRy = g_Players[sock_info->id]->fRotate[1];
+			packet_MP->fRz = g_Players[sock_info->id]->fRotate[2];
 
 			// 패킷 보내기
 			send(client.socket, reinterpret_cast<char*>(packet_SP), sizeof(SEND_PLAYER), 0);
