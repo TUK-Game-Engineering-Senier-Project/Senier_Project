@@ -35,11 +35,10 @@ void ErrorQuit(const char* msg)
 // 버튼 입력 전달 함수
 void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 {
-
 	switch (input)
 	{
 		// 화살표 키 (이동)
-		case VK_LEFT: {g_Players[sock_info->id]->bLeftKeyDown = KeyDown; printf("왼쪽 방향키 입력\n"); break; }
+		case VK_LEFT: {g_Players[sock_info->id]->bLeftKeyDown = KeyDown; break; }
 		case VK_RIGHT: {g_Players[sock_info->id]->bRightKeyDown = KeyDown; printf("오른쪽 방향키 입력\n"); break; }
 		case VK_UP: {g_Players[sock_info->id]->bForwardKeyDown = KeyDown; printf("위 방향키 입력\n"); break; }
 		case VK_DOWN: {g_Players[sock_info->id]->bBackKeyDown = KeyDown; printf("아래 방향키 입력\n"); break; }
@@ -49,9 +48,11 @@ void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 	}
 
 	// ### 테스트용
+	/*
 	printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
 		g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
 	printf("### 점프속도 : (%.2f)\n", g_Players[sock_info->id]->fJumpSpd);
+	*/
 }
 
 // 플레이어 업데이트
@@ -96,7 +97,7 @@ void UpdatePlayer()
 		// 점프 동작
 		if (g_Players[id]->bJumping)
 		{
-			printf("[점프중]\n");
+			// printf("[점프중]\n");
 
 			// 점프 속도에 따른 y좌표 변화
 			g_Players[id]->fPos[1] += g_Players[id]->fJumpSpd;
@@ -105,6 +106,8 @@ void UpdatePlayer()
 			// 플레이어 y좌표가 0 미만일 경우
 			if (g_Players[id]->fPos[1] < 0.0f)
 			{
+				printf("[점프 완료]\n");
+
 				// y좌표를 0으로 하고 점프를 다시 가능하게 한다
 				g_Players[id]->fPos[1] = 0.0f;
 				g_Players[id]->fJumpSpd = 0.0f;

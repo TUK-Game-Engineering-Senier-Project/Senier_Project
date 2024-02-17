@@ -384,17 +384,31 @@ void SoulSimul::OnKeyboardInput(const GameTimer& gt)
  
 void SoulSimul::UpdateCamera(const GameTimer& gt)
 {
-	// Convert Spherical to Cartesian coordinates.
-	mEyePos.x = mRadius*sinf(mPhi)*cosf(mTheta);
-	mEyePos.z = mRadius*sinf(mPhi)*sinf(mTheta);
-	mEyePos.y = mRadius*cosf(mPhi);
+    // 플레이어 위치
+    float fPlayerPosX = player[g_id].trans_x;
+    float fPlayerPosY = player[g_id].trans_y;
+    float fPlayerPosZ = player[g_id].trans_z;
 
-	// Build the view matrix.
-	XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
-	XMVECTOR target = XMVectorZero();
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    // 플레이어로부터 카메라 위치
+    float fBehindPlayer = 10.0f; // 플레이어로부터 뒤 거리
+    float fAbovePlayer = 10.0f;  // 플레이어로부터 위 거리 
 
-	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+	// 카메라 위치 좌표값
+    float cameraPosX = fPlayerPosX + fBehindPlayer * cosf(mTheta);
+    float cameraPosY = fPlayerPosY + fAbovePlayer;
+	float cameraPosZ = fPlayerPosZ + fBehindPlayer * sinf(mTheta);
+
+    // 카메라 위치 지정
+    XMVECTOR pos = XMVectorSet(cameraPosX, cameraPosY, cameraPosZ, 1.0f);
+    
+    // target (목표 : 플레이어 좌표를 중심으로)
+    XMVECTOR target = XMVectorSet(fPlayerPosX, fPlayerPosY, fPlayerPosZ, 1.0f);
+
+    // up 벡터
+    XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+    // 카메라 뷰 적용
+    XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, view);
 }
 
