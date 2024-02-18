@@ -242,6 +242,7 @@ void SoulSimul::Update(const GameTimer& gt)
 // 플레이어 업데이트
 void SoulSimul::UpdatePlayer(const GameTimer& gt)
 {
+
 	// 플레이어 갱신
 	auto skullRitem = std::make_unique<RenderItem>();
 	XMStoreFloat4x4
@@ -251,6 +252,9 @@ void SoulSimul::UpdatePlayer(const GameTimer& gt)
 		XMMatrixScaling(player[g_id].scale_x, player[g_id].scale_y, player[g_id].scale_z)
 		* XMMatrixTranslation(player[g_id].trans_x, player[g_id].trans_y, player[g_id].trans_z)
 	);
+
+	// 플레이어 각도를 카메라 각도에 맞춰 회전
+	player[g_id].rotate_y -= mTheta + 1.5f;
 
 	// 플레이어 회전
 	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(player[g_id].rotate_x, player[g_id].rotate_y, player[g_id].rotate_z);
@@ -401,7 +405,7 @@ void SoulSimul::UpdateCamera(const GameTimer& gt)
     // 카메라 위치 지정
     XMVECTOR pos = XMVectorSet(cameraPosX, cameraPosY, cameraPosZ, 1.0f);
     
-    // target (목표 : 플레이어 좌표를 중심으로)
+    // target (플레이어 좌표를 중심으로)
     XMVECTOR target = XMVectorSet(fPlayerPosX, fPlayerPosY, fPlayerPosZ, 1.0f);
 
     // up 벡터
@@ -557,7 +561,7 @@ void SoulSimul::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
 	GeometryGenerator::MeshData box = geoGen.CreateBox(1.5f, 0.5f, 1.5f, 3);
-	GeometryGenerator::MeshData floor = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
+	GeometryGenerator::MeshData floor = geoGen.CreateGrid(10.0f, 10.0f, 40, 40);
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 
@@ -836,15 +840,15 @@ void SoulSimul::BuildMaterials()
 
 void SoulSimul::BuildRenderItems()
 {
+
 	// 해골 (### 플레이어 임시)
 	auto skullRitem = std::make_unique<RenderItem>();
 	XMStoreFloat4x4
 	(
-		// 플레이어 배율, 위치, 각도에 맞춰 지정
+		// 플레이어 배율, 위치에 맞춰 지정
 		&skullRitem->World,
 		XMMatrixScaling(player[g_id].scale_x, player[g_id].scale_y, player[g_id].scale_z)
 		* XMMatrixTranslation(player[g_id].trans_x, player[g_id].trans_y, player[g_id].trans_z)
-		* XMMatrixRotationRollPitchYaw(player[g_id].rotate_x, player[g_id].rotate_y, player[g_id].rotate_z)
 	);
 	skullRitem->TexTransform = MathHelper::Identity4x4();
 	skullRitem->ObjCBIndex = INDEXPLAYER;
