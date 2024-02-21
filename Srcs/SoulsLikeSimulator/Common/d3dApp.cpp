@@ -158,12 +158,15 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 		// 플레이어 데이터 갱신
 		MOVE_PACKET* packet_tr = reinterpret_cast<MOVE_PACKET*>(buf);
-		player[g_id].trans_x = packet_tr->fPx;
-		player[g_id].trans_y = packet_tr->fPy;
-		player[g_id].trans_z = packet_tr->fPz;
-		player[g_id].rotate_x = packet_tr->fRx;
-		player[g_id].rotate_y = packet_tr->fRy;
-		player[g_id].rotate_z = packet_tr->fRz;
+		player[g_id].pos_x = packet_tr->fPx; // 위치x
+		player[g_id].pos_y = packet_tr->fPy; // 위치y
+		player[g_id].pos_z = packet_tr->fPz; // 위치z
+		player[g_id].rotate_x = packet_tr->fRx; // 회전x
+		player[g_id].rotate_y = packet_tr->fRy; // 회전y
+		player[g_id].rotate_z = packet_tr->fRz; // 회전z
+		player[g_id].move_x = packet_tr->fMx; // 이동x
+		player[g_id].move_y = packet_tr->fMy; // 이동y
+		player[g_id].move_z = packet_tr->fMz; // 이동z
 
 		// 버퍼 값에 따른 동작
 		switch (buf[0])

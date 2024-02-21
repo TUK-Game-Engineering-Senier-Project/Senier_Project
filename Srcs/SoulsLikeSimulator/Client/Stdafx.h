@@ -45,12 +45,13 @@ struct INPUT_PACKET
 };
 
 // 이동 패킷
-struct MOVE_PACKET 
+struct MOVE_PACKET
 {
 	char type; // 종류
-	float fPx, fPy, fPz; // 이동
+	float fPx, fPy, fPz; // 위치
 	float fRx, fRy, fRz; // 회전
-};
+	float fMx, fMy, fMz; // 이동
+};;
 
 
 // 회전 패킷
@@ -70,9 +71,10 @@ struct SEND_PLAYER
 // 플레이어 구조체
 extern struct Player
 {
-	float trans_x{ 0.0f }, trans_y{ 0.0f }, trans_z{ 0.0f };    // 위치
-	float scale_x{ 0.3f }, scale_y{ 0.3f }, scale_z{ 0.3f };    // 크기 배율
+	float pos_x{ 0.0f },    pos_y{ 0.0f },    pos_z{ 0.0f };    // 위치
+	float scale_x{ 0.3f },  scale_y{ 0.3f },  scale_z{ 0.3f };  // 크기 배율
 	float rotate_x{ 0.0f }, rotate_y{ 0.0f }, rotate_z{ 0.0f }; // 회전 각도
+	float move_x{ 0.0f },   move_y{ 0.0f },   move_z{ 0.0f };   // 이동 거리
 	// float color_r{}, color_g{}, color_b{};
 };
 

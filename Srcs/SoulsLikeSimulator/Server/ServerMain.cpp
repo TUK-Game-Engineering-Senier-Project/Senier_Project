@@ -67,21 +67,21 @@ void UpdatePlayer()
 		if (g_Players[id]->bForwardKeyDown) 
 		{ 
 			g_Players[id]->fRotate[1] = 3.0f;
-			g_Players[id]->fPos[2] += g_fPlayerSpd; 
+			g_Players[id]->fMove[2] += g_fPlayerSpd;
 		}
 		if (g_Players[id]->bBackKeyDown) { 
 			g_Players[id]->fRotate[1] = 0.0f;
-			g_Players[id]->fPos[2] -= g_fPlayerSpd; 
+			g_Players[id]->fMove[2] -= g_fPlayerSpd;
 		}
 		if (g_Players[id]->bLeftKeyDown) 
 		{ 
 			g_Players[id]->fRotate[1] = 1.5f;
-			g_Players[id]->fPos[0] -= g_fPlayerSpd; 
+			g_Players[id]->fMove[0] -= g_fPlayerSpd;
 		}
 		if (g_Players[id]->bRightKeyDown) 
 		{ 
 			g_Players[id]->fRotate[1] = 4.5f;
-			g_Players[id]->fPos[0] += g_fPlayerSpd; 
+			g_Players[id]->fMove[0] += g_fPlayerSpd;
 		}
 
 		// z키 누르면 점프 시작하기
@@ -152,12 +152,15 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			// 패킷에 값 지정
 			MOVE_PACKET* packet_MP = new MOVE_PACKET;
 			packet_MP->type = SC_PLAYER_MOVE;
-			packet_MP->fPx = g_Players[sock_info->id]->fPos[0];
-			packet_MP->fPy = g_Players[sock_info->id]->fPos[1];
-			packet_MP->fPz = g_Players[sock_info->id]->fPos[2];
-			packet_MP->fRx = g_Players[sock_info->id]->fRotate[0];
-			packet_MP->fRy = g_Players[sock_info->id]->fRotate[1];
-			packet_MP->fRz = g_Players[sock_info->id]->fRotate[2];
+			packet_MP->fPx = g_Players[sock_info->id]->fPos[0]; // 위치x
+			packet_MP->fPy = g_Players[sock_info->id]->fPos[1]; // 위치y
+			packet_MP->fPz = g_Players[sock_info->id]->fPos[2]; // 위치z
+			packet_MP->fRx = g_Players[sock_info->id]->fRotate[0]; // 회전x
+			packet_MP->fRy = g_Players[sock_info->id]->fRotate[1]; // 회전y
+			packet_MP->fRz = g_Players[sock_info->id]->fRotate[2]; // 회전z
+			packet_MP->fMx = g_Players[sock_info->id]->fMove[0]; // 이동x
+			packet_MP->fMy = g_Players[sock_info->id]->fMove[1]; // 이동y
+			packet_MP->fMz = g_Players[sock_info->id]->fMove[2]; // 이동z
 
 			// 패킷 보내기
 			send(client.socket, reinterpret_cast<char*>(packet_SP), sizeof(SEND_PLAYER), 0);

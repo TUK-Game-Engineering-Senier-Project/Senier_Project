@@ -76,10 +76,13 @@ private:
     virtual void OnMouseMove(WPARAM btnState, int x, int y)override;
 
     void OnKeyboardInput(const GameTimer& gt);
-	void UpdateCamera(const GameTimer& gt);
 
 	// 플레이어 업데이트
-	void UpdatePlayer(const GameTimer& gt); 
+	void UpdatePlayer(const GameTimer& gt);
+
+	// 카메라 업데이트 (플레이어 위치 확정된 뒤)
+	void UpdateCamera(const GameTimer& gt);
+
 
 	void AnimateMaterials(const GameTimer& gt);
 	void UpdateObjectCBs(const GameTimer& gt);
@@ -213,11 +216,14 @@ void SoulSimul::OnResize()
 
 void SoulSimul::Update(const GameTimer& gt)
 {
-    OnKeyboardInput(gt);
-	UpdateCamera(gt);
+	// 키보드 입력받기 (서버에서 처리)
+    // OnKeyboardInput(gt);
 
 	// 플레이어 업데이트
 	UpdatePlayer(gt);
+
+	// 카메라 업데이트 (플레이어 위치 확정된 뒤)
+	UpdateCamera(gt);
 
     // Cycle through the circular frame resource array.
     mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
@@ -242,6 +248,15 @@ void SoulSimul::Update(const GameTimer& gt)
 // 플레이어 업데이트
 void SoulSimul::UpdatePlayer(const GameTimer& gt)
 {
+	// 플레이어 이동
+	player[g_id].pos_x += player[g_id].move_x;
+	player[g_id].pos_y += player[g_id].move_y;
+	player[g_id].pos_z += player[g_id].move_z;
+
+	// 플레이어 이동거리 초기화
+	player[g_id].move_x = 0.0f;
+	player[g_id].move_y = 0.0f;
+	player[g_id].move_z = 0.0f;
 
 	// 플레이어 갱신
 	auto skullRitem = std::make_unique<RenderItem>();
@@ -250,7 +265,7 @@ void SoulSimul::UpdatePlayer(const GameTimer& gt)
 		// 플레이어 배율, 위치에 맞춰 지정
 		&skullRitem->World,
 		XMMatrixScaling(player[g_id].scale_x, player[g_id].scale_y, player[g_id].scale_z)
-		* XMMatrixTranslation(player[g_id].trans_x, player[g_id].trans_y, player[g_id].trans_z)
+		* XMMatrixTranslation(player[g_id].pos_x, player[g_id].pos_y, player[g_id].pos_z)
 	);
 
 	// 플레이어 각도를 카메라 각도에 맞춰 회전
@@ -389,9 +404,9 @@ void SoulSimul::OnKeyboardInput(const GameTimer& gt)
 void SoulSimul::UpdateCamera(const GameTimer& gt)
 {
     // 플레이어 위치
-    float fPlayerPosX = player[g_id].trans_x;
-    float fPlayerPosY = player[g_id].trans_y;
-    float fPlayerPosZ = player[g_id].trans_z;
+    float fPlayerPosX = player[g_id].pos_x;
+    float fPlayerPosY = player[g_id].pos_y;
+    float fPlayerPosZ = player[g_id].pos_z;
 
     // 플레이어로부터 카메라 위치
     float fBehindPlayer = 10.0f; // 플레이어로부터 뒤 거리
@@ -848,7 +863,7 @@ void SoulSimul::BuildRenderItems()
 		// 플레이어 배율, 위치에 맞춰 지정
 		&skullRitem->World,
 		XMMatrixScaling(player[g_id].scale_x, player[g_id].scale_y, player[g_id].scale_z)
-		* XMMatrixTranslation(player[g_id].trans_x, player[g_id].trans_y, player[g_id].trans_z)
+		* XMMatrixTranslation(player[g_id].pos_x, player[g_id].pos_y, player[g_id].pos_z)
 	);
 	skullRitem->TexTransform = MathHelper::Identity4x4();
 	skullRitem->ObjCBIndex = INDEXPLAYER;

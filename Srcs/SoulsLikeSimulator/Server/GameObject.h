@@ -20,6 +20,7 @@ public:
     
     float fPos[3] = { 0.0f, 0.0f, 0.0f };    // 위치
     float fRotate[3] = { 0.0f, 0.0f, 0.0f }; // 회전
+    float fMove[3] = { 0.0f, 0.0f, 0.0f };   // 이동
 
     // 점프중 여부
     bool bJumping = false; 

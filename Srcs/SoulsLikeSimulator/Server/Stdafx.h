@@ -70,8 +70,9 @@ struct INPUT_PACKET
 struct MOVE_PACKET 
 {
 	char type; // 종류
-	float fPx, fPy, fPz; // 이동
+	float fPx, fPy, fPz; // 위치
 	float fRx, fRy, fRz; // 회전
+	float fMx, fMy, fMz; // 이동
 };
 
 // 회전 패킷
