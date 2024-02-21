@@ -38,17 +38,22 @@ void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 	switch (input)
 	{
 		// 화살표 키 (이동)
-		case VK_LEFT: {g_Players[sock_info->id]->bLeftKeyDown = KeyDown; break; }
+		case VK_LEFT: { g_Players[sock_info->id]->bLeftKeyDown = KeyDown; printf("왼쪽 방향키 입력\n"); break; }
 		case VK_RIGHT: {g_Players[sock_info->id]->bRightKeyDown = KeyDown; printf("오른쪽 방향키 입력\n"); break; }
 		case VK_UP: {g_Players[sock_info->id]->bForwardKeyDown = KeyDown; printf("위 방향키 입력\n"); break; }
 		case VK_DOWN: {g_Players[sock_info->id]->bBackKeyDown = KeyDown; printf("아래 방향키 입력\n"); break; }
 
 		// z키 (점프)
 		case ZKEY: {g_Players[sock_info->id]->bZDown = KeyDown; printf("점프 키 (z키) 입력\n"); break; }
+
+		// 특수 키
+		case VK_F1: { g_Players[sock_info->id]->bF1Down = KeyDown; printf("F1키 입력\n"); break; }
+		case VK_F2: { g_Players[sock_info->id]->bF2Down = KeyDown; printf("F2키 입력\n"); break; }
+		case VK_F3: { g_Players[sock_info->id]->bF3Down = KeyDown; printf("F3키 입력\n"); break; }
 	}
 
-	// ### 테스트용
 	/*
+	printf("### 테스트용 y회전 : (%.2f)\n", g_Players[sock_info->id]->fRotate[1]);
 	printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
 		g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
 	printf("### 점프속도 : (%.2f)\n", g_Players[sock_info->id]->fJumpSpd);
@@ -115,6 +120,11 @@ void UpdatePlayer()
 			}
 		}
 
+		// F1 ~ F3 : 시야 설정
+
+		if (g_Players[id]->bF1Down) g_Players[id]->fRadius = 15.0f;
+		else if (g_Players[id]->bF2Down) g_Players[id]->fRadius = 10.0f;
+		else if (g_Players[id]->bF3Down) g_Players[id]->fRadius = 5.0f;
 	}
 }
 
@@ -161,6 +171,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			packet_MP->fMx = g_Players[sock_info->id]->fMove[0]; // 이동x
 			packet_MP->fMy = g_Players[sock_info->id]->fMove[1]; // 이동y
 			packet_MP->fMz = g_Players[sock_info->id]->fMove[2]; // 이동z
+
+			packet_MP->fRadius = g_Players[sock_info->id]->fRadius; // 시야 위치
 
 			// 패킷 보내기
 			send(client.socket, reinterpret_cast<char*>(packet_SP), sizeof(SEND_PLAYER), 0);

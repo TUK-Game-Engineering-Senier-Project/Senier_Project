@@ -51,6 +51,8 @@ struct MOVE_PACKET
 	float fPx, fPy, fPz; // 위치
 	float fRx, fRy, fRz; // 회전
 	float fMx, fMy, fMz; // 이동
+
+	float fRadius; // 시야 위치
 };;
 
 
@@ -75,6 +77,9 @@ extern struct Player
 	float scale_x{ 0.3f },  scale_y{ 0.3f },  scale_z{ 0.3f };  // 크기 배율
 	float rotate_x{ 0.0f }, rotate_y{ 0.0f }, rotate_z{ 0.0f }; // 회전 각도
 	float move_x{ 0.0f },   move_y{ 0.0f },   move_z{ 0.0f };   // 이동 거리
+
+	float fRadius{ 10.0f }; // 시야 위치
+
 	// float color_r{}, color_g{}, color_b{};
 };
 

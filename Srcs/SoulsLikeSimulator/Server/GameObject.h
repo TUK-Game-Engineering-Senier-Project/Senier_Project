@@ -16,7 +16,11 @@ public:
         bLeftKeyDown{ false }, 
         bRightKeyDown{ false },
 
-        bZDown{ false };
+        bZDown{ false },
+        
+        bF1Down{ false },
+        bF2Down{ false },
+        bF3Down{ false };
     
     float fPos[3] = { 0.0f, 0.0f, 0.0f };    // 위치
     float fRotate[3] = { 0.0f, 0.0f, 0.0f }; // 회전
@@ -25,6 +29,8 @@ public:
     // 점프중 여부
     bool bJumping = false; 
     float fJumpSpd = 0.0f;
+
+    float fRadius = 10.0f;
 
     // 
     // float fScale[3];  // 크기

@@ -82,13 +82,36 @@ void KeyBoardDown(unsigned char key, int x, int y)
 		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
 		break;
 
-		// 점프
+	// 점프
 	case ZKEY:
 		packet->type = SC_KEY_INPUT;
 		packet->input = ZKEY;
 		packet->bKeyDown = true;
 		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
 		break;
+
+	// 세팅
+	case VK_F1:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_F1;
+		packet->bKeyDown = true;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
+
+	case VK_F2:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_F2;
+		packet->bKeyDown = true;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
+
+	case VK_F3:
+		packet->type = SC_KEY_INPUT;
+		packet->input = VK_F3;
+		packet->bKeyDown = true;
+		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+		break;
+
 	}
 	delete packet;
 }
@@ -100,38 +123,60 @@ void KeyBoardUp(unsigned char key, int x, int y)
 	switch (key)
 	{
 		// 이동
-	case VK_LEFT:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_LEFT;
-		packet->bKeyDown = false;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_RIGHT:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_RIGHT;
-		packet->bKeyDown = false;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_UP:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_UP;
-		packet->bKeyDown = false;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_DOWN:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_DOWN;
-		packet->bKeyDown = false;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
+		case VK_LEFT:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_LEFT;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_RIGHT:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_RIGHT;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_UP:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_UP;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_DOWN:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_DOWN;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
 
 		// 점프
-	case ZKEY:
-		packet->type = SC_KEY_INPUT;
-		packet->input = ZKEY;
-		packet->bKeyDown = false;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
+		case ZKEY:
+			packet->type = SC_KEY_INPUT;
+			packet->input = ZKEY;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+
+		// 세팅
+		case VK_F1:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_F1;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+
+		case VK_F2:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_F2;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+
+		case VK_F3:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_F3;
+			packet->bKeyDown = false;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
 	}
 	delete packet;
 }
@@ -167,6 +212,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		player[g_id].move_x = packet_tr->fMx; // 이동x
 		player[g_id].move_y = packet_tr->fMy; // 이동y
 		player[g_id].move_z = packet_tr->fMz; // 이동z
+
+		player[g_id].fRadius = packet_tr->fRadius; // 이동z
 
 		// 버퍼 값에 따른 동작
 		switch (buf[0])

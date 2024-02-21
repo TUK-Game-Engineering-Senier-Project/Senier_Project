@@ -75,14 +75,11 @@ private:
     virtual void OnMouseUp(WPARAM btnState, int x, int y)override;
     virtual void OnMouseMove(WPARAM btnState, int x, int y)override;
 
-    void OnKeyboardInput(const GameTimer& gt);
-
 	// 플레이어 업데이트
 	void UpdatePlayer(const GameTimer& gt);
 
 	// 카메라 업데이트 (플레이어 위치 확정된 뒤)
 	void UpdateCamera(const GameTimer& gt);
-
 
 	void AnimateMaterials(const GameTimer& gt);
 	void UpdateObjectCBs(const GameTimer& gt);
@@ -134,7 +131,7 @@ private:
 
     float mTheta = 1.5f*XM_PI;
     float mPhi = 0.2f*XM_PI;
-    float mRadius = 15.0f;
+    float mRadius = 10.0f;
 
     POINT mLastMousePos;
 };
@@ -216,9 +213,6 @@ void SoulSimul::OnResize()
 
 void SoulSimul::Update(const GameTimer& gt)
 {
-	// 키보드 입력받기 (서버에서 처리)
-    // OnKeyboardInput(gt);
-
 	// 플레이어 업데이트
 	UpdatePlayer(gt);
 
@@ -248,6 +242,9 @@ void SoulSimul::Update(const GameTimer& gt)
 // 플레이어 업데이트
 void SoulSimul::UpdatePlayer(const GameTimer& gt)
 {
+	// 플레이어 각도를 카메라 각도에 맞춰 회전
+	player[g_id].rotate_y -= mTheta + 1.5f;
+
 	// 플레이어 이동
 	player[g_id].pos_x += player[g_id].move_x;
 	player[g_id].pos_y += player[g_id].move_y;
@@ -258,26 +255,16 @@ void SoulSimul::UpdatePlayer(const GameTimer& gt)
 	player[g_id].move_y = 0.0f;
 	player[g_id].move_z = 0.0f;
 
-	// 플레이어 갱신
 	auto skullRitem = std::make_unique<RenderItem>();
+
+	// 플레이어 갱신
 	XMStoreFloat4x4
 	(
-		// 플레이어 배율, 위치에 맞춰 지정
+		// 플레이어 배율, 회전, 위치에 맞춰 지정
 		&skullRitem->World,
 		XMMatrixScaling(player[g_id].scale_x, player[g_id].scale_y, player[g_id].scale_z)
+		* XMMatrixRotationRollPitchYaw(player[g_id].rotate_x, player[g_id].rotate_y, player[g_id].rotate_z)
 		* XMMatrixTranslation(player[g_id].pos_x, player[g_id].pos_y, player[g_id].pos_z)
-	);
-
-	// 플레이어 각도를 카메라 각도에 맞춰 회전
-	player[g_id].rotate_y -= mTheta + 1.5f;
-
-	// 플레이어 회전
-	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(player[g_id].rotate_x, player[g_id].rotate_y, player[g_id].rotate_z);
-	XMStoreFloat4x4
-	(
-		// 플레이어 각도에 맞춰 지정
-		&skullRitem->World,
-		rotationMatrix * XMLoadFloat4x4(&skullRitem->World)
 	);
 
 	skullRitem->TexTransform = MathHelper::Identity4x4();
@@ -366,6 +353,7 @@ void SoulSimul::OnMouseMove(WPARAM btnState, int x, int y)
 	// 왼쪽 마우스 버튼
 	if ((btnState & MK_LBUTTON) != 0)
 	{
+		/*
 		// Make each pixel correspond to a quarter of a degree.
 		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - mLastMousePos.x));
 		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - mLastMousePos.y));
@@ -376,11 +364,13 @@ void SoulSimul::OnMouseMove(WPARAM btnState, int x, int y)
 
 		// 아래에서는 안 보이게 각도 제한
 		mPhi = MathHelper::Clamp(mPhi, 0.5f, MathHelper::Pi - 2.0f);
+		*/
 	}
 
 	// 오른쪽 마우스 버튼
 	else if ((btnState & MK_RBUTTON) != 0)
 	{
+		/*
 		// Make each pixel correspond to 0.005 unit in the scene.
 		float dx = 0.005f * static_cast<float>(x - mLastMousePos.x);
 		float dy = 0.005f * static_cast<float>(y - mLastMousePos.y);
@@ -389,16 +379,12 @@ void SoulSimul::OnMouseMove(WPARAM btnState, int x, int y)
 		mRadius += dx - dy;
 
 		// Restrict the radius.
-		mRadius = MathHelper::Clamp(mRadius, 6.0f, 15.0f);
+		mRadius = MathHelper::Clamp(mRadius, 5.0f, 15.0f);
+		*/
 	}
 
     mLastMousePos.x = x;
     mLastMousePos.y = y;
-}
- 
-void SoulSimul::OnKeyboardInput(const GameTimer& gt)
-{
-
 }
  
 void SoulSimul::UpdateCamera(const GameTimer& gt)
@@ -410,7 +396,7 @@ void SoulSimul::UpdateCamera(const GameTimer& gt)
 
     // 플레이어로부터 카메라 위치
     float fBehindPlayer = 10.0f; // 플레이어로부터 뒤 거리
-    float fAbovePlayer = 10.0f;  // 플레이어로부터 위 거리 
+    float fAbovePlayer = player[g_id].fRadius; // 플레이어로부터 위 거리 
 
 	// 카메라 위치 좌표값
     float cameraPosX = fPlayerPosX + fBehindPlayer * cosf(mTheta);

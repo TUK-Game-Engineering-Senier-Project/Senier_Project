@@ -73,6 +73,8 @@ struct MOVE_PACKET
 	float fPx, fPy, fPz; // 위치
 	float fRx, fRy, fRz; // 회전
 	float fMx, fMy, fMz; // 이동
+
+	float fRadius; // 시야 위치
 };
 
 // 회전 패킷
