@@ -21,6 +21,14 @@ const int gNumFrameResources = 3;
 // 각 오브젝트 인덱스
 constexpr char INDEXPLAYER = 0;
 constexpr char INDEXFLOOR = 1;
+constexpr char INDEXWEAPON = 2;
+constexpr char INDEXSHIELD = 3;
+
+// 각 오브젝트 상대 위치
+constexpr float WEAPON_POSFROMPLAYER = 1.3f; // 플레이어 우측 무기
+constexpr float SHIELD_POSFROMPLAYER = 1.7f; // 플레이어 좌측 방패
+constexpr float WEAPON_UPFROMFLOOR   = 2.0f; // 무기 드는 높이
+constexpr float SHIELD_UPFROMFLOOR   = 1.0f; // 방패 드는 높이
 
 // Lightweight structure stores parameters to draw a shape.  This will
 // vary from app-to-app.
@@ -76,7 +84,7 @@ private:
     virtual void OnMouseMove(WPARAM btnState, int x, int y)override;
 
 	// 플레이어 업데이트
-	void UpdatePlayer(const GameTimer& gt);
+	void UpdatePlayer();
 
 	// 카메라 업데이트 (플레이어 위치 확정된 뒤)
 	void UpdateCamera(const GameTimer& gt);
@@ -214,7 +222,7 @@ void SoulSimul::OnResize()
 void SoulSimul::Update(const GameTimer& gt)
 {
 	// 플레이어 업데이트
-	UpdatePlayer(gt);
+	UpdatePlayer();
 
 	// 카메라 업데이트 (플레이어 위치 확정된 뒤)
 	UpdateCamera(gt);
@@ -240,10 +248,10 @@ void SoulSimul::Update(const GameTimer& gt)
 }
 
 // 플레이어 업데이트
-void SoulSimul::UpdatePlayer(const GameTimer& gt)
+void SoulSimul::UpdatePlayer()
 {
 	// 플레이어 각도를 카메라 각도에 맞춰 회전
-	player[g_id].rotate_y -= mTheta + 1.5f;
+	// player[g_id].rotate_y -= mTheta + 1.5f;
 
 	// 플레이어 이동
 	player[g_id].pos_x += player[g_id].move_x;
@@ -276,6 +284,106 @@ void SoulSimul::UpdatePlayer(const GameTimer& gt)
 	skullRitem->StartIndexLocation = skullRitem->Geo->DrawArgs["skull"].StartIndexLocation;
 	skullRitem->BaseVertexLocation = skullRitem->Geo->DrawArgs["skull"].BaseVertexLocation;
 	mAllRitems.push_back(std::move(skullRitem));
+
+	// 무기
+
+	float weaponX = 0.0f;
+	float weaponY = 0.0f;
+	float weaponZ = 0.0f;
+
+	if ((player[g_id].rotate_y >= -0.1 * XM_PI) && (player[g_id].rotate_y <= 0.1 * XM_PI))
+	{
+		weaponX = player[g_id].pos_x - WEAPON_POSFROMPLAYER;
+		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
+		weaponZ = player[g_id].pos_z;
+	}
+	if ((player[g_id].rotate_y >= 0.4 * XM_PI) && (player[g_id].rotate_y <= 0.6 * XM_PI))
+	{
+		weaponX = player[g_id].pos_x;
+		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
+		weaponZ = player[g_id].pos_z + WEAPON_POSFROMPLAYER;
+	}
+	if ((player[g_id].rotate_y >= 0.9 * XM_PI) && (player[g_id].rotate_y <= 1.1 * XM_PI))
+	{
+		weaponX = player[g_id].pos_x + WEAPON_POSFROMPLAYER;
+		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
+		weaponZ = player[g_id].pos_z;
+	}
+	if ((player[g_id].rotate_y >= 1.4 * XM_PI) && (player[g_id].rotate_y <= 1.6 * XM_PI))
+	{
+		weaponX = player[g_id].pos_x;
+		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
+		weaponZ = player[g_id].pos_z - WEAPON_POSFROMPLAYER;
+	}
+
+	auto weaponRitem = std::make_unique<RenderItem>();
+	XMStoreFloat4x4
+	(
+		// 플레이어 배율, 회전, 위치에 맞춰 지정
+		&weaponRitem->World,
+		XMMatrixScaling(1.0f, 1.0f, 1.0f)
+		* XMMatrixRotationRollPitchYaw(player[g_id].rotate_x, player[g_id].rotate_y, player[g_id].rotate_z)
+		* XMMatrixTranslation(weaponX, weaponY, weaponZ)
+	);
+	weaponRitem->TexTransform = MathHelper::Identity4x4();
+	weaponRitem->ObjCBIndex = INDEXWEAPON;
+	weaponRitem->Mat = mMaterials["skullMat"].get();
+	weaponRitem->Geo = mGeometries["shapeGeo"].get();
+	weaponRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	weaponRitem->IndexCount = weaponRitem->Geo->DrawArgs["weapon"].IndexCount;
+	weaponRitem->StartIndexLocation = weaponRitem->Geo->DrawArgs["weapon"].StartIndexLocation;
+	weaponRitem->BaseVertexLocation = weaponRitem->Geo->DrawArgs["weapon"].BaseVertexLocation;
+	mAllRitems.push_back(std::move(weaponRitem));
+
+	// 방패
+
+	float shieldX = 0.0f;
+	float shieldY = 0.0f;
+	float shieldZ = 0.0f;
+
+	if ((player[g_id].rotate_y >= -0.1 * XM_PI) && (player[g_id].rotate_y <= 0.1 * XM_PI))
+	{
+		shieldX = player[g_id].pos_x + SHIELD_POSFROMPLAYER;
+		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
+		shieldZ = player[g_id].pos_z;
+	}
+	if ((player[g_id].rotate_y >= 0.4 * XM_PI) && (player[g_id].rotate_y <= 0.6 * XM_PI))
+	{
+		shieldX = player[g_id].pos_x;
+		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
+		shieldZ = player[g_id].pos_z - SHIELD_POSFROMPLAYER;
+	}
+	if ((player[g_id].rotate_y >= 0.9 * XM_PI) && (player[g_id].rotate_y <= 1.1 * XM_PI))
+	{
+		shieldX = player[g_id].pos_x - SHIELD_POSFROMPLAYER;
+		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
+		shieldZ = player[g_id].pos_z;
+	}
+	if ((player[g_id].rotate_y >= 1.4 * XM_PI) && (player[g_id].rotate_y <= 1.6 * XM_PI))
+	{
+		shieldX = player[g_id].pos_x;
+		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
+		shieldZ = player[g_id].pos_z + SHIELD_POSFROMPLAYER;
+	}
+
+	auto shieldRitem = std::make_unique<RenderItem>();
+	XMStoreFloat4x4
+	(
+		// 플레이어 배율, 회전, 위치에 맞춰 지정
+		&shieldRitem->World,
+		XMMatrixScaling(1.0f, 1.0f, 1.0f)
+		* XMMatrixRotationRollPitchYaw(player[g_id].rotate_x, player[g_id].rotate_y, player[g_id].rotate_z)
+		* XMMatrixTranslation(shieldX, shieldY, shieldZ)
+	);
+	shieldRitem->TexTransform = MathHelper::Identity4x4();
+	shieldRitem->ObjCBIndex = INDEXSHIELD;
+	shieldRitem->Mat = mMaterials["skullMat"].get();
+	shieldRitem->Geo = mGeometries["shapeGeo"].get();
+	shieldRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	shieldRitem->IndexCount = shieldRitem->Geo->DrawArgs["shield"].IndexCount;
+	shieldRitem->StartIndexLocation = shieldRitem->Geo->DrawArgs["shield"].StartIndexLocation;
+	shieldRitem->BaseVertexLocation = shieldRitem->Geo->DrawArgs["shield"].BaseVertexLocation;
+	mAllRitems.push_back(std::move(shieldRitem));
 }
 
 void SoulSimul::Draw(const GameTimer& gt)
@@ -561,10 +669,11 @@ void SoulSimul::BuildShadersAndInputLayout()
 void SoulSimul::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
-	GeometryGenerator::MeshData box = geoGen.CreateBox(1.5f, 0.5f, 1.5f, 3);
-	GeometryGenerator::MeshData floor = geoGen.CreateGrid(10.0f, 10.0f, 40, 40);
-	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
-	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
+	GeometryGenerator::MeshData floor = geoGen.CreateGrid(20.0f, 20.0f, 40, 40);
+	GeometryGenerator::MeshData weapon = geoGen.CreateBox(0.5f, 3.0f, 0.5f, 3);
+	GeometryGenerator::MeshData shield = geoGen.CreateBox(1.4f, 1.4f, 0.2f, 3);
+	// GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
+	// GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 
 	//
 	// We are concatenating all the geometry into one big vertex/index buffer.  So
@@ -572,56 +681,39 @@ void SoulSimul::BuildShapeGeometry()
 	//
 
 	// Cache the vertex offsets to each object in the concatenated vertex buffer.
-	UINT boxVertexOffset = 0;
-	UINT floorVertexOffset = (UINT)box.Vertices.size();
-	UINT sphereVertexOffset = floorVertexOffset + (UINT)floor.Vertices.size();
-	UINT cylinderVertexOffset = sphereVertexOffset + (UINT)sphere.Vertices.size();
+	UINT floorVertexOffset = 0;
+	UINT weaponVertexOffset = floorVertexOffset + (UINT)floor.Vertices.size();
+	UINT shieldVertexOffset = weaponVertexOffset + (UINT)weapon.Vertices.size();
 
 	// Cache the starting index for each object in the concatenated index buffer.
-	UINT boxIndexOffset = 0;
-	UINT floorIndexOffset = (UINT)box.Indices32.size();
-	UINT sphereIndexOffset = floorIndexOffset + (UINT)floor.Indices32.size();
-	UINT cylinderIndexOffset = sphereIndexOffset + (UINT)sphere.Indices32.size();
+	UINT floorIndexOffset = 0;
+	UINT weaponIndexOffset = floorIndexOffset + (UINT)floor.Indices32.size();
+	UINT shieldIndexOffset = weaponIndexOffset + (UINT)weapon.Indices32.size();
 
-	SubmeshGeometry boxSubmesh;
-	boxSubmesh.IndexCount = (UINT)box.Indices32.size();
-	boxSubmesh.StartIndexLocation = boxIndexOffset;
-	boxSubmesh.BaseVertexLocation = boxVertexOffset;
-
+	// 각 메쉬들의 위치를 지정
 	SubmeshGeometry floorSubmesh;
 	floorSubmesh.IndexCount = (UINT)floor.Indices32.size();
 	floorSubmesh.StartIndexLocation = floorIndexOffset;
 	floorSubmesh.BaseVertexLocation = floorVertexOffset;
 
-	SubmeshGeometry sphereSubmesh;
-	sphereSubmesh.IndexCount = (UINT)sphere.Indices32.size();
-	sphereSubmesh.StartIndexLocation = sphereIndexOffset;
-	sphereSubmesh.BaseVertexLocation = sphereVertexOffset;
+	SubmeshGeometry weaponSubmesh;
+	weaponSubmesh.IndexCount = (UINT)weapon.Indices32.size();
+	weaponSubmesh.StartIndexLocation = weaponIndexOffset;
+	weaponSubmesh.BaseVertexLocation = weaponVertexOffset;
 
-	SubmeshGeometry cylinderSubmesh;
-	cylinderSubmesh.IndexCount = (UINT)cylinder.Indices32.size();
-	cylinderSubmesh.StartIndexLocation = cylinderIndexOffset;
-	cylinderSubmesh.BaseVertexLocation = cylinderVertexOffset;
+	SubmeshGeometry shieldSubmesh;
+	shieldSubmesh.IndexCount = (UINT)shield.Indices32.size();
+	shieldSubmesh.StartIndexLocation = shieldIndexOffset;
+	shieldSubmesh.BaseVertexLocation = shieldVertexOffset;
 
-	//
-	// Extract the vertex elements we are interested in and pack the
-	// vertices of all the meshes into one vertex buffer.
-	//
-
+	// 총합 버텍스 수
 	auto totalVertexCount =
-		box.Vertices.size() +
 		floor.Vertices.size() +
-		sphere.Vertices.size() +
-		cylinder.Vertices.size();
+		weapon.Vertices.size() +
+		shield.Vertices.size();
 
 	std::vector<Vertex> vertices(totalVertexCount);
-
 	UINT k = 0;
-	for(size_t i = 0; i < box.Vertices.size(); ++i, ++k)
-	{
-		vertices[k].Pos = box.Vertices[i].Position;
-		vertices[k].Normal = box.Vertices[i].Normal;
-	}
 
 	for(size_t i = 0; i < floor.Vertices.size(); ++i, ++k)
 	{
@@ -629,23 +721,22 @@ void SoulSimul::BuildShapeGeometry()
 		vertices[k].Normal = floor.Vertices[i].Normal;
 	}
 
-	for(size_t i = 0; i < sphere.Vertices.size(); ++i, ++k)
+	for(size_t i = 0; i < weapon.Vertices.size(); ++i, ++k)
 	{
-		vertices[k].Pos = sphere.Vertices[i].Position;
-		vertices[k].Normal = sphere.Vertices[i].Normal;
+		vertices[k].Pos = weapon.Vertices[i].Position;
+		vertices[k].Normal = weapon.Vertices[i].Normal;
 	}
 
-	for(size_t i = 0; i < cylinder.Vertices.size(); ++i, ++k)
+	for(size_t i = 0; i < shield.Vertices.size(); ++i, ++k)
 	{
-		vertices[k].Pos = cylinder.Vertices[i].Position;
-		vertices[k].Normal = cylinder.Vertices[i].Normal;
+		vertices[k].Pos = shield.Vertices[i].Position;
+		vertices[k].Normal = shield.Vertices[i].Normal;
 	}
 
 	std::vector<std::uint16_t> indices;
-	indices.insert(indices.end(), std::begin(box.GetIndices16()), std::end(box.GetIndices16()));
 	indices.insert(indices.end(), std::begin(floor.GetIndices16()), std::end(floor.GetIndices16()));
-	indices.insert(indices.end(), std::begin(sphere.GetIndices16()), std::end(sphere.GetIndices16()));
-	indices.insert(indices.end(), std::begin(cylinder.GetIndices16()), std::end(cylinder.GetIndices16()));
+	indices.insert(indices.end(), std::begin(weapon.GetIndices16()), std::end(weapon.GetIndices16()));
+	indices.insert(indices.end(), std::begin(shield.GetIndices16()), std::end(shield.GetIndices16()));
 
     const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
     const UINT ibByteSize = (UINT)indices.size()  * sizeof(std::uint16_t);
@@ -670,10 +761,9 @@ void SoulSimul::BuildShapeGeometry()
 	geo->IndexFormat = DXGI_FORMAT_R16_UINT;
 	geo->IndexBufferByteSize = ibByteSize;
 
-	geo->DrawArgs["box"] = boxSubmesh;
 	geo->DrawArgs["floor"] = floorSubmesh;
-	geo->DrawArgs["sphere"] = sphereSubmesh;
-	geo->DrawArgs["cylinder"] = cylinderSubmesh;
+	geo->DrawArgs["weapon"] = weaponSubmesh;
+	geo->DrawArgs["shield"] = shieldSubmesh;
 
 	mGeometries[geo->Name] = std::move(geo);
 }
@@ -818,8 +908,8 @@ void SoulSimul::BuildMaterials()
 	// 바닥
 	auto floor = std::make_unique<Material>();
 	floor->Name = "floor";
-	floor->MatCBIndex = 2;
-	floor->DiffuseSrvHeapIndex = 2;
+	floor->MatCBIndex = 0;
+	floor->DiffuseSrvHeapIndex = 0;
 	floor->DiffuseAlbedo = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	floor->FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
 	floor->Roughness = 0.2f;
@@ -827,8 +917,8 @@ void SoulSimul::BuildMaterials()
 	// 플레이어
 	auto skullMat = std::make_unique<Material>();
 	skullMat->Name = "skullMat";
-	skullMat->MatCBIndex = 3;
-	skullMat->DiffuseSrvHeapIndex = 3;
+	skullMat->MatCBIndex = 1;
+	skullMat->DiffuseSrvHeapIndex = 1;
 	skullMat->DiffuseAlbedo = XMFLOAT4(0.5f, 1.0f, 0.5f, 1.0f);
 	skullMat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05);
 	skullMat->Roughness = 0.3f;
@@ -841,26 +931,6 @@ void SoulSimul::BuildMaterials()
 
 void SoulSimul::BuildRenderItems()
 {
-
-	// 해골 (### 플레이어 임시)
-	auto skullRitem = std::make_unique<RenderItem>();
-	XMStoreFloat4x4
-	(
-		// 플레이어 배율, 위치에 맞춰 지정
-		&skullRitem->World,
-		XMMatrixScaling(player[g_id].scale_x, player[g_id].scale_y, player[g_id].scale_z)
-		* XMMatrixTranslation(player[g_id].pos_x, player[g_id].pos_y, player[g_id].pos_z)
-	);
-	skullRitem->TexTransform = MathHelper::Identity4x4();
-	skullRitem->ObjCBIndex = INDEXPLAYER;
-	skullRitem->Mat = mMaterials["skullMat"].get();
-	skullRitem->Geo = mGeometries["skullGeo"].get();
-	skullRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	skullRitem->IndexCount = skullRitem->Geo->DrawArgs["skull"].IndexCount;
-	skullRitem->StartIndexLocation = skullRitem->Geo->DrawArgs["skull"].StartIndexLocation;
-	skullRitem->BaseVertexLocation = skullRitem->Geo->DrawArgs["skull"].BaseVertexLocation;
-	mAllRitems.push_back(std::move(skullRitem));
-
 	// 바닥 격자 그리기
     auto floorRitem = std::make_unique<RenderItem>();
 	floorRitem->World = MathHelper::Identity4x4();
@@ -874,84 +944,7 @@ void SoulSimul::BuildRenderItems()
 	floorRitem->BaseVertexLocation = floorRitem->Geo->DrawArgs["floor"].BaseVertexLocation;
 	mAllRitems.push_back(std::move(floorRitem));
 
-
-
-	/*
-	auto boxRitem = std::make_unique<RenderItem>();
-	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f)*XMMatrixTranslation(0.0f, 0.5f, 0.0f));
-	XMStoreFloat4x4(&boxRitem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
-	boxRitem->ObjCBIndex = 2;
-	boxRitem->Mat = mMaterials["stone0"].get();
-	boxRitem->Geo = mGeometries["shapeGeo"].get();
-	boxRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
-	boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
-	boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-	mAllRitems.push_back(std::move(boxRitem));
-	*/
-
-	/*
-	XMMATRIX brickTexTransform = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	UINT objCBIndex = 3;
-	for(int i = 0; i < 5; ++i)
-	{
-		auto leftCylRitem = std::make_unique<RenderItem>();
-		auto rightCylRitem = std::make_unique<RenderItem>();
-		auto leftSphereRitem = std::make_unique<RenderItem>();
-		auto rightSphereRitem = std::make_unique<RenderItem>();
-
-		XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i*5.0f);
-		XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f + i*5.0f);
-
-		XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f + i*5.0f);
-		XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f + i*5.0f);
-
-		XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
-		XMStoreFloat4x4(&leftCylRitem->TexTransform, brickTexTransform);
-		leftCylRitem->ObjCBIndex = objCBIndex++;
-		leftCylRitem->Mat = mMaterials["bricks0"].get();
-		leftCylRitem->Geo = mGeometries["shapeGeo"].get();
-		leftCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		leftCylRitem->IndexCount = leftCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-		leftCylRitem->StartIndexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-		leftCylRitem->BaseVertexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-
-		XMStoreFloat4x4(&rightCylRitem->World, leftCylWorld);
-		XMStoreFloat4x4(&rightCylRitem->TexTransform, brickTexTransform);
-		rightCylRitem->ObjCBIndex = objCBIndex++;
-		rightCylRitem->Mat = mMaterials["bricks0"].get();
-		rightCylRitem->Geo = mGeometries["shapeGeo"].get();
-		rightCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		rightCylRitem->IndexCount = rightCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-		rightCylRitem->StartIndexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-		rightCylRitem->BaseVertexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-
-		XMStoreFloat4x4(&leftSphereRitem->World, leftSphereWorld);
-		leftSphereRitem->TexTransform = MathHelper::Identity4x4();
-		leftSphereRitem->ObjCBIndex = objCBIndex++;
-		leftSphereRitem->Mat = mMaterials["stone0"].get();
-		leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
-		leftSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		leftSphereRitem->IndexCount = leftSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-		leftSphereRitem->StartIndexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-		leftSphereRitem->BaseVertexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-
-		XMStoreFloat4x4(&rightSphereRitem->World, rightSphereWorld);
-		rightSphereRitem->TexTransform = MathHelper::Identity4x4();
-		rightSphereRitem->ObjCBIndex = objCBIndex++;
-		rightSphereRitem->Mat = mMaterials["stone0"].get();
-		rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
-		rightSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		rightSphereRitem->IndexCount = rightSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-		rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-		rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-
-		mAllRitems.push_back(std::move(leftCylRitem));
-		mAllRitems.push_back(std::move(rightCylRitem));
-		mAllRitems.push_back(std::move(leftSphereRitem));
-		mAllRitems.push_back(std::move(rightSphereRitem));
-	}
-	*/
+	UpdatePlayer();
 
 	// All the render items are opaque.
 	for(auto& e : mAllRitems)

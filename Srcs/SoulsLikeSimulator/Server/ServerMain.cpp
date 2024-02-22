@@ -18,6 +18,8 @@ float g_fJumpSpd = 0.20f; // 점프 속도
 
 constexpr auto ZKEY = 0x5A; // z키
 
+constexpr float XM_PI = 3.141592654f; // 원주율
+
 // 소켓 함수 오류 출력 후 종료
 void ErrorQuit(const char* msg)
 {
@@ -52,8 +54,10 @@ void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 		case VK_F3: { g_Players[sock_info->id]->bF3Down = KeyDown; printf("F3키 입력\n"); break; }
 	}
 
-	/*
+	
 	printf("### 테스트용 y회전 : (%.2f)\n", g_Players[sock_info->id]->fRotate[1]);
+
+	/*
 	printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
 		g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
 	printf("### 점프속도 : (%.2f)\n", g_Players[sock_info->id]->fJumpSpd);
@@ -68,24 +72,26 @@ void UpdatePlayer()
 
 		// ----- 입력한 키에 따른 동작 수행 ----- //
 
+
+
 		// 입력한 화살표키에 따라 이동
-		if (g_Players[id]->bForwardKeyDown) 
-		{ 
-			g_Players[id]->fRotate[1] = 3.0f;
+		if (g_Players[id]->bForwardKeyDown)
+		{
+			g_Players[id]->fRotate[1] = 1.0 * XM_PI;
 			g_Players[id]->fMove[2] += g_fPlayerSpd;
 		}
-		if (g_Players[id]->bBackKeyDown) { 
-			g_Players[id]->fRotate[1] = 0.0f;
+		if (g_Players[id]->bBackKeyDown) {
+			g_Players[id]->fRotate[1] = 0.0 * XM_PI;
 			g_Players[id]->fMove[2] -= g_fPlayerSpd;
 		}
-		if (g_Players[id]->bLeftKeyDown) 
-		{ 
-			g_Players[id]->fRotate[1] = 1.5f;
+		if (g_Players[id]->bLeftKeyDown)
+		{
+			g_Players[id]->fRotate[1] = 0.5 * XM_PI;
 			g_Players[id]->fMove[0] -= g_fPlayerSpd;
 		}
-		if (g_Players[id]->bRightKeyDown) 
-		{ 
-			g_Players[id]->fRotate[1] = 4.5f;
+		if (g_Players[id]->bRightKeyDown)
+		{
+			g_Players[id]->fRotate[1] = 1.5 * XM_PI;
 			g_Players[id]->fMove[0] += g_fPlayerSpd;
 		}
 
