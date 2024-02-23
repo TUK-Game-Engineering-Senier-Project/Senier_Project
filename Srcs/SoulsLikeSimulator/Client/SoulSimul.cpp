@@ -30,8 +30,8 @@ constexpr float SHIELD_POSFROMPLAYER = 1.7f; // 플레이어 좌측 방패
 constexpr float WEAPON_UPFROMFLOOR   = 2.0f; // 무기 드는 높이
 constexpr float SHIELD_UPFROMFLOOR   = 1.0f; // 방패 드는 높이
 
-// Lightweight structure stores parameters to draw a shape.  This will
-// vary from app-to-app.
+// Lightweight structure stores parameters to draw a shape.
+// This will vary from app-to-app.
 struct RenderItem
 {
 	RenderItem() = default;
@@ -291,29 +291,58 @@ void SoulSimul::UpdatePlayer()
 	float weaponY = 0.0f;
 	float weaponZ = 0.0f;
 
-	if ((player[g_id].rotate_y >= -0.1 * XM_PI) && (player[g_id].rotate_y <= 0.1 * XM_PI))
+	// 직선 4방향 (무기)
+
+	if (player[g_id].rotate_y == 0.0f * XM_PI)
 	{
 		weaponX = player[g_id].pos_x - WEAPON_POSFROMPLAYER;
 		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
 		weaponZ = player[g_id].pos_z;
 	}
-	if ((player[g_id].rotate_y >= 0.4 * XM_PI) && (player[g_id].rotate_y <= 0.6 * XM_PI))
+	if (player[g_id].rotate_y == 0.5f * XM_PI)
 	{
 		weaponX = player[g_id].pos_x;
 		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
 		weaponZ = player[g_id].pos_z + WEAPON_POSFROMPLAYER;
 	}
-	if ((player[g_id].rotate_y >= 0.9 * XM_PI) && (player[g_id].rotate_y <= 1.1 * XM_PI))
+	if (player[g_id].rotate_y == 1.0f * XM_PI)
 	{
 		weaponX = player[g_id].pos_x + WEAPON_POSFROMPLAYER;
 		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
 		weaponZ = player[g_id].pos_z;
 	}
-	if ((player[g_id].rotate_y >= 1.4 * XM_PI) && (player[g_id].rotate_y <= 1.6 * XM_PI))
+	if (player[g_id].rotate_y == 1.5f * XM_PI)
 	{
 		weaponX = player[g_id].pos_x;
 		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
 		weaponZ = player[g_id].pos_z - WEAPON_POSFROMPLAYER;
+	}
+
+	// 대각선 4방향 (무기)
+
+	if (player[g_id].rotate_y == 0.25f * XM_PI)
+	{
+		weaponX = player[g_id].pos_x - cos(XM_PI / 4) * WEAPON_POSFROMPLAYER;
+		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
+		weaponZ = player[g_id].pos_z + sin(XM_PI / 4) * WEAPON_POSFROMPLAYER;
+	}
+	if (player[g_id].rotate_y == 0.75f * XM_PI)
+	{
+		weaponX = player[g_id].pos_x + cos(XM_PI / 4) * WEAPON_POSFROMPLAYER;
+		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
+		weaponZ = player[g_id].pos_z + sin(XM_PI / 4) * WEAPON_POSFROMPLAYER;
+	}
+	if (player[g_id].rotate_y == 1.25f * XM_PI)
+	{
+		weaponX = player[g_id].pos_x + cos(XM_PI / 4) * WEAPON_POSFROMPLAYER;
+		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
+		weaponZ = player[g_id].pos_z - sin(XM_PI / 4) * WEAPON_POSFROMPLAYER;
+	}
+	if (player[g_id].rotate_y == 1.75f * XM_PI)
+	{
+		weaponX = player[g_id].pos_x - cos(XM_PI / 4) * WEAPON_POSFROMPLAYER;
+		weaponY = player[g_id].pos_y + WEAPON_UPFROMFLOOR;
+		weaponZ = player[g_id].pos_z - sin(XM_PI / 4) * WEAPON_POSFROMPLAYER;
 	}
 
 	auto weaponRitem = std::make_unique<RenderItem>();
@@ -341,30 +370,60 @@ void SoulSimul::UpdatePlayer()
 	float shieldY = 0.0f;
 	float shieldZ = 0.0f;
 
-	if ((player[g_id].rotate_y >= -0.1 * XM_PI) && (player[g_id].rotate_y <= 0.1 * XM_PI))
+	// 직선 4방향 (무기)
+
+	if (player[g_id].rotate_y == 0.0f * XM_PI)
 	{
 		shieldX = player[g_id].pos_x + SHIELD_POSFROMPLAYER;
 		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
 		shieldZ = player[g_id].pos_z;
 	}
-	if ((player[g_id].rotate_y >= 0.4 * XM_PI) && (player[g_id].rotate_y <= 0.6 * XM_PI))
+	if (player[g_id].rotate_y == 0.5f * XM_PI)
 	{
 		shieldX = player[g_id].pos_x;
 		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
 		shieldZ = player[g_id].pos_z - SHIELD_POSFROMPLAYER;
 	}
-	if ((player[g_id].rotate_y >= 0.9 * XM_PI) && (player[g_id].rotate_y <= 1.1 * XM_PI))
+	if (player[g_id].rotate_y == 1.0f * XM_PI)
 	{
 		shieldX = player[g_id].pos_x - SHIELD_POSFROMPLAYER;
 		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
 		shieldZ = player[g_id].pos_z;
 	}
-	if ((player[g_id].rotate_y >= 1.4 * XM_PI) && (player[g_id].rotate_y <= 1.6 * XM_PI))
+	if (player[g_id].rotate_y == 1.5f * XM_PI)
 	{
 		shieldX = player[g_id].pos_x;
 		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
 		shieldZ = player[g_id].pos_z + SHIELD_POSFROMPLAYER;
 	}
+
+	// 대각선 4방향 (무기)
+
+	if (player[g_id].rotate_y == 0.25f * XM_PI)
+	{
+		shieldX = player[g_id].pos_x + cos(XM_PI / 4) * SHIELD_POSFROMPLAYER;
+		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
+		shieldZ = player[g_id].pos_z - sin(XM_PI / 4) * SHIELD_POSFROMPLAYER;
+	}
+	if (player[g_id].rotate_y == 0.75f * XM_PI)
+	{
+		shieldX = player[g_id].pos_x - cos(XM_PI / 4) * SHIELD_POSFROMPLAYER;
+		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
+		shieldZ = player[g_id].pos_z - sin(XM_PI / 4) * SHIELD_POSFROMPLAYER;
+	}
+	if (player[g_id].rotate_y == 1.25f * XM_PI)
+	{
+		shieldX = player[g_id].pos_x - cos(XM_PI / 4) * SHIELD_POSFROMPLAYER;
+		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
+		shieldZ = player[g_id].pos_z + sin(XM_PI / 4) * SHIELD_POSFROMPLAYER;
+	}
+	if (player[g_id].rotate_y == 1.75f * XM_PI)
+	{
+		shieldX = player[g_id].pos_x + cos(XM_PI / 4) * SHIELD_POSFROMPLAYER;
+		shieldY = player[g_id].pos_y + SHIELD_UPFROMFLOOR;
+		shieldZ = player[g_id].pos_z + sin(XM_PI / 4) * SHIELD_POSFROMPLAYER;
+	}
+
 
 	auto shieldRitem = std::make_unique<RenderItem>();
 	XMStoreFloat4x4

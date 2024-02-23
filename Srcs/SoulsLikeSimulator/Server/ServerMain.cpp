@@ -72,28 +72,59 @@ void UpdatePlayer()
 
 		// ----- 입력한 키에 따른 동작 수행 ----- //
 
+		// 두 방향 동시 입력시
+		if ((g_Players[id]->bForwardKeyDown) && (g_Players[id]->bLeftKeyDown))
+		{
+			// 왼쪽 앞
+			g_Players[id]->fRotate[1] = 0.75 * XM_PI;
+			g_Players[id]->fMove[0] -= cos(XM_PI / 4) * g_fPlayerSpd;
+			g_Players[id]->fMove[2] += sin(XM_PI / 4) * g_fPlayerSpd;
+		}
+		else if ((g_Players[id]->bForwardKeyDown) && (g_Players[id]->bRightKeyDown))
+		{
+			// 오른쪽 앞
+			g_Players[id]->fRotate[1] = 1.25 * XM_PI;
+			g_Players[id]->fMove[0] += cos(XM_PI / 4) * g_fPlayerSpd;
+			g_Players[id]->fMove[2] += sin(XM_PI / 4) * g_fPlayerSpd;
+		}
+		else if ((g_Players[id]->bBackKeyDown) && (g_Players[id]->bLeftKeyDown))
+		{
+			// 왼쪽 뒤
+			g_Players[id]->fRotate[1] = 0.25 * XM_PI;
+			g_Players[id]->fMove[0] -= cos(XM_PI / 4) * g_fPlayerSpd;
+			g_Players[id]->fMove[2] -= sin(XM_PI / 4) * g_fPlayerSpd;
+		}
+		else if ((g_Players[id]->bBackKeyDown) && (g_Players[id]->bRightKeyDown))
+		{
+			// 오른쪽 뒤
+			g_Players[id]->fRotate[1] = 1.75 * XM_PI;
+			g_Players[id]->fMove[0] += cos(XM_PI / 4) * g_fPlayerSpd;
+			g_Players[id]->fMove[2] -= sin(XM_PI / 4) * g_fPlayerSpd;
+		}
 
+		// 하나만 입력시
 
-		// 입력한 화살표키에 따라 이동
-		if (g_Players[id]->bForwardKeyDown)
+		else if (g_Players[id]->bForwardKeyDown)
 		{
 			g_Players[id]->fRotate[1] = 1.0 * XM_PI;
 			g_Players[id]->fMove[2] += g_fPlayerSpd;
 		}
-		if (g_Players[id]->bBackKeyDown) {
+		else if (g_Players[id]->bBackKeyDown) {
 			g_Players[id]->fRotate[1] = 0.0 * XM_PI;
 			g_Players[id]->fMove[2] -= g_fPlayerSpd;
 		}
-		if (g_Players[id]->bLeftKeyDown)
+		else if (g_Players[id]->bLeftKeyDown)
 		{
 			g_Players[id]->fRotate[1] = 0.5 * XM_PI;
 			g_Players[id]->fMove[0] -= g_fPlayerSpd;
 		}
-		if (g_Players[id]->bRightKeyDown)
+		else if (g_Players[id]->bRightKeyDown)
 		{
 			g_Players[id]->fRotate[1] = 1.5 * XM_PI;
 			g_Players[id]->fMove[0] += g_fPlayerSpd;
 		}
+
+
 
 		// z키 누르면 점프 시작하기
 		if ((g_Players[id]->bZDown) && (!g_Players[id]->bJumping)) // z키 눌렀고 점프중이 아니면
