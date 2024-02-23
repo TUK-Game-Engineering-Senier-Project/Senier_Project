@@ -3,18 +3,18 @@
 using namespace std;
 
 // 데이터 통신에 사용할 변수
-mutex clientListMutex; // 뮤텍스
-vector<ClientInfo> ClientList; // 클라이언트 목록
-vector<g_cPlayer*> g_Players; // 플레이어 클래스들
-SOCKET listen_sock{}; // listen 소켓
+mutex g_clientListMutex;         // 뮤텍스
+vector<ClientInfo> g_ClientList; // 클라이언트 목록
+vector<g_cPlayer*> g_Players;    // 플레이어 클래스들
+SOCKET g_listenSock{};           // listen 소켓
 
 // 랜덤 디바이스
 random_device rd;
 mt19937 gen{ rd() };
 // uniform_int_distribution<int> uid{ 0,2000 };
 
-float g_fPlayerSpd = 0.05f;  // 이동 속도
-float g_fJumpSpd = 0.20f; // 점프 속도
+float g_fPlayerSpd = 0.05f; // 이동 속도
+float g_fJumpSpd = 0.20f;   // 점프 속도
 
 constexpr auto ZKEY = 0x5A; // z키
 
@@ -189,7 +189,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		UpdatePlayer();
 
 		// 각 클라이언트의 데이터 보내기
-		for (const auto& client : ClientList) {
+		for (const auto& client : g_ClientList) {
 
 			// 패킷 생성
 			SEND_PLAYER* packet_SP = new SEND_PLAYER;
@@ -258,8 +258,8 @@ int main(int argc, char* argv[])
 		return 1;
 
 	// 소켓 생성
-	listen_sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (listen_sock == INVALID_SOCKET) ErrorQuit("Error: 소켓 생성");
+	g_listenSock = socket(AF_INET, SOCK_STREAM, 0);
+	if (g_listenSock == INVALID_SOCKET) ErrorQuit("Error: 소켓 생성");
 
 	// 소켓 bind()
 	struct sockaddr_in serveraddr;
@@ -267,11 +267,11 @@ int main(int argc, char* argv[])
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	serveraddr.sin_port = htons(SERVERPORT);
-	retval = bind(listen_sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
+	retval = bind(g_listenSock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	if (retval == SOCKET_ERROR) ErrorQuit("Error: 소켓 bind()");
 
 	// 소켓 listen()
-	retval = listen(listen_sock, SOMAXCONN);
+	retval = listen(g_listenSock, SOMAXCONN);
 	if (retval == SOCKET_ERROR) ErrorQuit("Error: 소켓 listen()");
 
 	// 데이터 통신에 사용할 변수
@@ -289,15 +289,15 @@ int main(int argc, char* argv[])
 	while (1) {
 		// 소켓 accept()
 		addrlen = sizeof(clientaddr);
-		client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
-		if (listen_sock == 0)break;
+		client_sock = accept(g_listenSock, (struct sockaddr*)&clientaddr, &addrlen);
+		if (g_listenSock == 0) break;
 		if (client_sock == INVALID_SOCKET) {
 			ErrorQuit("Error: 소켓 accept()");
 			break;
 		}
 
 		// 클라이언트 뮤텍스 잠그기 (동시접근 방지)
-		lock_guard<mutex> lock(clientListMutex);
+		lock_guard<mutex> lock(g_clientListMutex);
 
 		// 플레이어 id 지정
 		Clients[iPlayerNum].client_sock = client_sock;
@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
 		ClientInfo newClient;
 		newClient.socket = Clients->client_sock;
 		newClient.id = Clients->id;
-		ClientList.push_back(newClient);
+		g_ClientList.push_back(newClient);
 
 		// 플레이어 추가
 		g_cPlayer* newPlayer = new g_cPlayer;
@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
 	// ----- 서버 루프 종료 ----- //
 
 	// 소켓 닫기
-	closesocket(listen_sock);
+	closesocket(g_listenSock);
 	// 윈속 종료
 	WSACleanup();
 

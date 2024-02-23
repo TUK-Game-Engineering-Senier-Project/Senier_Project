@@ -8,7 +8,6 @@
 #include "../Common/GeometryGenerator.h"
 #include "FrameResource.h"
 
-
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -100,7 +99,13 @@ private:
 	void BuildSkullGeometry();
     void BuildPSOs();
     void BuildFrameResources();
+
+	// 재질 build (코드 간략화)
+	void BuildMaterial(char* name, int index,
+		XMFLOAT4 DiffuseAlbedo, XMFLOAT3 FresnelR0, float roughness);
+
     void BuildMaterials();
+
     void BuildRenderItems();
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
  
@@ -356,7 +361,7 @@ void SoulSimul::UpdatePlayer()
 	);
 	weaponRitem->TexTransform = MathHelper::Identity4x4();
 	weaponRitem->ObjCBIndex = INDEXWEAPON;
-	weaponRitem->Mat = mMaterials["skullMat"].get();
+	weaponRitem->Mat = mMaterials["weaponMat"].get();
 	weaponRitem->Geo = mGeometries["shapeGeo"].get();
 	weaponRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	weaponRitem->IndexCount = weaponRitem->Geo->DrawArgs["weapon"].IndexCount;
@@ -424,7 +429,6 @@ void SoulSimul::UpdatePlayer()
 		shieldZ = player[g_id].pos_z + sin(XM_PI / 4) * SHIELD_POSFROMPLAYER;
 	}
 
-
 	auto shieldRitem = std::make_unique<RenderItem>();
 	XMStoreFloat4x4
 	(
@@ -436,7 +440,7 @@ void SoulSimul::UpdatePlayer()
 	);
 	shieldRitem->TexTransform = MathHelper::Identity4x4();
 	shieldRitem->ObjCBIndex = INDEXSHIELD;
-	shieldRitem->Mat = mMaterials["skullMat"].get();
+	shieldRitem->Mat = mMaterials["shieldMat"].get();
 	shieldRitem->Geo = mGeometries["shapeGeo"].get();
 	shieldRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	shieldRitem->IndexCount = shieldRitem->Geo->DrawArgs["shield"].IndexCount;
@@ -944,48 +948,53 @@ void SoulSimul::BuildFrameResources()
     }
 }
 
+// 재질 build (코드 간략화)
+void SoulSimul::BuildMaterial(char* name, int index, 
+	XMFLOAT4 DiffuseAlbedo, XMFLOAT3 FresnelR0, float roughness)
+{
+	auto material = std::make_unique<Material>();
+	material->Name = name;
+	material->MatCBIndex = index;
+	material->DiffuseSrvHeapIndex = index;
+	material->DiffuseAlbedo = DiffuseAlbedo;
+	material->FresnelR0 = FresnelR0;
+	material->Roughness = roughness;
+	mMaterials[name] = std::move(material);
+}
+
 void SoulSimul::BuildMaterials()
 {
-	// (현재 안 씀)
-	auto bricks0 = std::make_unique<Material>();
-	bricks0->Name = "bricks0";
-	bricks0->MatCBIndex = 0;
-	bricks0->DiffuseSrvHeapIndex = 0;
-	bricks0->DiffuseAlbedo = XMFLOAT4(Colors::ForestGreen);
-	bricks0->FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
-	bricks0->Roughness = 0.1f;
-
-	// (현재 안 씀)
-	auto stone0 = std::make_unique<Material>();
-	stone0->Name = "stone0";
-	stone0->MatCBIndex = 1;
-	stone0->DiffuseSrvHeapIndex = 1;
-	stone0->DiffuseAlbedo = XMFLOAT4(Colors::LightSteelBlue);
-	stone0->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
-	stone0->Roughness = 0.3f;
- 
 	// 바닥
-	auto floor = std::make_unique<Material>();
-	floor->Name = "floor";
-	floor->MatCBIndex = 0;
-	floor->DiffuseSrvHeapIndex = 0;
-	floor->DiffuseAlbedo = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	floor->FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
-	floor->Roughness = 0.2f;
+	BuildMaterial
+	(
+		"floorMat", INDEXFLOOR,             // material 이름 및 인덱스
+		XMFLOAT4(0.95f, 0.80f, 0.0f, 1.0f), // DiffuseAlbedo
+		XMFLOAT3(0.02f, 0.02f, 0.02f), 0.2f // FresnelR0, Roughness
+	);
 
 	// 플레이어
-	auto skullMat = std::make_unique<Material>();
-	skullMat->Name = "skullMat";
-	skullMat->MatCBIndex = 1;
-	skullMat->DiffuseSrvHeapIndex = 1;
-	skullMat->DiffuseAlbedo = XMFLOAT4(0.5f, 1.0f, 0.5f, 1.0f);
-	skullMat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05);
-	skullMat->Roughness = 0.3f;
-	
-	mMaterials["bricks0"] = std::move(bricks0);
-	mMaterials["stone0"] = std::move(stone0);
-	mMaterials["floor"] = std::move(floor);
-	mMaterials["skullMat"] = std::move(skullMat);
+	BuildMaterial
+	(
+		"skullMat", INDEXPLAYER,            // material 이름 및 인덱스
+		XMFLOAT4(0.5f, 1.0f, 0.5f, 1.0f),   // DiffuseAlbedo
+		XMFLOAT3(0.05f, 0.05f, 0.05f), 0.3f // FresnelR0, Roughness
+	);
+
+	// 무기
+	BuildMaterial
+	(
+		"weaponMat", INDEXWEAPON,           // material 이름 및 인덱스
+		XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f),   // DiffuseAlbedo
+		XMFLOAT3(0.02f, 0.02f, 0.02f), 0.1f // FresnelR0, Roughness
+	);
+
+	// 방패
+	BuildMaterial
+	(
+		"shieldMat", INDEXSHIELD,           // material 이름 및 인덱스
+		XMFLOAT4(0.65f, 0.65f, 0.8f, 1.0f), // DiffuseAlbedo
+		XMFLOAT3(0.05f, 0.05f, 0.05f), 0.1f // FresnelR0, Roughness
+	);
 }
 
 void SoulSimul::BuildRenderItems()
@@ -995,7 +1004,7 @@ void SoulSimul::BuildRenderItems()
 	floorRitem->World = MathHelper::Identity4x4();
 	XMStoreFloat4x4(&floorRitem->TexTransform, XMMatrixScaling(8.0f, 8.0f, 1.0f));
 	floorRitem->ObjCBIndex = INDEXFLOOR;
-	floorRitem->Mat = mMaterials["floor"].get();
+	floorRitem->Mat = mMaterials["floorMat"].get();
 	floorRitem->Geo = mGeometries["shapeGeo"].get();
 	floorRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	floorRitem->IndexCount = floorRitem->Geo->DrawArgs["floor"].IndexCount;
@@ -1003,6 +1012,7 @@ void SoulSimul::BuildRenderItems()
 	floorRitem->BaseVertexLocation = floorRitem->Geo->DrawArgs["floor"].BaseVertexLocation;
 	mAllRitems.push_back(std::move(floorRitem));
 
+	// 플레이어 업데이트
 	UpdatePlayer();
 
 	// All the render items are opaque.
