@@ -57,61 +57,60 @@ void KeyBoardDown(unsigned char key, int x, int y)
 	switch (key)
 	{
 		// 이동
-	case VK_LEFT:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_LEFT;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_RIGHT:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_RIGHT;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_UP:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_UP;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-	case VK_DOWN:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_DOWN;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
+		case VK_LEFT:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_LEFT;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_RIGHT:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_RIGHT;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_UP:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_UP;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
+		case VK_DOWN:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_DOWN;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
 
-	// 점프
-	case ZKEY:
-		packet->type = SC_KEY_INPUT;
-		packet->input = ZKEY;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
+		// 점프
+		case ZKEY:
+			packet->type = SC_KEY_INPUT;
+			packet->input = ZKEY;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
 
-	// 세팅
-	case VK_F1:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_F1;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
+		// 세팅
+		case VK_F1:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_F1;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
 
-	case VK_F2:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_F2;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
+		case VK_F2:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_F2;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
 
-	case VK_F3:
-		packet->type = SC_KEY_INPUT;
-		packet->input = VK_F3;
-		packet->bKeyDown = true;
-		send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-		break;
-
+		case VK_F3:
+			packet->type = SC_KEY_INPUT;
+			packet->input = VK_F3;
+			packet->bKeyDown = true;
+			send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+			break;
 	}
 	delete packet;
 }
@@ -203,23 +202,21 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 		// 플레이어 데이터 갱신
 		MOVE_PACKET* packet_tr = reinterpret_cast<MOVE_PACKET*>(buf);
-		player[g_id].pos_x = packet_tr->fPx; // 위치x
-		player[g_id].pos_y = packet_tr->fPy; // 위치y
-		player[g_id].pos_z = packet_tr->fPz; // 위치z
+		player[g_id].pos_x = packet_tr->fPx;    // 위치x
+		player[g_id].pos_y = packet_tr->fPy;    // 위치y
+		player[g_id].pos_z = packet_tr->fPz;    // 위치z
 		player[g_id].rotate_x = packet_tr->fRx; // 회전x
 		player[g_id].rotate_y = packet_tr->fRy; // 회전y
 		player[g_id].rotate_z = packet_tr->fRz; // 회전z
-		player[g_id].move_x = packet_tr->fMx; // 이동x
-		player[g_id].move_y = packet_tr->fMy; // 이동y
-		player[g_id].move_z = packet_tr->fMz; // 이동z
 
-		player[g_id].fRadius = packet_tr->fRadius; // 이동z
+		player[g_id].fRadius = packet_tr->fRadius; // 카메라 위치
 
 		// 버퍼 값에 따른 동작
 		switch (buf[0])
 		{
 			case SC_SEND_PLAYER:
 			{
+				// 플레이어 패킷 전송
 				SEND_PLAYER* packet_sp = reinterpret_cast<SEND_PLAYER*>(buf);
 				g_id = packet_sp->id;
 				break;
@@ -235,6 +232,85 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 }
 
 // ----- 추가한 내용 완료 부분 ----- //
+
+// [프로그램 실행]
+
+int D3DApp::Run()
+{
+	MSG msg = { 0 };
+	mTimer.Reset();
+
+	int retval;
+
+	// 윈속 초기화
+	WSADATA wsa;
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+		return 1;
+
+	// 소켓 생성
+	siSockInfo = new g_sockInfo;
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock == INVALID_SOCKET) err_quit("socket() 생성");
+
+	// connect()
+	struct sockaddr_in serveraddr;
+	memset(&serveraddr, 0, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	inet_pton(AF_INET, SERVERIP, &serveraddr.sin_addr);
+	serveraddr.sin_port = htons(SERVERPORT);
+
+	retval = connect(sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
+	if (retval == SOCKET_ERROR) err_quit("소켓 connect()");
+	siSockInfo->sock = sock;
+
+	// 스레드 생성
+	HANDLE hThread;
+	hThread = CreateThread(NULL, 0, ProcessClient,
+		reinterpret_cast<LPVOID*>(siSockInfo->GetSockInfo()), 0, NULL);
+	if (hThread == NULL) { closesocket(sock); }
+	else { CloseHandle(hThread); }
+
+	// ----- 클라이언트 루프 시작 ----- //
+	while (msg.message != WM_QUIT)
+	{
+		// 윈도우 메시지가 있으면 처리
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// 그 외
+		else
+		{
+			// 시간 갱신
+			mTimer.Tick();
+
+			// 앱이 실행중인 경우
+			if (!mAppPaused)
+			{
+				CalculateFrameStats();
+				Update(mTimer);
+				Draw(mTimer);
+
+				// 패킷 실시간 전송
+				INPUT_PACKET* packet = new INPUT_PACKET;
+				packet->type = SC_KEY_INPUT;
+				send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
+				Sleep(1); // 전송 간격
+			}
+
+			// 앱이 중단된 경우
+			else { Sleep(100); }
+		}
+	}
+	// ----- 클라이언트 루프 종료 ----- //
+
+	closesocket(sock); // 소켓 종료
+	WSACleanup(); // 윈속 종료
+
+	return (int)msg.wParam;
+}
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -294,82 +370,6 @@ void D3DApp::Set4xMsaaState(bool value)
         CreateSwapChain();
         OnResize();
     }
-}
-
-int D3DApp::Run()
-{
-	MSG msg = { 0 };
-	mTimer.Reset();
-
-	int retval;
-
-	// 윈속 초기화
-	WSADATA wsa;
-	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-		return 1;
-
-	// 소켓 생성
-	siSockInfo = new g_sockInfo;
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock == INVALID_SOCKET) err_quit("socket()");
-
-	// connect()
-	struct sockaddr_in serveraddr;
-	memset(&serveraddr, 0, sizeof(serveraddr));
-	serveraddr.sin_family = AF_INET;
-	inet_pton(AF_INET, SERVERIP, &serveraddr.sin_addr);
-	serveraddr.sin_port = htons(SERVERPORT);
-
-	retval = connect(sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
-	if (retval == SOCKET_ERROR) err_quit("connect()");
-	siSockInfo->sock = sock;
-
-	// 스레드 생성
-	HANDLE hThread;
-	hThread = CreateThread(NULL, 0, ProcessClient,
-		reinterpret_cast<LPVOID*>(siSockInfo->GetSockInfo()), 0, NULL);
-	if (hThread == NULL) { closesocket(sock); }
-	else { CloseHandle(hThread); }
-
-	// ----- 클라이언트 루프 시작 ----- //
-	while (msg.message != WM_QUIT)
-	{
-		// 윈도우 메시지가 있으면 처리
-		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-		// 그 외
-		else
-		{
-			// 시간 갱신
-			mTimer.Tick();
-
-			// 앱이 실행중인 경우
-			if (!mAppPaused)
-			{
-				CalculateFrameStats();
-				Update(mTimer);
-				Draw(mTimer);
-
-				// 패킷 실시간 전송
-				INPUT_PACKET* packet = new INPUT_PACKET;
-				send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
-				Sleep(1); // 전송 간격
-			}
-
-			// 앱이 중단된 경우
-			else { Sleep(100); }
-		}
-	}
-	// ----- 클라이언트 루프 종료 ----- //
-
-	closesocket(sock); // 소켓 종료
-	WSACleanup(); // 윈속 종료
-
-	return (int)msg.wParam;
 }
 
 bool D3DApp::Initialize()

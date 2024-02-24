@@ -54,14 +54,13 @@ void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 		case VK_F3: { g_Players[sock_info->id]->bF3Down = KeyDown; printf("F3키 입력\n"); break; }
 	}
 
-	
-	printf("### 테스트용 y회전 : (%.2f)\n", g_Players[sock_info->id]->fRotate[1]);
+	// printf("### 테스트용 y회전 : (%.2f)\n", g_Players[sock_info->id]->fRotate[1]);
 
-	/*
+	
 	printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
 		g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
 	printf("### 점프속도 : (%.2f)\n", g_Players[sock_info->id]->fJumpSpd);
-	*/
+	
 }
 
 // 플레이어 업데이트
@@ -72,59 +71,69 @@ void UpdatePlayer()
 
 		// ----- 입력한 키에 따른 동작 수행 ----- //
 
-		// 두 방향 동시 입력시
-		if ((g_Players[id]->bForwardKeyDown) && (g_Players[id]->bLeftKeyDown))
+		// 앞 키
+		if (g_Players[id]->bForwardKeyDown)
 		{
-			// 왼쪽 앞
-			g_Players[id]->fRotate[1] = 0.75 * XM_PI;
-			g_Players[id]->fMove[0] -= cos(XM_PI / 4) * g_fPlayerSpd;
-			g_Players[id]->fMove[2] += sin(XM_PI / 4) * g_fPlayerSpd;
-		}
-		else if ((g_Players[id]->bForwardKeyDown) && (g_Players[id]->bRightKeyDown))
-		{
-			// 오른쪽 앞
-			g_Players[id]->fRotate[1] = 1.25 * XM_PI;
-			g_Players[id]->fMove[0] += cos(XM_PI / 4) * g_fPlayerSpd;
-			g_Players[id]->fMove[2] += sin(XM_PI / 4) * g_fPlayerSpd;
-		}
-		else if ((g_Players[id]->bBackKeyDown) && (g_Players[id]->bLeftKeyDown))
-		{
-			// 왼쪽 뒤
-			g_Players[id]->fRotate[1] = 0.25 * XM_PI;
-			g_Players[id]->fMove[0] -= cos(XM_PI / 4) * g_fPlayerSpd;
-			g_Players[id]->fMove[2] -= sin(XM_PI / 4) * g_fPlayerSpd;
-		}
-		else if ((g_Players[id]->bBackKeyDown) && (g_Players[id]->bRightKeyDown))
-		{
-			// 오른쪽 뒤
-			g_Players[id]->fRotate[1] = 1.75 * XM_PI;
-			g_Players[id]->fMove[0] += cos(XM_PI / 4) * g_fPlayerSpd;
-			g_Players[id]->fMove[2] -= sin(XM_PI / 4) * g_fPlayerSpd;
+			if ((g_Players[id]->bForwardKeyDown) && (g_Players[id]->bLeftKeyDown))
+			{
+				// 왼쪽 앞
+				g_Players[id]->fRotate[1] = 0.75 * XM_PI;
+				g_Players[id]->fPos[0] -= cos(XM_PI / 4) * g_fPlayerSpd;
+				g_Players[id]->fPos[2] += sin(XM_PI / 4) * g_fPlayerSpd;
+			}
+			else if ((g_Players[id]->bForwardKeyDown) && (g_Players[id]->bRightKeyDown))
+			{
+				// 오른쪽 앞
+				g_Players[id]->fRotate[1] = 1.25 * XM_PI;
+				g_Players[id]->fPos[0] += cos(XM_PI / 4) * g_fPlayerSpd;
+				g_Players[id]->fPos[2] += sin(XM_PI / 4) * g_fPlayerSpd;
+			}
+			else
+			{
+				// 앞
+				g_Players[id]->fRotate[1] = 1.0 * XM_PI;
+				g_Players[id]->fPos[2] += g_fPlayerSpd;
+			}
 		}
 
-		// 하나만 입력시
-
-		else if (g_Players[id]->bForwardKeyDown)
+		// 뒤 키
+		else if (g_Players[id]->bBackKeyDown)
 		{
-			g_Players[id]->fRotate[1] = 1.0 * XM_PI;
-			g_Players[id]->fMove[2] += g_fPlayerSpd;
+			if ((g_Players[id]->bBackKeyDown) && (g_Players[id]->bLeftKeyDown))
+			{
+				// 왼쪽 뒤
+				g_Players[id]->fRotate[1] = 0.25 * XM_PI;
+				g_Players[id]->fPos[0] -= cos(XM_PI / 4) * g_fPlayerSpd;
+				g_Players[id]->fPos[2] -= sin(XM_PI / 4) * g_fPlayerSpd;
+			}
+			else if ((g_Players[id]->bBackKeyDown) && (g_Players[id]->bRightKeyDown))
+			{
+				// 오른쪽 뒤
+				g_Players[id]->fRotate[1] = 1.75 * XM_PI;
+				g_Players[id]->fPos[0] += cos(XM_PI / 4) * g_fPlayerSpd;
+				g_Players[id]->fPos[2] -= sin(XM_PI / 4) * g_fPlayerSpd;
+			}
+			else
+			{
+				// 뒤
+				g_Players[id]->fRotate[1] = 0.0 * XM_PI;
+				g_Players[id]->fPos[2] -= g_fPlayerSpd;
+			}
 		}
-		else if (g_Players[id]->bBackKeyDown) {
-			g_Players[id]->fRotate[1] = 0.0 * XM_PI;
-			g_Players[id]->fMove[2] -= g_fPlayerSpd;
-		}
+
+		// 왼쪽 키
 		else if (g_Players[id]->bLeftKeyDown)
 		{
 			g_Players[id]->fRotate[1] = 0.5 * XM_PI;
-			g_Players[id]->fMove[0] -= g_fPlayerSpd;
+			g_Players[id]->fPos[0] -= g_fPlayerSpd;
 		}
+
+		// 오른쪽 키
 		else if (g_Players[id]->bRightKeyDown)
 		{
 			g_Players[id]->fRotate[1] = 1.5 * XM_PI;
-			g_Players[id]->fMove[0] += g_fPlayerSpd;
+			g_Players[id]->fPos[0] += g_fPlayerSpd;
 		}
-
-
 
 		// z키 누르면 점프 시작하기
 		if ((g_Players[id]->bZDown) && (!g_Players[id]->bJumping)) // z키 눌렀고 점프중이 아니면
@@ -136,8 +145,22 @@ void UpdatePlayer()
 			g_Players[id]->fJumpSpd = g_fJumpSpd;
 		}
 
+		// F1 ~ F3 : 시야 설정
+		if (g_Players[id]->bF1Down)
+		{
+			g_Players[id]->fRadius = 15.0f;
+		}
+		else if (g_Players[id]->bF2Down)
+		{
+			g_Players[id]->fRadius = 10.0f;
+		}
+		else if (g_Players[id]->bF3Down)
+		{
+			g_Players[id]->fRadius = 5.0f;
+		}
+
 		// 점프 동작
-		if (g_Players[id]->bJumping)
+		else if (g_Players[id]->bJumping)
 		{
 			// printf("[점프중]\n");
 
@@ -148,6 +171,7 @@ void UpdatePlayer()
 			// 플레이어 y좌표가 0 미만일 경우
 			if (g_Players[id]->fPos[1] < 0.0f)
 			{
+
 				printf("[점프 완료]\n");
 
 				// y좌표를 0으로 하고 점프를 다시 가능하게 한다
@@ -156,12 +180,6 @@ void UpdatePlayer()
 				g_Players[id]->bJumping = false;
 			}
 		}
-
-		// F1 ~ F3 : 시야 설정
-
-		if (g_Players[id]->bF1Down) g_Players[id]->fRadius = 15.0f;
-		else if (g_Players[id]->bF2Down) g_Players[id]->fRadius = 10.0f;
-		else if (g_Players[id]->bF3Down) g_Players[id]->fRadius = 5.0f;
 	}
 }
 
@@ -196,18 +214,17 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			packet_SP->type = SC_SEND_PLAYER;
 			packet_SP->id = sock_info->id;
 
+
+
 			// 패킷에 값 지정
 			MOVE_PACKET* packet_MP = new MOVE_PACKET;
 			packet_MP->type = SC_PLAYER_MOVE;
-			packet_MP->fPx = g_Players[sock_info->id]->fPos[0]; // 위치x
-			packet_MP->fPy = g_Players[sock_info->id]->fPos[1]; // 위치y
-			packet_MP->fPz = g_Players[sock_info->id]->fPos[2]; // 위치z
+			packet_MP->fPx = g_Players[sock_info->id]->fPos[0];    // 위치x
+			packet_MP->fPy = g_Players[sock_info->id]->fPos[1];    // 위치y
+			packet_MP->fPz = g_Players[sock_info->id]->fPos[2];    // 위치z
 			packet_MP->fRx = g_Players[sock_info->id]->fRotate[0]; // 회전x
 			packet_MP->fRy = g_Players[sock_info->id]->fRotate[1]; // 회전y
 			packet_MP->fRz = g_Players[sock_info->id]->fRotate[2]; // 회전z
-			packet_MP->fMx = g_Players[sock_info->id]->fMove[0]; // 이동x
-			packet_MP->fMy = g_Players[sock_info->id]->fMove[1]; // 이동y
-			packet_MP->fMz = g_Players[sock_info->id]->fMove[2]; // 이동z
 
 			packet_MP->fRadius = g_Players[sock_info->id]->fRadius; // 시야 위치
 
@@ -232,13 +249,13 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		// 버퍼 값에 따라 동작 수행
 		switch (buf[0]) {
 			// 키 입력받는 경우
-		case SC_KEY_INPUT:
-		{
-			// 키 입력 전달하기
-			INPUT_PACKET* packet = reinterpret_cast<INPUT_PACKET*>(buf);
-			SendPressKey(sock_info, packet->input, packet->bKeyDown);
-			break;
-		}
+			case SC_KEY_INPUT:
+			{
+				// 키 입력 전달하기
+				INPUT_PACKET* packet = reinterpret_cast<INPUT_PACKET*>(buf);
+				SendPressKey(sock_info, packet->input, packet->bKeyDown);
+				break;
+			}
 		}
 	}
 	// ----- 클라이언트 Process 루프 종료 ----- //
