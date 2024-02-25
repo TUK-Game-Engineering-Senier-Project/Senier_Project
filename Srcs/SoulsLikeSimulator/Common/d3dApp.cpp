@@ -202,6 +202,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 		// 플레이어 데이터 갱신
 		MOVE_PACKET* packet_tr = reinterpret_cast<MOVE_PACKET*>(buf);
+
 		player[g_id].pos_x = packet_tr->fPx;    // 위치x
 		player[g_id].pos_y = packet_tr->fPy;    // 위치y
 		player[g_id].pos_z = packet_tr->fPz;    // 위치z
@@ -209,7 +210,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		player[g_id].rotate_y = packet_tr->fRy; // 회전y
 		player[g_id].rotate_z = packet_tr->fRz; // 회전z
 
-		player[g_id].fRadius = packet_tr->fRadius; // 카메라 위치
+		player[g_id].fRadius = packet_tr->fRadius;       // 카메라 위치
+		player[g_id].cNowAction = packet_tr->cNowAction; // 현재 동작
 
 		// 버퍼 값에 따른 동작
 		switch (buf[0])
@@ -290,14 +292,16 @@ int D3DApp::Run()
 			if (!mAppPaused)
 			{
 				CalculateFrameStats();
-				Update(mTimer);
-				Draw(mTimer);
 
 				// 패킷 실시간 전송
 				INPUT_PACKET* packet = new INPUT_PACKET;
 				packet->type = SC_KEY_INPUT;
 				send(sock, reinterpret_cast<char*>(packet), sizeof(INPUT_PACKET), 0);
 				Sleep(1); // 전송 간격
+
+				// 업데이트 및 그리기
+				Update(mTimer);
+				Draw(mTimer);
 			}
 
 			// 앱이 중단된 경우

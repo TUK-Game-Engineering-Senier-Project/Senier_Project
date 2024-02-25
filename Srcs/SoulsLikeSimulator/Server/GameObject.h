@@ -30,8 +30,9 @@ public:
     float fJumpSpd = 0.0f;
 
     float fRadius = 10.0f;
+    
+    char cNowAction = 100; // 현재 동작 (ACTION_NONE)
 
-    // 
     // float fScale[3];  // 크기
     // float fColor[3];  // 색상
 };

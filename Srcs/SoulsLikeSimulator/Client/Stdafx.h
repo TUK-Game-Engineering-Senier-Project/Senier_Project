@@ -31,11 +31,15 @@ struct g_sockInfo
 	g_sockInfo* GetSockInfo() { return this; }
 };
 
+// 소켓 정보
 extern constexpr char SC_UPDATE = 10;
 extern constexpr char SC_PLAYER_MOVE = 0;
 extern constexpr char SC_KEY_INPUT = 1;
 extern constexpr char SC_PLAYER_ROTATE = 2;
 extern constexpr char SC_SEND_PLAYER = 3;
+
+// 동작
+extern constexpr char ACTION_NONE = 100;
 
 // 입력 패킷
 struct INPUT_PACKET
@@ -48,7 +52,7 @@ struct INPUT_PACKET
 // 이동 패킷
 struct MOVE_PACKET
 {
-	char type; // 종류
+	char cType; // 종류
 	float fPx, fPy, fPz; // 위치
 	float fRx, fRy, fRz; // 회전
 	float fMx, fMy, fMz; // 이동
@@ -56,7 +60,9 @@ struct MOVE_PACKET
 	float fRadius; // 시야 위치
 
 	bool bNowMoving{ false }; // 현재 이동중 여부
-};;
+
+	char cNowAction{ ACTION_NONE }; // 현재 동작
+};
 
 
 // 회전 패킷
@@ -83,7 +89,8 @@ extern struct Player
 
 	float fRadius{ 10.0f }; // 시야 위치
 
-	bool bNowMoving{ false }; // 현재 이동중 여부
+	bool bNowMoving{ false };       // 현재 이동중 여부
+	char cNowAction{ ACTION_NONE }; // 현재 동작
 
 	// float color_r{}, color_g{}, color_b{};
 };

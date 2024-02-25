@@ -13,8 +13,8 @@ random_device rd;
 mt19937 gen{ rd() };
 // uniform_int_distribution<int> uid{ 0,2000 };
 
-float g_fPlayerSpd = 0.05f; // 이동 속도
-float g_fJumpSpd = 0.20f;   // 점프 속도
+float g_fPlayerSpd = 0.12f; // 이동 속도
+float g_fJumpSpd = 0.24f;   // 점프 속도
 
 constexpr auto ZKEY = 0x5A; // z키
 
@@ -55,7 +55,6 @@ void SendPressKey(SOCK_INFO* sock_info, char input, bool KeyDown)
 	}
 
 	// printf("### 테스트용 y회전 : (%.2f)\n", g_Players[sock_info->id]->fRotate[1]);
-
 	
 	printf("### 테스트용 : (%.2f, %.2f, %.2f)\n",
 		g_Players[sock_info->id]->fPos[0], g_Players[sock_info->id]->fPos[1], g_Players[sock_info->id]->fPos[2]);
@@ -214,11 +213,10 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			packet_SP->type = SC_SEND_PLAYER;
 			packet_SP->id = sock_info->id;
 
-
-
 			// 패킷에 값 지정
 			MOVE_PACKET* packet_MP = new MOVE_PACKET;
-			packet_MP->type = SC_PLAYER_MOVE;
+			packet_MP->cType = SC_PLAYER_MOVE; // 패킷 타입
+
 			packet_MP->fPx = g_Players[sock_info->id]->fPos[0];    // 위치x
 			packet_MP->fPy = g_Players[sock_info->id]->fPos[1];    // 위치y
 			packet_MP->fPz = g_Players[sock_info->id]->fPos[2];    // 위치z
@@ -226,7 +224,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			packet_MP->fRy = g_Players[sock_info->id]->fRotate[1]; // 회전y
 			packet_MP->fRz = g_Players[sock_info->id]->fRotate[2]; // 회전z
 
-			packet_MP->fRadius = g_Players[sock_info->id]->fRadius; // 시야 위치
+			packet_MP->fRadius = g_Players[sock_info->id]->fRadius;       // 시야 위치
+			packet_MP->cNowAction = g_Players[sock_info->id]->cNowAction; // 현재 동작
 
 			// 패킷 보내기
 			send(client.socket, reinterpret_cast<char*>(packet_SP), sizeof(SEND_PLAYER), 0);

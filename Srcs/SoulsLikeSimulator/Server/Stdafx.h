@@ -53,15 +53,20 @@ struct SOCK_INFO {
 	SOCK_INFO* GetSockInfo() { return this; }
 };
 
+// 소켓 정보
+constexpr char SC_UPDATE = 10;
 constexpr char SC_PLAYER_MOVE = 0;
 constexpr char SC_KEY_INPUT = 1;
 constexpr char SC_PLAYER_ROTATE = 2;
 constexpr char SC_SEND_PLAYER = 3;
 
+// 동작
+constexpr char ACTION_NONE = 100;
+
 // 입력 패킷
 struct INPUT_PACKET 
 {
-	char type;
+	char cType;
 	bool bKeyDown;
 	char input;
 };
@@ -69,12 +74,15 @@ struct INPUT_PACKET
 // 이동 패킷
 struct MOVE_PACKET 
 {
-	char type; // 종류
+	char cType; // 종류
+
 	float fPx, fPy, fPz; // 위치
 	float fRx, fRy, fRz; // 회전
 	float fMx, fMy, fMz; // 이동
 
 	float fRadius; // 시야 위치
+
+	char cNowAction{ ACTION_NONE }; // 현재 동작
 };
 
 // 회전 패킷
