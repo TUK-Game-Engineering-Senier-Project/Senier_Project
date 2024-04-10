@@ -4,6 +4,7 @@
 #define FIRST_PERSON_CAMERA 0x01
 #define SPACESHIP_CAMERA 0x02
 #define THIRD_PERSON_CAMERA 0x03
+#define MENU_CAMERA 0x04
 
 // 프레임 버퍼의 크기와 종횡비(Aspect Ratio)를 나타내는 상수를 다음과 같이 선언한다. 
 #define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
@@ -79,6 +80,8 @@ public:
 	//투영 변환 행렬을 생성한다.
 	void GenerateProjectionMatrix(float fNearPlaneDistance, 
 		float fFarPlaneDistance, float fAspectRatio, float fFOVAngle);
+	void GenerateOrthographicMatrix(float fNearPlaneDistance,
+		float fFarPlaneDistance, float nWidth, float nHeight);
 
 	void SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ =
 		0.0f, float fMaxZ = 1.0f);
@@ -159,4 +162,11 @@ public:
 	virtual ~CThirdPersonCamera() { }
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& vLookAt);
+};
+
+class CMenuCamera : public CCamera
+{
+public:
+	CMenuCamera(CCamera* pCamera);
+	virtual ~CMenuCamera(){ }
 };

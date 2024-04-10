@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameScenes.h"
+#include "Shader.h"
 
 CMainScene::CMainScene()
 {
@@ -24,121 +25,173 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-
+	m_nShaders = 1;
+	m_pShaders = new CMainSceneShader[m_nShaders];
+	m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
 }
 
 void CMainScene::ReleaseObjects()
 {
+	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		m_pShaders[i].ReleaseShaderVariables();
+		m_pShaders[i].ReleaseObjects();
+	}
+
+	if (m_pShaders) delete[] m_pShaders;
 }
 
-SingleSettingScene::SingleSettingScene()
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+CSingleSettingScene::CSingleSettingScene()
 {
 }
 
-SingleSettingScene::~SingleSettingScene()
+CSingleSettingScene::~CSingleSettingScene()
 {
 }
 
-bool SingleSettingScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CSingleSettingScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	return false;
 }
 
-bool SingleSettingScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CSingleSettingScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	return false;
 }
 
-void SingleSettingScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSingleSettingScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// 그래픽 루트 시그너쳐를 생성한다. 
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	m_nShaders = 1;
+	m_pShaders = new CSingleSetSceneShader[m_nShaders];
+	m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
+}
+
+void CSingleSettingScene::ReleaseObjects()
+{
+	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		m_pShaders[i].ReleaseShaderVariables();
+		m_pShaders[i].ReleaseObjects();
+	}
+
+	if (m_pShaders) delete[] m_pShaders;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+CSinglePlayScene::CSinglePlayScene()
+{
+}
+
+CSinglePlayScene::~CSinglePlayScene()
+{
+}
+
+bool CSinglePlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	return false;
+}
+
+bool CSinglePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	return false;
+}
+
+void CSinglePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 }
 
-void SingleSettingScene::ReleaseObjects()
+void CSinglePlayScene::ReleaseObjects()
 {
 }
 
-SinglePlayScene::SinglePlayScene()
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+CMultiSettingScene::CMultiSettingScene()
 {
 }
 
-SinglePlayScene::~SinglePlayScene()
+CMultiSettingScene::~CMultiSettingScene()
 {
 }
 
-bool SinglePlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	return false;
-}
-
-bool SinglePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CMultiSettingScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	return false;
 }
 
-void SinglePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+bool CMultiSettingScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	return false;
+}
+
+void CMultiSettingScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// 그래픽 루트 시그너쳐를 생성한다. 
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	m_nShaders = 1;
+	m_pShaders = new CMulitSetSceneShader[m_nShaders];
+	m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
+}
+
+void CMultiSettingScene::ReleaseObjects()
+{
+	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		m_pShaders[i].ReleaseShaderVariables();
+		m_pShaders[i].ReleaseObjects();
+	}
+
+	if (m_pShaders) delete[] m_pShaders;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+CMultiPlayScene::CMultiPlayScene()
+{
+}
+
+CMultiPlayScene::~CMultiPlayScene()
+{
+}
+
+bool CMultiPlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	return false;
+}
+
+bool CMultiPlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	return false;
+}
+
+void CMultiPlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 }
 
-void SinglePlayScene::ReleaseObjects()
-{
-}
-
-MultiSettingScene::MultiSettingScene()
-{
-}
-
-MultiSettingScene::~MultiSettingScene()
-{
-}
-
-bool MultiSettingScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	return false;
-}
-
-bool MultiSettingScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	return false;
-}
-
-void MultiSettingScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	// 그래픽 루트 시그너쳐를 생성한다. 
-	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-}
-
-void MultiSettingScene::ReleaseObjects()
-{
-}
-
-MultiPlayScene::MultiPlayScene()
-{
-}
-
-MultiPlayScene::~MultiPlayScene()
-{
-}
-
-bool MultiPlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	return false;
-}
-
-bool MultiPlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	return false;
-}
-
-void MultiPlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	// 그래픽 루트 시그너쳐를 생성한다. 
-	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-}
-
-void MultiPlayScene::ReleaseObjects()
+void CMultiPlayScene::ReleaseObjects()
 {
 }

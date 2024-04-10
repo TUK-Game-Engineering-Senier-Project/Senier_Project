@@ -264,6 +264,9 @@ CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 	case SPACESHIP_CAMERA:
 		pNewCamera = new CSpaceShipCamera(m_pCamera);
 		break;
+	case MENU_CAMERA:
+		pNewCamera = new CMenuCamera(m_pCamera);
+		break;
 	}
 	/*현재 카메라의 모드가 스페이스-쉽 모드의 카메라이고 새로운 카메라가 1인칭 또는 
 	3인칭 카메라이면 플레이어의 Up 벡터를 월드좌표계의 y-축 방향 벡터(0, 1, 0)이 되도록 한다. 
@@ -289,6 +292,12 @@ CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 	{
 		/*새로운 카메라의 모드가 스페이스-쉽 모드의 카메라이고 현재 카메라 모드가 1인칭 
 		또는 3인칭 카메라이면 플레이어의 로컬 축을 현재 카메라의 로컬 축과 같게 만든다.*/
+		m_xmf3Right = m_pCamera->GetRightVector();
+		m_xmf3Up = m_pCamera->GetUpVector();
+		m_xmf3Look = m_pCamera->GetLookVector();
+	}
+	else if (nNewCameraMode == MENU_CAMERA && m_pCamera)
+	{
 		m_xmf3Right = m_pCamera->GetRightVector();
 		m_xmf3Up = m_pCamera->GetUpVector();
 		m_xmf3Look = m_pCamera->GetLookVector();
@@ -437,4 +446,55 @@ void CAirplanePlayer::OnPrepareRender()
 	왜냐하면 비행기 모델 메쉬는 다음 그림과 같이 y-축 방향이 비행기의 앞쪽이 
 	되도록 모델링이 되었기 때문이다. 
 	그리고 이 메쉬를 카메라의 z- 축 방향으로 향하도록 그릴 것이기 때문이다.*/
+}
+
+CMenuPlayer::CMenuPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature)
+{ 
+	SetFriction(0.0f);
+	SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetMaxVelocityXZ(0.0f);
+	SetMaxVelocityY(0.0f);
+
+	// 플레이어를 위한 셰이더 변수를 생성한다. 
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	//카메라 객체를 생성하여 뷰포트, 씨저 사각형, 투영 변환 행렬, 카메라 변환 행렬을 생성하고 설정한다. 
+	m_pCamera = new CCamera();
+	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	m_pCamera->GenerateOrthographicMatrix(1.0f, 500.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	// 카메라의 위치 설정
+	//m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -2.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -25.0f), XMFLOAT3(0.0f, 0.0f,
+		0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+}
+
+CMenuPlayer::~CMenuPlayer()
+{
+}
+
+CCamera* CMenuPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
+{
+	//DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
+	//if (nCurrentCameraMode == nNewCameraMode) return(m_pCamera);
+
+
+	//m_pCamera = new CCamera();
+	//m_pCamera->SetViewport(0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
+	//m_pCamera->SetScissorRect(0, 0, m_nWndClientWidth, m_nWndClientHeight);
+	//m_pCamera->GenerateProjectionMatrix(1.0f, 500.0f, float(m_nWndClientWidth) /
+	//	float(m_nWndClientHeight), 90.0f);
+	//// 카메라의 위치 설정
+	////m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -2.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	//m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 15.0f, -25.0f), XMFLOAT3(0.0f, 0.0f,
+	//	0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	//m_pCamera = OnChangeCamera(nNewCameraMode, nCurrentCameraMode);
+	//m_pCamera->SetTimeLag(0.0f);
+	//m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	//m_pCamera->GenerateProjectionMatrix(1.01f, 500.0f, ASPECT_RATIO, 90.0f);
+	//m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f,
+	//	1.0f);
+	//m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	return (NULL);
 }

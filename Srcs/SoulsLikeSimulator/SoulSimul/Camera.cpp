@@ -120,6 +120,12 @@ void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlane
 		fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 }
 
+void CCamera::GenerateOrthographicMatrix(float fNearPlaneDistance,
+	float fFarPlaneDistance, float nWidth, float nHeight)
+{
+	m_xmf4x4Projection = Matrix4x4::OrthographicLH(nWidth, nHeight, fNearPlaneDistance, fFarPlaneDistance);
+}
+
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ, float fMaxZ)
 {
 	m_d3dViewport.TopLeftX = float(xTopLeft);
@@ -340,4 +346,17 @@ void CThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
 	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
 	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
+}
+
+CMenuCamera::CMenuCamera(CCamera* pCamera) : CCamera(pCamera)
+{
+	m_nMode = MENU_CAMERA;
+	if (pCamera)
+	{
+		m_xmf3Position = XMFLOAT3(0.f,0.f,-20.f);
+		m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	}
 }

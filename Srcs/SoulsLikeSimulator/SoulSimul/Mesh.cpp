@@ -360,3 +360,36 @@ CAirplaneMeshDiffused::~CAirplaneMeshDiffused()
 {
 }
 
+CPlaneMesh::CPlaneMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+	* pd3dCommandList, float fWidth, float fHeight, float fDepth,
+	XMFLOAT4 xmf4Color) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 6;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+
+	CDiffusedVertex pVertices[6];
+	pVertices[0] = CDiffusedVertex(XMFLOAT3(-fx, +fy, 0), xmf4Color);
+	pVertices[1] = CDiffusedVertex(XMFLOAT3(+fx, +fy, 0), xmf4Color);
+	pVertices[2] = CDiffusedVertex(XMFLOAT3(+fx, -fy, 0), xmf4Color);
+
+	pVertices[3] = CDiffusedVertex(XMFLOAT3(-fx, +fy, 0), xmf4Color);
+	pVertices[4] = CDiffusedVertex(XMFLOAT3(+fx, -fy, 0), xmf4Color);
+	pVertices[5] = CDiffusedVertex(XMFLOAT3(-fx, -fy, 0), xmf4Color);
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	// 정점 버퍼 뷰를 생성한다.
+	// 정점 버퍼 뷰란 정점 데이터를 메모리에서 어떻게 읽을 것인가를 정의하는 구조
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CPlaneMesh::~CPlaneMesh()
+{
+
+}

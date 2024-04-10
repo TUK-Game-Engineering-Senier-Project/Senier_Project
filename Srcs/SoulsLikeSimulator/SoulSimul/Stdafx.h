@@ -243,6 +243,14 @@ namespace Matrix4x4
 			NearZ, FarZ));
 		return(xmmtx4x4Result);
 	}
+	inline XMFLOAT4X4 OrthographicLH(float Width, float Height, float NearZ,
+		float FarZ)
+	{
+		XMFLOAT4X4 xmmtx4x4Result;
+		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixOrthographicLH(Width, Height,
+			NearZ, FarZ));
+		return(xmmtx4x4Result);
+	}
 	inline XMFLOAT4X4 LookAtLH(const XMFLOAT3& xmf3EyePosition, const XMFLOAT3& xmf3LookAtPosition,
 		const XMFLOAT3& xmf3UpDirection)
 	{

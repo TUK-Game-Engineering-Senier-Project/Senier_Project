@@ -201,6 +201,9 @@ void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	OnPrepareRender(pd3dCommandList);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
 CPlayerShader::CPlayerShader()
 {
 }
@@ -245,6 +248,9 @@ void CPlayerShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* 
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
 
 CObjectsShader::CObjectsShader()
 {
@@ -373,3 +379,144 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+CMainSceneShader::CMainSceneShader()
+{
+
+}
+
+CMainSceneShader::~CMainSceneShader()
+{
+}
+
+void CMainSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// 배경화면 메쉬 불러오기
+	CPlaneMesh* pBackGroundMesh = new CPlaneMesh(pd3dDevice, pd3dCommandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f, XMFLOAT4(0.f,0.f,1.f,1.f));
+	// 버튼 메쉬 불러오기
+	CPlaneMesh* pButtonMesh = new CPlaneMesh(pd3dDevice, pd3dCommandList, 300, 100);
+
+	m_nObjects = 3;
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	m_ppObjects[0] = new CGameObject();
+	m_ppObjects[0]->SetMesh(pBackGroundMesh);
+	m_ppObjects[0]->SetPosition(0, 0.f, 10.f);
+
+	m_ppObjects[1] = new CGameObject();
+	m_ppObjects[1]->SetMesh(pButtonMesh);
+	m_ppObjects[1]->SetPosition(0, 0.f, 0.f);
+
+	m_ppObjects[2] = new CGameObject();
+	m_ppObjects[2]->SetMesh(pButtonMesh);
+	m_ppObjects[2]->SetPosition(0, -150.f, 0.f);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+CSingleSetSceneShader::CSingleSetSceneShader()
+{
+
+}
+
+CSingleSetSceneShader::~CSingleSetSceneShader()
+{
+}
+
+void CSingleSetSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CPlaneMesh* pBackGroundMesh = new CPlaneMesh(pd3dDevice, pd3dCommandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f, XMFLOAT4(0.f, 0.f, 1.f, 1.f));
+	CPlaneMesh* pButtonMesh = new CPlaneMesh(pd3dDevice, pd3dCommandList, 300, 100);
+
+	m_nObjects = 2;
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	m_ppObjects[0] = new CGameObject();
+	m_ppObjects[0]->SetMesh(pBackGroundMesh);
+	m_ppObjects[0]->SetPosition(0, 0.f, 10.f);
+
+	m_ppObjects[1] = new CGameObject();
+	m_ppObjects[1]->SetMesh(pButtonMesh);
+	m_ppObjects[1]->SetPosition(0, -250.f, 0.f);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+CSinglePlaySceneShader::CSinglePlaySceneShader()
+{
+}
+
+CSinglePlaySceneShader::~CSinglePlaySceneShader()
+{
+}
+
+void CSinglePlaySceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+CMulitSetSceneShader::CMulitSetSceneShader()
+{
+}
+
+CMulitSetSceneShader::~CMulitSetSceneShader()
+{
+}
+
+void CMulitSetSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+	* pd3dCommandList)
+{
+	CPlaneMesh* pBackGroundMesh = new CPlaneMesh(pd3dDevice, pd3dCommandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f, XMFLOAT4(0.f, 0.f, 1.f, 1.f));
+	CPlaneMesh* pButtonMesh = new CPlaneMesh(pd3dDevice, pd3dCommandList, 300, 100);
+	CPlaneMesh* pUIMesh = new CPlaneMesh(pd3dDevice, pd3dCommandList, 200, 600);
+
+	m_nObjects = 4;
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	m_ppObjects[0] = new CGameObject();
+	m_ppObjects[0]->SetMesh(pBackGroundMesh);
+	m_ppObjects[0]->SetPosition(0, 0.f, 10.f);
+
+	m_ppObjects[1] = new CGameObject();
+	m_ppObjects[1]->SetMesh(pButtonMesh);
+	m_ppObjects[1]->SetPosition(0, -250.f, 0.f);
+
+	m_ppObjects[2] = new CGameObject();
+	m_ppObjects[2]->SetMesh(pUIMesh);
+	m_ppObjects[2]->SetPosition(-300, 200.f, 0.f);
+
+	m_ppObjects[3] = new CGameObject();
+	m_ppObjects[3]->SetMesh(pUIMesh);
+	m_ppObjects[3]->SetPosition(300, 200.f, 0.f);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+CMulitPlaySceneShader::CMulitPlaySceneShader()
+{
+
+}
+
+CMulitPlaySceneShader::~CMulitPlaySceneShader()
+{
+
+}
+
+void CMulitPlaySceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+	* pd3dCommandList)
+{
+
+}

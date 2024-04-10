@@ -2,6 +2,17 @@
 #include "Scene.h"
 
 
+enum class SceneState {
+	Main,
+	SingleSetting,
+	SinglePlay,
+	MultiSetting,
+	MultiPlay,
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
 class CMainScene : public CScene
 {
 public:
@@ -17,12 +28,17 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		* pd3dCommandList);
 	virtual void ReleaseObjects();
+
 };
 
-class SingleSettingScene : public CScene
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+class CSingleSettingScene : public CScene
 {
-	SingleSettingScene();
-	~SingleSettingScene();
+public:
+	CSingleSettingScene();
+	~CSingleSettingScene();
 
 	// 씬에서 마우스와 키보드 메시지를 처리한다.
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -35,10 +51,14 @@ class SingleSettingScene : public CScene
 	virtual void ReleaseObjects();
 };
 
-class SinglePlayScene : public CScene
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+class CSinglePlayScene : public CScene
 {
-	SinglePlayScene();
-	~SinglePlayScene();
+public:
+	CSinglePlayScene();
+	~CSinglePlayScene();
 
 	// 씬에서 마우스와 키보드 메시지를 처리한다.
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -51,10 +71,14 @@ class SinglePlayScene : public CScene
 	virtual void ReleaseObjects();
 };
 
-class MultiSettingScene : public CScene
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+class CMultiSettingScene : public CScene
 {
-	MultiSettingScene();
-	~MultiSettingScene();
+public:
+	CMultiSettingScene();
+	~CMultiSettingScene();
 
 	// 씬에서 마우스와 키보드 메시지를 처리한다.
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -67,10 +91,14 @@ class MultiSettingScene : public CScene
 	virtual void ReleaseObjects();
 };
 
-class MultiPlayScene : public CScene
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+class CMultiPlayScene : public CScene
 {
-	MultiPlayScene();
-	~MultiPlayScene();
+public:
+	CMultiPlayScene();
+	~CMultiPlayScene();
 
 	// 씬에서 마우스와 키보드 메시지를 처리한다.
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM

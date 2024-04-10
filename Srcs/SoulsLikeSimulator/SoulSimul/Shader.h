@@ -53,6 +53,9 @@ protected:
 
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
 class CPlayerShader : public CShader
 {
 public:
@@ -67,6 +70,9 @@ public:
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
 		* pd3dGraphicsRootSignature);
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
 
 //“CObjectsShader” 클래스는 게임 객체들을 포함하는 셰이더 객체이다. 
 class CObjectsShader : public CShader
@@ -95,3 +101,70 @@ protected:
 	CGameObject** m_ppObjects = NULL;
 	int m_nObjects = 0;
 };
+
+// 여기 부터는 각 씬들에 맞게 게임 객체들(UI)들을 포함하는 객체이다.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+class CMainSceneShader : public CObjectsShader
+{
+public:
+	CMainSceneShader();
+	virtual ~CMainSceneShader();
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+		* pd3dCommandList);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+class CSingleSetSceneShader : public CObjectsShader
+{
+public:
+	CSingleSetSceneShader();
+	virtual ~CSingleSetSceneShader();
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+		* pd3dCommandList);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+class CSinglePlaySceneShader : public CObjectsShader
+{
+public:
+	CSinglePlaySceneShader();
+	virtual ~CSinglePlaySceneShader();
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+		* pd3dCommandList);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+class CMulitSetSceneShader : public CObjectsShader
+{
+public:
+	CMulitSetSceneShader();
+	virtual ~CMulitSetSceneShader();
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+		* pd3dCommandList);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////
+
+class CMulitPlaySceneShader : public CObjectsShader
+{
+public:
+	CMulitPlaySceneShader();
+	virtual ~CMulitPlaySceneShader();
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+		* pd3dCommandList);
+};
+
