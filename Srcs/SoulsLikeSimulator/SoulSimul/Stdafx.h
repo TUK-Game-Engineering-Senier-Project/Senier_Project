@@ -14,6 +14,9 @@
 #include <memory.h>
 #include <tchar.h>
 
+// C++
+#include <iostream>
+#include <queue>
 
 // DirectX 3D 관련 헤더
 #include <string>
@@ -31,6 +34,8 @@
 #include <DirectXCollision.h>
 
 #include <DXGIDebug.h>
+
+using namespace std;
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

@@ -10,14 +10,14 @@ public:
 	~CScene();
 
 	// 씬에서 마우스와 키보드 메시지를 처리한다.
-	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
+	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 		lParam);
-	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
+	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 		lParam);
 
-	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		* pd3dCommandList);
-	void ReleaseObjects();
+	virtual void ReleaseObjects();
 
 	bool ProcessInput(UCHAR* pKeysBuffer);
 	void AnimateObjects(float fTimeElapsed);
@@ -41,3 +41,4 @@ protected:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 };
 
+//queue<CScene> g_Scene;

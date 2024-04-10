@@ -68,7 +68,6 @@ public:
 		* pd3dGraphicsRootSignature);
 };
 
-// 따라하기(11) p.6 읽기!
 //“CObjectsShader” 클래스는 게임 객체들을 포함하는 셰이더 객체이다. 
 class CObjectsShader : public CShader
 {
