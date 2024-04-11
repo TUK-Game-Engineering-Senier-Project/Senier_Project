@@ -17,6 +17,7 @@
 #include <dxgi1_4.h>
 #include <tchar.h>
 
+
 #ifdef _DEBUG
 #define DX12_ENABLE_DEBUG_LAYER
 #endif
@@ -119,7 +120,9 @@ int main(int, char**)
 
     // Our state
     bool show_demo_window = true;
-    bool show_another_window = false;
+    bool save_window = false;
+    bool load_window = false;
+    bool save = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -144,23 +147,123 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+        // default
+        //static float f = 0.0f;
+        static int hp = 500; // 0~1000
+        static int damage = 50;
+        static int def_degree = 50;
+        static int farring_speed = 50;
+        static int avoid_decision = 50;
+        static int attack_speed = 50;
+        static int speed = 50;
+        static int running_speed = 50;
+
+        //save
+        static int save_hp; // 0~1000
+        static int save_damage;
+        static int save_def_degree;
+        static int save_farring_speed;
+        static int save_avoid_decision;
+        static int save_attack_speed;
+        static int save_speed;
+        static int save_running_speed;
+
         
         {
-            static float f = 0.0f;
-            static int hp = 500; // 0~1000
-      
+            //static float f = 0.0f;
+            //static int hp = 500; // 0~1000
+            //static int damage = 50;
+            //static int def_degree = 50;
+            //static int farring_speed = 50;
+            //static int avoid_decision = 50;
+            //static int attack_speed = 50;
+            //static int speed = 50;
+            //static int running_speed = 50;
 
             ImGui::Begin("test preset");                          // Create a window called "Hello, world!" and append into it.
 
-            ImGui::Text("preset");               // ÇÑ±Û ¾ÈµÊ
+            ImGui::Text("player preset");               // ÇÑ±Û ¾ÈµÊ
       
 
             ImGui::SliderInt("hp", &hp, 0, 1000);            // hp
-            //ImGui::SliderInt("hp", &hp, 0, 1000);            // test
-            //ImGui::SliderInt("hp", &hp, 0, 1000);            
-            //ImGui::SliderInt("hp", &hp, 0, 1000);            
+            ImGui::SliderInt("damage", &damage, 0, 100);
+            ImGui::SliderInt("def_degree", &def_degree, 0, 100);
+            ImGui::SliderInt("farring_speed", &farring_speed, 0, 100);
+            ImGui::SliderInt("avoid_decision", &avoid_decision, 0, 100);
+            ImGui::SliderInt("attack_speed", &attack_speed, 0, 100);
+            ImGui::SliderInt("speed", &speed, 0, 100);
+            ImGui::SliderInt("running_speed", &running_speed, 0, 100);
+           
+            if (ImGui::Button("save"))
+            {
+                save_window = true;
+            }
 
+            if (ImGui::Button("load"))
+            {
+               load_window = true;
+            }
 
+     
+            ImGui::End();
+        }
+
+        // save window
+        if (save_window)
+        {
+            ImGui::Begin("save preset", &save_window);
+            ImGui::Text("save preset");
+            if (ImGui::Button("1"))
+            {
+                save_hp = hp;
+                save_damage = damage;
+                save_def_degree = def_degree;
+                save_farring_speed = farring_speed;
+                save_avoid_decision = avoid_decision;
+                save_attack_speed = attack_speed;
+                save_speed = speed;
+                save_running_speed = running_speed;
+            }
+
+            if (ImGui::Button("close"))
+            {
+                save_window = false;
+            }
+            ImGui::End();
+        }
+
+        // load window
+        if (load_window)
+        {
+            ImGui::Begin("save preset", &load_window);
+            ImGui::Text("save preset");
+            if (ImGui::Button("1"))
+            {
+                hp = 700;
+                damage = 70;
+                def_degree = 40;
+                farring_speed = 20;
+                avoid_decision = 30;
+                attack_speed = 80;
+                speed = 10;
+                running_speed = 30;
+            }
+            if (ImGui::Button("load"))
+            {
+                hp = save_hp;
+                damage = save_damage;
+                def_degree = save_def_degree;
+                farring_speed = save_farring_speed;
+                avoid_decision = save_avoid_decision;
+                attack_speed = save_attack_speed;
+                speed = save_speed;
+                running_speed = save_running_speed;
+            }
+
+            if (ImGui::Button("close"))
+            {
+               load_window = false;
+            }
             ImGui::End();
         }
 
