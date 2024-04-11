@@ -68,8 +68,9 @@ bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	return m_qScenes.top()->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 }
 
-bool CSceneManager::OnProcessingKeyboardMessage(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	bool b_change = false;
 	shared_ptr<CScene> pScene;
 
 	switch (nMessageID)
@@ -80,14 +81,14 @@ bool CSceneManager::OnProcessingKeyboardMessage(ID3D12Device* pd3dDevice, ID3D12
 		case '2':
 			if (m_CurrentState == SceneState::MAIN_MENU) {
 				StartScene(SceneState::SINGLE_SETTING);
-				BuildObjects(pd3dDevice, pd3dCommandList);
+				b_change = true;
 			}
 			break;
 
 		case '3':
 			if (m_CurrentState == SceneState::MAIN_MENU) {
 				StartScene(SceneState::MULTI_SETTING);
-				BuildObjects(pd3dDevice, pd3dCommandList);
+				b_change = true;
 			}
 			break;
 
@@ -103,7 +104,9 @@ bool CSceneManager::OnProcessingKeyboardMessage(ID3D12Device* pd3dDevice, ID3D12
 	default:
 		break;
 	}
-	return m_qScenes.top()->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	if (m_qScenes.top()->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam))
+		b_change = true;
+	return b_change;
 }
 
 void CSceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

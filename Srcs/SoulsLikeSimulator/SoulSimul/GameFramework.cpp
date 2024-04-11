@@ -29,11 +29,18 @@ CGameFramework::CGameFramework()
 	for (int i = 0; i < m_nSwapChainBuffers; i++) m_nFenceValues[i] = 0;
 
 	m_pScene = NULL;
+	m_pCamera = NULL;
 
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
 	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
 
 	_tcscpy_s(m_pszFrameRate, _T("LapProject ("));
+
+	// 씬 객체를 생성하고 씬에 포함될 게임 객체들을 생성한다.
+	m_pScene = make_shared<CSceneManager>();
+
+	CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList);
+	m_pPlayer = pMenuPlayer;
 }
 
 CGameFramework::~CGameFramework()
@@ -331,8 +338,6 @@ void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	// 씬 객체를 생성하고 씬에 포함될 게임 객체들을 생성한다.
-	m_pScene = make_shared<CSceneManager>();
 	//m_pScene = new CMultiSettingScene();
 	//m_pScene = new CSingleSettingScene();
 	//m_pScene = new CScene();
@@ -341,9 +346,8 @@ void CGameFramework::BuildObjects()
 	//CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice,
 	//	m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	//m_pPlayer = pAirplanePlayer;
-	CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList);
-	m_pPlayer = pMenuPlayer;
-	m_pCamera = m_pPlayer->GetCamera();
+	
+	if (!m_pCamera) m_pCamera = m_pPlayer->GetCamera();
 
 	// 씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다.
 	m_pd3dCommandList->Close();
@@ -654,7 +658,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		default:
 			break;
 	}
-	m_pScene->OnProcessingKeyboardMessage(m_pd3dDevice, m_pd3dCommandList, hWnd, nMessageID, wParam, lParam);
+	if (m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam)) {
+		BuildObjects();
+	}
 }
 
 // 윈도우의 메시지
