@@ -107,16 +107,13 @@ t[1] = "one"
 
 // 메타 테이블은 아직 잘 모르겠어서 혹시 나중에 쓸 일이 있으면 더 확실히 알아볼 예정입니다.
 
-### Visual Studio 개발 환경
-- 참고 : https://behonestar.tistory.com/23
+### Visual Studio 개발 환경 (수정함)
+- 참고 링크 : https://hack.kr/333
 
-Lua 최신 버전을 다운받은 뒤 압축 해제
--> Visual Studio 프로젝트 생성
--> Header Files와 Source Files에 Lua의 .h와 .c파일 포함 (lua.c와 luah.c 제외)
--> Lua 스크립트 작성 후 Visual Studio 프로젝트에 저장
--> 프로젝트 main 함수 작성
+5.4.2 windows 64byte 버전 : https://sourceforge.net/projects/luabinaries/files/5.4.2/Windows%20Libraries/Static/lua-5.4.2_Win64_vc17_lib.zip/download
 
-// src 폴더에 넣은 경우
-#include "src/lua.h"
-#include "src/lualib.h"
-#include "src/lauxlib.h"
+C드라이브에 해당 폴더를 저장하였다고 전제
+
+Visual Studio에서
+- C/C++ - 일반 - 추가 포함 디렉터리 설정 : include 경로 C:\lua-5.4.2_Win64_vc17_lib\include 지정
+- 속성 - 링커 - 일반 - 추가 라이브러리 디렉터리 설정 : lub54.lib 경로 C:\lua-5.4.2_Win64_vc17_lib 지정
