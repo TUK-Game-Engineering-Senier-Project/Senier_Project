@@ -4,6 +4,7 @@
 - 다운로드 : https://www.lua.org/download.html
 - 참고 링크 : https://hazarddev.tistory.com/34 ~ 36, https://reebok.tistory.com/80 ~ 83
 - 메타 테이블 참고 : https://blog.naver.com/qkrqldtjqj/220565237699, https://delightlane.tistory.com/10
+- Visual Studio와 연결 참고 : https://behonestar.tistory.com/23
 ---
 
 필요한 내용 있으면 추가 예정
@@ -105,3 +106,17 @@ t[1] = "one"
 - __add, __sub, __mul, __div 등등
 
 // 메타 테이블은 아직 잘 모르겠어서 혹시 나중에 쓸 일이 있으면 더 확실히 알아볼 예정입니다.
+
+### Visual Studio 개발 환경
+- 참고 : https://behonestar.tistory.com/23
+
+Lua 최신 버전을 다운받은 뒤 압축 해제
+-> Visual Studio 프로젝트 생성
+-> Header Files와 Source Files에 Lua의 .h와 .c파일 포함 (lua.c와 luah.c 제외)
+-> Lua 스크립트 작성 후 Visual Studio 프로젝트에 저장
+-> 프로젝트 main 함수 작성
+
+// src 폴더에 넣은 경우
+#include "src/lua.h"
+#include "src/lualib.h"
+#include "src/lauxlib.h"
