@@ -3,6 +3,14 @@
 #include "Timer.h"
 #include "Shader.h"
 
+enum class SceneState {
+	MAIN_MENU,
+	SINGLE_SETTING,
+	SINGLE_PLAY,
+	MULTI_SETTING,
+	MULTI_PLAY,
+};
+
 class CScene
 {
 public:
@@ -29,10 +37,16 @@ public:
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ID3D12RootSignature* GetGraphicsRootSignature();
 
+	SceneState GetSceneState() const { return m_SceneState; }
+
 protected:
+	
+
 	//배치(Batch) 처리를 하기 위하여 씬을 셰이더들의 리스트로 표현한다. 
 	CObjectsShader *m_pShaders = NULL;
 	int m_nShaders = 0;
+
+	SceneState					m_SceneState;
 
 	// 루트 시그너쳐를 나타내는 인터페이스 포인터이다.
 	/*그래픽스 파이프라인이나 계산 파이프라인에 의해 사용되는 리소스

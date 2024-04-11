@@ -448,8 +448,7 @@ void CAirplanePlayer::OnPrepareRender()
 	그리고 이 메쉬를 카메라의 z- 축 방향으로 향하도록 그릴 것이기 때문이다.*/
 }
 
-CMenuPlayer::CMenuPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dGraphicsRootSignature)
+CMenuPlayer::CMenuPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 { 
 	SetFriction(0.0f);
 	SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));

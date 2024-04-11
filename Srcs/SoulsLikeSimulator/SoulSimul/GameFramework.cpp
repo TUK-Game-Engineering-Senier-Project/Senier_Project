@@ -332,7 +332,7 @@ void CGameFramework::BuildObjects()
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	// 씬 객체를 생성하고 씬에 포함될 게임 객체들을 생성한다.
-	m_pScene = new CMainScene();
+	m_pScene = make_shared<CSceneManager>();
 	//m_pScene = new CMultiSettingScene();
 	//m_pScene = new CSingleSettingScene();
 	//m_pScene = new CScene();
@@ -341,7 +341,7 @@ void CGameFramework::BuildObjects()
 	//CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice,
 	//	m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	//m_pPlayer = pAirplanePlayer;
-	CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
+	CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList);
 	m_pPlayer = pMenuPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
@@ -362,13 +362,15 @@ void CGameFramework::BuildObjects()
 void CGameFramework::ReleaseObjects()
 {
 	if (m_pScene) m_pScene->ReleaseObjects();
-	if (m_pScene) delete m_pScene;
 }
 
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeyBuffer[256];
 	DWORD dwDirection = 0;
+
+	//m_pScene->ProcessInput(pKeyBuffer);
+
 	/*키보드의 상태 정보를 반환한다. 
 	화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 
 	오른쪽/왼쪽(로컬 x-축), 앞/뒤(로컬 z-축)로 이동한다. 
@@ -618,6 +620,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 // 키보드
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	
 	switch (nMessageID)
 	{
 		case WM_KEYUP:
@@ -633,7 +636,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				//	m_pCamera = m_pPlayer->ChangeCamera((wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 				break;
 			case VK_ESCAPE:
-				::PostQuitMessage(0);
+				if (m_pScene->GetCurrentSceneState() == SceneState::MAIN_MENU)
+					::PostQuitMessage(0);
 				break;
 			case VK_RETURN:
 				break;
@@ -650,6 +654,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		default:
 			break;
 	}
+	m_pScene->OnProcessingKeyboardMessage(m_pd3dDevice, m_pd3dCommandList, hWnd, nMessageID, wParam, lParam);
 }
 
 // 윈도우의 메시지

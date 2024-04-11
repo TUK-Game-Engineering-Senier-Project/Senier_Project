@@ -17,6 +17,8 @@
 // C++
 #include <iostream>
 #include <queue>
+#include <vector>
+#include <stack>
 
 // DirectX 3D 관련 헤더
 #include <string>
@@ -52,6 +54,9 @@ using Microsoft::WRL::ComPtr;
 
 #define FRAME_BUFFER_WIDTH	800
 #define FRAME_BUFFER_HEIGHT	600
+
+// 프레임 버퍼의 크기와 종횡비(Aspect Ratio)를 나타내는 상수를 다음과 같이 선언한다. 
+#define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
 /*정점의 색상을 무작위로(Random) 설정하기 위해 사용한다. 각 정점의 색상은 난수(Random Number)를 생성하여
 지정한다.*/

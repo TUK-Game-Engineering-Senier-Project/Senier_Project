@@ -3,6 +3,7 @@
 
 CScene::CScene()
 {
+	m_SceneState = SceneState::MAIN_MENU;
 }
 
 CScene::~CScene()

@@ -4,6 +4,7 @@
 
 CMainScene::CMainScene()
 {
+	m_SceneState = SceneState::MAIN_MENU;
 }
 
 CMainScene::~CMainScene()
@@ -49,6 +50,7 @@ void CMainScene::ReleaseObjects()
 
 CSingleSettingScene::CSingleSettingScene()
 {
+	m_SceneState = SceneState::SINGLE_SETTING;
 }
 
 CSingleSettingScene::~CSingleSettingScene()
@@ -94,6 +96,7 @@ void CSingleSettingScene::ReleaseObjects()
 
 CSinglePlayScene::CSinglePlayScene()
 {
+	m_SceneState = SceneState::SINGLE_PLAY;
 }
 
 CSinglePlayScene::~CSinglePlayScene()
@@ -125,6 +128,7 @@ void CSinglePlayScene::ReleaseObjects()
 
 CMultiSettingScene::CMultiSettingScene()
 {
+	m_SceneState = SceneState::MULTI_SETTING;
 }
 
 CMultiSettingScene::~CMultiSettingScene()
@@ -170,6 +174,7 @@ void CMultiSettingScene::ReleaseObjects()
 
 CMultiPlayScene::CMultiPlayScene()
 {
+	m_SceneState = SceneState::MULTI_PLAY;
 }
 
 CMultiPlayScene::~CMultiPlayScene()

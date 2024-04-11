@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Camera.h"
-#include "GameScenes.h"
+#include "SceneManager.h"
 #include "Timer.h"
 #include "Player.h"
 
@@ -57,7 +57,8 @@ private:
 	HANDLE		m_hFenceEvent;
 
 	// 씬을 위한 변수
-	CScene* m_pScene;
+	//CScene* m_pScene;
+	shared_ptr<CSceneManager> m_pScene;
 
 	//다음은 게임 프레임워크에서 사용할 타이머이다. 
 	CGameTimer m_GameTimer;
