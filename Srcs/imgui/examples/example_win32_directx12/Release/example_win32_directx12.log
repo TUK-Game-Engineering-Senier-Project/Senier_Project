@@ -1,14 +1,35 @@
 ﻿  main.cpp
-D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1e59 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1e5b 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1e5c 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1e5e 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1e61 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1d38 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1d39 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1d3b 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1dd7 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1dd9 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1dda 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1ddc 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1ddf 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1de1 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1de8 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1deb 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x1ded 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x21e4 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x21e5 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x21e9 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x21ea 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x21eb 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x21ec 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x21ed 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x21ee 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x21f0 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x2311 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x2314 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x2318 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x231b 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(1,1): warning C4828: 파일에 0x231c 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
 D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(122,10): warning C4189: 'show_demo_window': 지역 변수가 초기화되었으나 참조되지 않았습니다.
 D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp(125,10): warning C4189: 'save': 지역 변수가 초기화되었으나 참조되지 않았습니다.
   코드를 생성하고 있습니다.
-  27 of 1527 functions ( 1.8%) were compiled, the rest were copied from previous compilation.
+  0 of 1534 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    21 functions had inline decision re-evaluated but remain unchanged
+    0 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   example_win32_directx12.vcxproj -> D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\Release\example_win32_directx12.exe

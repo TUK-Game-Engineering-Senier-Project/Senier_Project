@@ -158,6 +158,12 @@ int main(int, char**)
         static int speed = 50;
         static int running_speed = 50;
 
+        static bool key_merge = true;
+        static bool use_jump = true;
+
+        static int shield = 1;
+        static int weapon = 4;
+
         //save
         static int save_hp; // 0~1000
         static int save_damage;
@@ -168,21 +174,19 @@ int main(int, char**)
         static int save_speed;
         static int save_running_speed;
 
+        static bool save_key_merge ;
+        static bool save_use_jump;
+
+        static int save_shield ;
+        static int save_weapon ;
+
         
+        // 메인 ui
         {
-            //static float f = 0.0f;
-            //static int hp = 500; // 0~1000
-            //static int damage = 50;
-            //static int def_degree = 50;
-            //static int farring_speed = 50;
-            //static int avoid_decision = 50;
-            //static int attack_speed = 50;
-            //static int speed = 50;
-            //static int running_speed = 50;
+         
+            ImGui::Begin("test preset");                         
 
-            ImGui::Begin("test preset");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("player preset");               // 한글 안됨
+            ImGui::Text("player preset");               // 한글 안됨 폰트 찾아야함
       
 
             ImGui::SliderInt("hp", &hp, 0, 1000);            // hp
@@ -193,12 +197,31 @@ int main(int, char**)
             ImGui::SliderInt("attack_speed", &attack_speed, 0, 100);
             ImGui::SliderInt("speed", &speed, 0, 100);
             ImGui::SliderInt("running_speed", &running_speed, 0, 100);
-           
+
+            //
+            ImGui::Checkbox("key_merge", &key_merge);
+            ImGui::SameLine();
+            ImGui::Checkbox("use_jump", &use_jump);
+
+            //
+            ImGui::RadioButton("small", &shield, 0);
+            ImGui::SameLine();
+            ImGui::RadioButton("midium", &shield, 1);
+            ImGui::SameLine();
+            ImGui::RadioButton("big", &shield, 2);
+
+            ImGui::RadioButton("small", &weapon, 3);  // weapon버튼 오류있음
+            ImGui::SameLine();
+            ImGui::RadioButton("midium", &weapon, 4);
+            ImGui::SameLine();
+            ImGui::RadioButton("big", &weapon, 5);
+
+            //
             if (ImGui::Button("save"))
             {
-                save_window = true;
+                save_window = true; // 창 바꿔야 할 듯
             }
-
+            ImGui::SameLine();
             if (ImGui::Button("load"))
             {
                load_window = true;
@@ -213,7 +236,7 @@ int main(int, char**)
         {
             ImGui::Begin("save preset", &save_window);
             ImGui::Text("save preset");
-            if (ImGui::Button("1"))
+            if (ImGui::Button("save"))
             {
                 save_hp = hp;
                 save_damage = damage;
@@ -223,6 +246,12 @@ int main(int, char**)
                 save_attack_speed = attack_speed;
                 save_speed = speed;
                 save_running_speed = running_speed;
+
+                save_key_merge = key_merge;
+                save_use_jump = use_jump;
+
+                save_shield = shield;
+                save_weapon = weapon;
             }
 
             if (ImGui::Button("close"))
@@ -237,7 +266,7 @@ int main(int, char**)
         {
             ImGui::Begin("save preset", &load_window);
             ImGui::Text("save preset");
-            if (ImGui::Button("1"))
+            if (ImGui::Button("load 1"))
             {
                 hp = 700;
                 damage = 70;
@@ -247,6 +276,12 @@ int main(int, char**)
                 attack_speed = 80;
                 speed = 10;
                 running_speed = 30;
+
+                key_merge = false;
+                use_jump = true;
+
+                shield = 0;
+                weapon = 5;
             }
             if (ImGui::Button("load"))
             {
@@ -258,6 +293,12 @@ int main(int, char**)
                 attack_speed = save_attack_speed;
                 speed = save_speed;
                 running_speed = save_running_speed;
+
+                key_merge = save_key_merge;
+                use_jump = save_use_jump;
+
+                shield = save_shield;
+                weapon = save_weapon;
             }
 
             if (ImGui::Button("close"))
@@ -266,6 +307,7 @@ int main(int, char**)
             }
             ImGui::End();
         }
+
 
       
         // Rendering
