@@ -1,47 +1,58 @@
 #pragma once
 
+#include "Texture.h"
 #include "Camera.h"
 #include "Mesh.h"
 
 class CShader;
 
+//게임 객체의 정보를 셰이더에게 넘겨주기 위한 구조체(상수 버퍼)이다. 
+struct CB_GAMEOBJECT_INFO
+{
+	XMFLOAT4X4 m_xmf4x4World;
+};
+
 class CGameObject
 {
 public:
-	CGameObject();
+	CGameObject(int nMeshes = 1);
 	virtual ~CGameObject();
 
-private:
-	int m_nReferences = 0;
-
 public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
+	XMFLOAT4X4						m_xmf4x4World;
+
+	CMesh**							m_ppMeshes;
+	int								m_nMeshes;
+
+	CMaterial*						m_pMaterial = NULL;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
 
 protected:
-	XMFLOAT4X4 m_xmf4x4World;
-	CMesh* m_pMesh = NULL;
-
-	CShader* m_pShader = NULL;
+	ID3D12Resource* m_pd3dcbGameObject = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 
 public:
-	void ReleaseUploadBuffers();
-
-	virtual void SetMesh(CMesh* pMesh);
+	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
+	virtual void SetMaterial(CMaterial* pMaterial);
+
+	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
+	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorHandle.ptr = nCbvGPUDescriptorHandlePtr; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetCbvGPUDescriptorHandle() { return(m_d3dCbvGPUDescriptorHandle); }
+
+	//상수 버퍼를 생성한다. 
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	//상수 버퍼의 내용을 갱신한다. 
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
 
 	virtual void Animate(float fTimeElapsed);
-
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
-	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
-
-	//상수 버퍼를 생성한다. 
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	//상수 버퍼의 내용을 갱신한다. 
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void ReleaseShaderVariables();
+	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
+	virtual void ReleaseUploadBuffers();
 
 	//게임 객체의 월드 변환 행렬에서 위치 벡터와 방향(x-축, y-축, z-축) 벡터를 반환한다. 
 	XMFLOAT3 GetPosition();
@@ -60,13 +71,14 @@ public:
 	
 	//게임 객체를 회전(x-축, y-축, z-축)한다. 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 
 };
 
 class CRotatingObject : public CGameObject
 {
 public:
-	CRotatingObject();
+	CRotatingObject(int nMeshes = 1);
 	virtual ~CRotatingObject();
 
 private:

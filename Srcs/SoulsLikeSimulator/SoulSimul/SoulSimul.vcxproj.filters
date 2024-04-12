@@ -43,6 +43,9 @@
     <Filter Include="Manager\ObjectManager">
       <UniqueIdentifier>{8e12602b-e705-4eaa-a00b-dddaae0b095d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TextureLoader">
+      <UniqueIdentifier>{c28e51c7-c6c3-4c5d-bbc5-4df9bc30ea95}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -90,6 +93,18 @@
     <ClInclude Include="Define.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader12.h">
+      <Filter>TextureLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneShader.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoulSimul.cpp">
@@ -127,6 +142,15 @@
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
       <Filter>Manager\SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>TextureLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSceneShader.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

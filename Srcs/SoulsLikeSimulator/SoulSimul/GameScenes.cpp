@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "GameScenes.h"
-#include "Shader.h"
+#include "GameSceneShader.h"
 
 CMainScene::CMainScene()
 {
@@ -27,22 +27,33 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_nShaders = 1;
-	m_pShaders = new CMainSceneShader[m_nShaders];
-	m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
+	m_ppShaders = new CShader * [m_nShaders];
+	CMainSceneShader* pMainSceneShader = new CMainSceneShader[m_nShaders];
+	pMainSceneShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pMainSceneShader->BuildObjects(pd3dDevice, pd3dCommandList, this, NULL);
+
+	m_ppShaders[0] = pMainSceneShader;
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CMainScene::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
 
-	for (int i = 0; i < m_nShaders; i++)
+	if (m_ppShaders)
 	{
-		m_pShaders[i].ReleaseShaderVariables();
-		m_pShaders[i].ReleaseObjects();
+		for (int i = 0; i < m_nShaders; i++)
+		{
+			m_ppShaders[i]->ReleaseShaderVariables();
+			m_ppShaders[i]->ReleaseObjects();
+			m_ppShaders[i]->Release();
+		}
+		delete[] m_ppShaders;
 	}
 
-	if (m_pShaders) delete[] m_pShaders;
+	ReleaseShaderVariables();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,22 +84,33 @@ void CSingleSettingScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_nShaders = 1;
-	m_pShaders = new CSingleSetSceneShader[m_nShaders];
-	m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
+	m_ppShaders = new CShader * [m_nShaders];
+	CSingleSetSceneShader* pSingleSetSceneShader = new CSingleSetSceneShader[m_nShaders];
+	pSingleSetSceneShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pSingleSetSceneShader->BuildObjects(pd3dDevice, pd3dCommandList, this, NULL);
+
+	m_ppShaders[0] = pSingleSetSceneShader;
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CSingleSettingScene::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
 
-	for (int i = 0; i < m_nShaders; i++)
+	if (m_ppShaders)
 	{
-		m_pShaders[i].ReleaseShaderVariables();
-		m_pShaders[i].ReleaseObjects();
+		for (int i = 0; i < m_nShaders; i++)
+		{
+			m_ppShaders[i]->ReleaseShaderVariables();
+			m_ppShaders[i]->ReleaseObjects();
+			m_ppShaders[i]->Release();
+		}
+		delete[] m_ppShaders;
 	}
 
-	if (m_pShaders) delete[] m_pShaders;
+	ReleaseShaderVariables();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,22 +173,33 @@ void CMultiSettingScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_nShaders = 1;
-	m_pShaders = new CMulitSetSceneShader[m_nShaders];
-	m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
+	m_ppShaders = new CShader * [m_nShaders];
+	CMulitSetSceneShader* pMulitSetSceneShader = new CMulitSetSceneShader[m_nShaders];
+	pMulitSetSceneShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pMulitSetSceneShader->BuildObjects(pd3dDevice, pd3dCommandList, this, NULL);
+
+	m_ppShaders[0] = pMulitSetSceneShader;
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CMultiSettingScene::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
 
-	for (int i = 0; i < m_nShaders; i++)
+	if (m_ppShaders)
 	{
-		m_pShaders[i].ReleaseShaderVariables();
-		m_pShaders[i].ReleaseObjects();
+		for (int i = 0; i < m_nShaders; i++)
+		{
+			m_ppShaders[i]->ReleaseShaderVariables();
+			m_ppShaders[i]->ReleaseObjects();
+			m_ppShaders[i]->Release();
+		}
+		delete[] m_ppShaders;
 	}
 
-	if (m_pShaders) delete[] m_pShaders;
+	ReleaseShaderVariables();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

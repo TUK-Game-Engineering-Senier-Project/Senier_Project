@@ -1,28 +1,21 @@
 #pragma once
 
-#define DIR_FORWARD 0x01
-#define DIR_BACKWARD 0x02
-#define DIR_LEFT 0x04
-#define DIR_RIGHT 0x08
-#define DIR_UP 0x10
-#define DIR_DOWN 0x20
-
 #include "Object.h"
 #include "Camera.h"
+
+struct CB_PLAYER_INFO
+{
+	XMFLOAT4X4					m_xmf4x4World;
+};
 
 class CPlayer : public CGameObject
 {
 protected:
 	//플레이어의 위치 벡터, x-축(Right), y-축(Up), z-축(Look) 벡터이다. 
-	XMFLOAT3 m_xmf3Position;
-	XMFLOAT3 m_xmf3Right;
-	XMFLOAT3 m_xmf3Up;
-	XMFLOAT3 m_xmf3Look;
-
-	//플레이어가 로컬 x-축(Right), y-축(Up), z-축(Look)으로 얼마만큼 회전했는가를 나타낸다. 
-	float m_fPitch;
-	float m_fYaw;
-	float m_fRoll;
+	XMFLOAT3					m_xmf3Position;
+	XMFLOAT3					m_xmf3Right;
+	XMFLOAT3					m_xmf3Up;
+	XMFLOAT3					m_xmf3Look;
 
 	//플레이어의 이동 속도를 나타내는 벡터이다. 
 	XMFLOAT3 m_xmf3Velocity;
@@ -30,23 +23,28 @@ protected:
 	//플레이어에 작용하는 중력을 나타내는 벡터이다. 
 	XMFLOAT3 m_xmf3Gravity;
 
+	//플레이어가 로컬 x-축(Right), y-축(Up), z-축(Look)으로 얼마만큼 회전했는가를 나타낸다. 
+	float						m_fPitch;
+	float						m_fYaw;
+	float						m_fRoll;
+
 	//xz-평면에서 (한 프레임 동안) 플레이어의 이동 속력의 최대값을 나타낸다. 
-	float m_fMaxVelocityXZ;
+	float						m_fMaxVelocityXZ;
 	//y-축 방향으로 (한 프레임 동안) 플레이어의 이동 속력의 최대값을 나타낸다. 
-	float m_fMaxVelocityY;
+	float						m_fMaxVelocityY;
 	//플레이어에 작용하는 마찰력을 나타낸다. 
-	float m_fFriction;
+	float						m_fFriction;
 
 	//플레이어의 위치가 바뀔 때마다 호출되는 OnPlayerUpdateCallback() 함수에서 사용하는 데이터이다. 
-	LPVOID m_pPlayerUpdatedContext;
+	LPVOID						m_pPlayerUpdatedContext;
 	//카메라의 위치가 바뀔 때마다 호출되는 OnCameraUpdateCallback() 함수에서 사용하는 데이터이다. 
-	LPVOID m_pCameraUpdatedContext;
+	LPVOID						m_pCameraUpdatedContext;
 
 	//플레이어에 현재 설정된 카메라이다. 
-	CCamera *m_pCamera = NULL;
+	CCamera						*m_pCamera = NULL;
 
 public:
-	CPlayer();
+	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL, int nMeshes = 1);
 	virtual ~CPlayer();
 
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
@@ -64,11 +62,7 @@ public:
 	xmf3Position 벡터에서 현재 플레이어의 위치 벡터를 빼면 
 	현재 플레이어의 위치에서 xmf3Position 방향으로의 벡터가 된다.
 	현재 플레이어의 위치에서 이 벡터 만큼 이동한다.*/
-	void SetPosition(const XMFLOAT3& xmf3Position) {
-		Move(XMFLOAT3(xmf3Position.x -
-			m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z),
-			false);
-	}
+	void SetPosition(const XMFLOAT3& xmf3Position) { Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false); }
 
 	XMFLOAT3& GetVelocity() { return(m_xmf3Velocity); }
 	float GetYaw() { return(m_fYaw); }
@@ -103,31 +97,38 @@ public:
 
 	//카메라를 변경하기 위하여 호출하는 함수이다. 
 	CCamera* OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
-	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) {
-		return(NULL);
-	}
+	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 
 	//플레이어의 위치와 회전축으로부터 월드 변환 행렬을 생성하는 함수이다.
 	virtual void OnPrepareRender();
 	//플레이어의 카메라가 3인칭 카메라일 때 플레이어(메쉬)를 렌더링한다.
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera =
-		NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+
+public:
+	ID3D12Resource* m_pd3dcbPlayer = NULL;
+	CB_PLAYER_INFO* m_pcbMappedPlayer = NULL;
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+ 
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		ID3D12RootSignature* pd3dGraphicsRootSignature);
+	CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL, int nMeshes = 1);
 	virtual ~CAirplanePlayer();
+
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+
 class CMenuPlayer : public CPlayer
 {
 public:
-	CMenuPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	CMenuPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes);
 	virtual ~CMenuPlayer();
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 

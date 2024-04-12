@@ -3,12 +3,7 @@
 #include "Camera.h"
 #include "Object.h"
 
-//게임 객체의 정보를 셰이더에게 넘겨주기 위한 구조체(상수 버퍼)이다. 
-struct CB_GAMEOBJECT_INFO
-{
-	XMFLOAT4X4 m_xmf4x4World;
-};
-
+class CScene;
 // 셰이더 소스 코드를 컴파일하고 그래픽스 상태 객체를 생성한다.
 class CShader
 {
@@ -30,26 +25,28 @@ public:
 
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
-	D3D12_SHADER_BYTECODE CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName,
-		LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
+	D3D12_SHADER_BYTECODE CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 
-	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
-		* pd3dGraphicsRootSignature);
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList,
-		XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CScene* pScene, void* pContext = NULL) { }
+	virtual void AnimateObjects(float fTimeElapsed) { }
+	virtual void ReleaseObjects() { }
+
+	virtual void ReleaseUploadBuffers();
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 protected:
 	// 파이프라인 상태 객체들의 리스트(배열)이다
-	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
-	int m_nPipelineStates = 0;
+	ID3D12PipelineState* m_pd3dPipelineState = NULL;
 
 };
 
@@ -71,100 +68,52 @@ public:
 		* pd3dGraphicsRootSignature);
 };
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CTexturedShader : public CShader
+{
+public:
+	CTexturedShader();
+	virtual ~CTexturedShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+};
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////
 
 //“CObjectsShader” 클래스는 게임 객체들을 포함하는 셰이더 객체이다. 
-class CObjectsShader : public CShader
+class CObjectsShader : public CTexturedShader
 {
 public:
 	CObjectsShader();
 	virtual ~CObjectsShader();
 
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
-		* pd3dCommandList);
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CScene* pScene, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseObjects();
 
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
-	
-	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
-		* pd3dGraphicsRootSignature);
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
 
 	virtual void ReleaseUploadBuffers();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 protected:
-	CGameObject** m_ppObjects = NULL;
-	int m_nObjects = 0;
+	CGameObject**					m_ppObjects = 0;
+	int								m_nObjects = 0;
+
+	ID3D12Resource*					m_pd3dcbGameObjects = NULL;
+	CB_GAMEOBJECT_INFO*				m_pcbMappedGameObjects = NULL;
 };
 
-// 여기 부터는 각 씬들에 맞게 게임 객체들(UI)들을 포함하는 객체이다.
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////
 
-class CMainSceneShader : public CObjectsShader
-{
-public:
-	CMainSceneShader();
-	virtual ~CMainSceneShader();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
-		* pd3dCommandList);
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////
-
-class CSingleSetSceneShader : public CObjectsShader
-{
-public:
-	CSingleSetSceneShader();
-	virtual ~CSingleSetSceneShader();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
-		* pd3dCommandList);
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////
-
-class CSinglePlaySceneShader : public CObjectsShader
-{
-public:
-	CSinglePlaySceneShader();
-	virtual ~CSinglePlaySceneShader();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
-		* pd3dCommandList);
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////
-
-class CMulitSetSceneShader : public CObjectsShader
-{
-public:
-	CMulitSetSceneShader();
-	virtual ~CMulitSetSceneShader();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
-		* pd3dCommandList);
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////
-
-class CMulitPlaySceneShader : public CObjectsShader
-{
-public:
-	CMulitPlaySceneShader();
-	virtual ~CMulitPlaySceneShader();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
-		* pd3dCommandList);
-};
 

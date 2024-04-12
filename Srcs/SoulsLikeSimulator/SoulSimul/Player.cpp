@@ -2,7 +2,7 @@
 #include "Shader.h"
 #include "Player.h"
 
-CPlayer::CPlayer()
+CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes) : CGameObject(nMeshes)
 {
 	m_pCamera = NULL;
 
@@ -230,21 +230,32 @@ void CPlayer::Update(float fTimeElapsed)
 void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	
-	CGameObject::CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
 	if (m_pCamera) m_pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	UINT ncbElementBytes = ((sizeof(CB_PLAYER_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbPlayer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbPlayer->Map(0, NULL, (void**)&m_pcbMappedPlayer);
 }
 
 void CPlayer::ReleaseShaderVariables()
 {
-	CGameObject::ReleaseShaderVariables();
-
 	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
+
+	if (m_pd3dcbPlayer)
+	{
+		m_pd3dcbPlayer->Unmap(0, NULL);
+		m_pd3dcbPlayer->Release();
+	}
+
 }
 
 void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CGameObject::UpdateShaderVariables(pd3dCommandList);
+	XMStoreFloat4x4(&m_pcbMappedPlayer->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbPlayer->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
 }
 
 /*카메라를 변경할 때 ChangeCamera() 함수에서 호출되는 함수이다. 
@@ -338,32 +349,26 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	
 	// 카메라 모드가 3인칭이면 플레이어 객체를 렌더링한다. 
-	if (nCameraMode == THIRD_PERSON_CAMERA)
-	{
-		if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
-		CGameObject::Render(pd3dCommandList, pCamera);
-	}
+	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }
 
-CAirplanePlayer::CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+
+CAirplanePlayer::CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes) : CPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext, nMeshes)
 {
-	// 비행기 메쉬를 생성한다. 
-	CMesh *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f,
-		20.0f, 4.0f, XMFLOAT4(0.0f, 0.5f, 0.0f, 0.0f));
-	SetMesh(pAirplaneMesh);
-	
-	// 플레이어의 카메라를 스페이스-쉽 카메라로 변경(생성)한다. 
-	m_pCamera = ChangeCamera(SPACESHIP_CAMERA, 0.0f);
-	
-	// 플레이어를 위한 셰이더 변수를 생성한다. 
+	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	
-	// 플레이어의 위치를 설정한다. 
-	SetPosition(XMFLOAT3(0.0f, 0.0f, -50.0f));
-	
-	// 플레이어(비행기) 메쉬를 렌더링할 때 사용할 셰이더를 생성한다.
+
+	CAirplaneMeshDiffused* pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.0f, 0.5f, 0.0f, 0.0f));
+	SetMesh(0, pAirplaneMesh);
+	UINT ncbElementBytes = ((sizeof(CB_PLAYER_INFO) + 255) & ~255); //256의 배수
+
 	CPlayerShader* pShader = new CPlayerShader();
 	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 	SetShader(pShader);
 }
 
@@ -448,7 +453,10 @@ void CAirplanePlayer::OnPrepareRender()
 	그리고 이 메쉬를 카메라의 z- 축 방향으로 향하도록 그릴 것이기 때문이다.*/
 }
 
-CMenuPlayer::CMenuPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+
+CMenuPlayer::CMenuPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes) : CPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext, nMeshes)
 { 
 	SetFriction(0.0f);
 	SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
