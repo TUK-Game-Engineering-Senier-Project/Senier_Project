@@ -37,6 +37,8 @@
 
 #include <DXGIDebug.h>
 
+#include "Define.h"
+
 using namespace std;
 
 using namespace DirectX;
@@ -52,15 +54,6 @@ using Microsoft::WRL::ComPtr;
 
 #pragma comment(lib, "dxguid.lib")
 
-#define FRAME_BUFFER_WIDTH	800
-#define FRAME_BUFFER_HEIGHT	600
-
-// 프레임 버퍼의 크기와 종횡비(Aspect Ratio)를 나타내는 상수를 다음과 같이 선언한다. 
-#define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
-
-/*정점의 색상을 무작위로(Random) 설정하기 위해 사용한다. 각 정점의 색상은 난수(Random Number)를 생성하여
-지정한다.*/
-#define RANDOM_COLOR XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 
 // 주석 해체하면 전체화면으로 시작
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
@@ -70,6 +63,9 @@ extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice,
 	d3dHeapType = D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATES d3dResourceStates =
 	D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, ID3D12Resource** ppd3dUploadBuffer =
 	NULL);
+
+extern ID3D12Resource* CreateTextureResourceFromWICFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
 
 // 3차원 벡터의 연산 
 // 준수 모드 켰을 때

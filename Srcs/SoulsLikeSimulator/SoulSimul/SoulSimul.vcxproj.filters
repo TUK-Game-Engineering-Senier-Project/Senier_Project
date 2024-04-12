@@ -87,6 +87,9 @@
     <ClInclude Include="SceneManager.h">
       <Filter>Manager\SceneManager</Filter>
     </ClInclude>
+    <ClInclude Include="Define.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoulSimul.cpp">
