@@ -10,6 +10,7 @@
 지정한다.*/
 #define RANDOM_COLOR XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 
+#define UI_MAIN_TEXTURE						3
 // 메인 메뉴 - 싱글플레이 버튼
 #define UI_MAIN_SIGLESETTING_BUTTON_WIDTH	300
 #define UI_MAIN_SIGLESETTING_BUTTON_HEIGHT	100

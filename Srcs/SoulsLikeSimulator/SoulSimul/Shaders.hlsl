@@ -1,5 +1,3 @@
-
-
 cbuffer cbPlayerInfo : register(b0)
 {
     matrix gmtxPlayerWorld : packoffset(c0);
@@ -18,7 +16,6 @@ cbuffer cbGameObjectInfo : register(b2)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-
 struct VS_DIFFUSED_INPUT
 {
     float3 position : POSITION;
@@ -48,7 +45,6 @@ float4 PSPlayer(VS_DIFFUSED_OUTPUT input) : SV_TARGET
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-
 Texture2D gtxtTexture : register(t0);
 SamplerState gSamplerState : register(s0);
 
