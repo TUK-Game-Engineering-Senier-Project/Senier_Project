@@ -26,6 +26,9 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
+	int nObjects = 3;
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, nObjects + 1, 1);
+
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
 	CMainSceneShader* pMainSceneShader = new CMainSceneShader[m_nShaders];

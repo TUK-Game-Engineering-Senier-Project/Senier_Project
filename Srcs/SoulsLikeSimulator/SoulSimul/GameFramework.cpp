@@ -33,7 +33,7 @@ CGameFramework::CGameFramework()
 	_tcscpy_s(m_pszFrameRate, _T("LabProject ("));
 
 	// 씬 객체를 생성하고 씬에 포함될 게임 객체들을 생성한다.
-	//m_pScene = make_shared<CSceneManager>();
+	m_pScene = make_shared<CSceneManager>();
 }
 
 CGameFramework::~CGameFramework()
@@ -59,35 +59,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	return(true);
 }
 
-void CGameFramework::OnDestroy()
-{
-	//게임 객체(게임 월드 객체)를 소멸한다. 
-	ReleaseObjects();
-	
-	::CloseHandle(m_hFenceEvent);
-
-#if defined(_DEBUG)
-	if (m_pd3dDebugController) m_pd3dDebugController->Release();
-#endif
-
-	if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
-	if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
-
-	for (int i = 0; i < m_nSwapChainBuffers; i++) if (m_ppd3dSwapChainBackBuffers[i]) m_ppd3dSwapChainBackBuffers[i]->Release();
-	if (m_pd3dRtvDescriptorHeap) m_pd3dRtvDescriptorHeap->Release();
-
-	if (m_pd3dCommandAllocator) m_pd3dCommandAllocator->Release();
-	if (m_pd3dCommandQueue) m_pd3dCommandQueue->Release();
-	if (m_pd3dCommandList) m_pd3dCommandList->Release();
-
-	if (m_pd3dFence) m_pd3dFence->Release();
-
-	m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
-	if (m_pdxgiSwapChain) m_pdxgiSwapChain->Release();
-	if (m_pd3dDevice) m_pd3dDevice->Release();
-	if (m_pdxgiFactory) m_pdxgiFactory->Release();
-}
-
+//#define _WITH_SWAPCHAIN
 void CGameFramework::CreateSwapChain()
 {
 	RECT rcClient;
@@ -157,7 +129,7 @@ void CGameFramework::CreateSwapChain()
 
 	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
-	
+
 }
 
 void CGameFramework::CreateDirect3DDevice()
@@ -215,16 +187,16 @@ void CGameFramework::CreateDirect3DDevice()
 
 	// 다중 샘플의 품질 수준이 1보다 크면 다중 샘플링을 활성화한다.
 	m_bMsaa4xEnable = (m_nMsaa4xQualityLevels > 1) ? true : false;
-	
+
 	// 펜스를 생성하고 펜스 값을 0으로 설정한다. 
 	hResult = m_pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, __uuidof(ID3D12Fence), (void**)&m_pd3dFence);
 	for (UINT i = 0; i < m_nSwapChainBuffers; i++) m_nFenceValues[i] = 1;
 	//m_nFenceValue = 0;
 
-	/* 펜스와 동기화를 위한 이벤트 객체를 생성한다(이벤트 객체의 초기값을 FALSE이다). 
+	/* 펜스와 동기화를 위한 이벤트 객체를 생성한다(이벤트 객체의 초기값을 FALSE이다).
 	이벤트가 실행되면(Signal) 이벤트의 값을 자동적으로 FALSE가 되도록 생성한다.*/
 	m_hFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
-	
+
 	::gnCbvSrvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	if (pd3dAdapter) pd3dAdapter->Release();
@@ -259,8 +231,6 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
 	HRESULT hResult = m_pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dRtvDescriptorHeap);
-
-
 	// 렌더 타겟 서술자 힙의 원소의 크기를 저장한다. 
 	m_nRtvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
@@ -268,7 +238,6 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 	d3dDescriptorHeapDesc.NumDescriptors = 1;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	hResult = m_pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dDsvDescriptorHeap);
-
 	// 깊이-스텐실 서술자 힙의 원소의 크기를 저장한다. 
 	m_nDsvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 }
@@ -308,8 +277,6 @@ void CGameFramework::CreateDepthStencilView()
 	d3dHeapProperties.CreationNodeMask = 1;
 	d3dHeapProperties.VisibleNodeMask = 1;
 
-	// 깊이-스텐실 버퍼를 생성한다. 
-	// 깊이-스텐실 버퍼 뷰를 생성한다.
 	D3D12_CLEAR_VALUE d3dClearValue;
 	d3dClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	d3dClearValue.DepthStencil.Depth = 1.0f;
@@ -359,26 +326,174 @@ void CGameFramework::OnResizeBackBuffers()
 	WaitForGpuComplete();
 }
 
+
+// 마우스
+void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	//if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+		break;
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+		::ReleaseCapture();
+		break;
+	case WM_MOUSEMOVE:
+		break;
+	default:
+		break;
+	}
+}
+
+// 키보드
+void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+
+	switch (nMessageID)
+	{
+	case WM_KEYUP:
+		switch (wParam)
+		{
+			/*‘F1’ 키를 누르면 1인칭 카메라,
+			‘F2’ 키를 누르면 스페이스-쉽 카메라로 변경한다,
+			‘F3’ 키를 누르면 3인칭 카메라로 변경한다.*/
+		case VK_F1:
+		case VK_F2:
+		case VK_F3:
+			//if (m_pPlayer) 
+			//	m_pCamera = m_pPlayer->ChangeCamera((wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+			break;
+		case VK_ESCAPE:
+			//if (m_pScene->GetCurrentSceneState() == SceneState::MAIN_MENU)
+			::PostQuitMessage(0);
+			break;
+		case VK_RETURN:
+			break;
+		case VK_F8:
+			break;
+			// “F9” 키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리한다.
+		case VK_F9:
+		{
+			BOOL bFullScreenState = FALSE;
+			m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
+			m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
+
+			DXGI_MODE_DESC dxgiTargetParameters;
+			dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			dxgiTargetParameters.Width = m_nWndClientWidth;
+			dxgiTargetParameters.Height = m_nWndClientHeight;
+			dxgiTargetParameters.RefreshRate.Numerator = 60;
+			dxgiTargetParameters.RefreshRate.Denominator = 1;
+			dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+			dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+			m_pdxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
+
+			OnResizeBackBuffers();
+
+			break;
+		}
+		break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	if (m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam)) {
+		BuildObjects();
+	}
+}
+
+// 윈도우의 메시지
+LRESULT CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_ACTIVATE:
+	{
+		if (LOWORD(wParam) == WA_INACTIVE)
+			m_GameTimer.Stop();
+		else
+			m_GameTimer.Start();
+		break;
+	}
+	case WM_SIZE:
+	{
+		m_nWndClientWidth = LOWORD(lParam);
+		m_nWndClientHeight = HIWORD(lParam);
+
+		OnResizeBackBuffers();
+		break;
+	}
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+	case WM_MOUSEMOVE:
+		OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+		break;
+	case WM_KEYDOWN:
+	case WM_KEYUP:
+		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		break;
+	}
+	return(0);
+}
+
+
+
+void CGameFramework::OnDestroy()
+{
+	//게임 객체(게임 월드 객체)를 소멸한다. 
+	ReleaseObjects();
+	
+	::CloseHandle(m_hFenceEvent);
+
+#if defined(_DEBUG)
+	if (m_pd3dDebugController) m_pd3dDebugController->Release();
+#endif
+
+	if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
+	if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
+
+	for (int i = 0; i < m_nSwapChainBuffers; i++) if (m_ppd3dSwapChainBackBuffers[i]) m_ppd3dSwapChainBackBuffers[i]->Release();
+	if (m_pd3dRtvDescriptorHeap) m_pd3dRtvDescriptorHeap->Release();
+
+	if (m_pd3dCommandAllocator) m_pd3dCommandAllocator->Release();
+	if (m_pd3dCommandQueue) m_pd3dCommandQueue->Release();
+	if (m_pd3dCommandList) m_pd3dCommandList->Release();
+
+	if (m_pd3dFence) m_pd3dFence->Release();
+
+	m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
+	if (m_pdxgiSwapChain) m_pdxgiSwapChain->Release();
+	if (m_pd3dDevice) m_pd3dDevice->Release();
+	if (m_pdxgiFactory) m_pdxgiFactory->Release();
+}
+
+
 void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	//m_pScene = new CMultiSettingScene();
-	//m_pScene = new CSingleSettingScene();
 	//m_pScene = new CScene();
-	//if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-	m_pScene = new CScene();
-	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	//m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
-	//CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice,
-	//	m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
-	//m_pPlayer = pAirplanePlayer;
-	if (!m_pPlayer) {
-		//CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
-		//m_pPlayer = pMenuPlayer;
-		m_pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
-		if (!m_pCamera) m_pCamera = m_pPlayer->GetCamera();
-	}
+	m_pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
+	m_pCamera = m_pPlayer->GetCamera();
+
+	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+
+	//if (!m_pPlayer) {
+	//	CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
+	//	m_pPlayer = pMenuPlayer;
+	//	if (!m_pCamera) m_pCamera = m_pPlayer->GetCamera();
+	//}
 
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = m_pScene->CreateConstantBufferView(m_pd3dDevice, m_pPlayer->m_pd3dcbPlayer, ((sizeof(CB_PLAYER_INFO) + 255) & ~255));
 	m_pPlayer->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
@@ -401,6 +516,9 @@ void CGameFramework::ReleaseObjects()
 {
 	if (m_pPlayer) delete m_pPlayer;
 	if (m_pScene) m_pScene->ReleaseObjects();
+
+	// 임시
+	//if (m_pScene) delete m_pScene;
 }
 
 void CGameFramework::ProcessInput()
@@ -470,7 +588,7 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
 }
 
-//#define _WITH_PLAYER_TOP
+#define _WITH_PLAYER_TOP
 // 렌더링
 void CGameFramework::FrameAdvance()
 {
@@ -582,7 +700,8 @@ void CGameFramework::FrameAdvance()
 void CGameFramework::MoveToNextFrame()
 {
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
-	
+	//m_nSwapChainBufferIndex = (m_nSwapChainBufferIndex + 1) % m_nSwapChainBuffers;
+
 	UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
 	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFenceValue);
 
@@ -592,130 +711,14 @@ void CGameFramework::MoveToNextFrame()
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
 	}
 }
-
 void CGameFramework::WaitForGpuComplete()
 {
-	// CPU 펜스의 값을 증가한다. 
 	const UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
-
-	// GPU가 펜스의 값을 설정하는 명령을 명령 큐에 추가한다.
 	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFenceValue);
 
-	// 펜스의 현재 값이 설정한 값보다 작으면 펜스의 현재 값이 설정한 값이 될 때까지 기다린다. 
 	if (m_pd3dFence->GetCompletedValue() < nFenceValue)
 	{
 		hResult = m_pd3dFence->SetEventOnCompletion(nFenceValue, m_hFenceEvent);
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
 	}
 }
-
-// 마우스
-void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-			//마우스 캡쳐를 하고 현재 마우스 위치를 가져온다. 
-			//::SetCapture(hWnd);
-			//::GetCursorPos(&m_ptOldCursorPos);
-			break;
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-			//마우스 캡쳐를 해제한다. 
-			//::ReleaseCapture();
-			break;
-		case WM_MOUSEMOVE:
-			break;
-		default:
-			break;
-	}
-}
-
-// 키보드
-void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	
-	switch (nMessageID)
-	{
-		case WM_KEYUP:
-			switch (wParam)
-			{
-			/*‘F1’ 키를 누르면 1인칭 카메라, 
-			‘F2’ 키를 누르면 스페이스-쉽 카메라로 변경한다, 
-			‘F3’ 키를 누르면 3인칭 카메라로 변경한다.*/ 
-			case VK_F1:
-			case VK_F2:
-			case VK_F3:
-				//if (m_pPlayer) 
-				//	m_pCamera = m_pPlayer->ChangeCamera((wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-				break;
-			case VK_ESCAPE:
-				//if (m_pScene->GetCurrentSceneState() == SceneState::MAIN_MENU)
-				//	::PostQuitMessage(0);
-				break;
-			case VK_RETURN:
-				break;
-			case VK_F8:
-				break;
-			// “F9” 키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리한다.
-			case VK_F9:
-			{
-				BOOL bFullScreenState = FALSE;
-				m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
-				m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
-
-				DXGI_MODE_DESC dxgiTargetParameters;
-				dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				dxgiTargetParameters.Width = m_nWndClientWidth;
-				dxgiTargetParameters.Height = m_nWndClientHeight;
-				dxgiTargetParameters.RefreshRate.Numerator = 60;
-				dxgiTargetParameters.RefreshRate.Denominator = 1;
-				dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-				dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-				m_pdxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
-
-				OnResizeBackBuffers();
-
-				break;
-			}
-				break;
-			default:
-				break;
-			}
-			break;
-		default:
-			break;
-	}
-	if (m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam)) {
-		BuildObjects();
-	}
-}
-
-// 윈도우의 메시지
-LRESULT CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-		case WM_SIZE:
-		{
-			m_nWndClientWidth = LOWORD(lParam);
-			m_nWndClientHeight = HIWORD(lParam);
-			break;
-		}
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-		case WM_MOUSEMOVE:
-			OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-			break;
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-			OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-			break;
-	}
-	return(0);
-}
-
-

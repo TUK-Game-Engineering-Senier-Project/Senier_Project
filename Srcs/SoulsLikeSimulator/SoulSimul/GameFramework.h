@@ -13,18 +13,16 @@ public:
 
 	//프레임워크를 초기화하는 함수이다(주 윈도우가 생성되면 호출된다). 
 	bool OnCreate(HINSTANCE hInstance, HWND hMainWnd);
-
 	void OnDestroy();
 
 	//스왑 체인, 디바이스, 서술자 힙, 명령 큐/할당자/리스트를 생성하는 함수이다. 
+	//렌더 타겟 뷰와 깊이-스텐실 뷰를 생성하는 함수이다. 
 	void CreateSwapChain();
 	void CreateDirect3DDevice();
-	void CreateCommandQueueAndList();
-
-	//렌더 타겟 뷰와 깊이-스텐실 뷰를 생성하는 함수이다. 
 	void CreateRtvAndDsvDescriptorHeaps();
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
+	void CreateCommandQueueAndList();
 
 	void OnResizeBackBuffers();
 
@@ -40,11 +38,11 @@ public:
 	// 전체 화면
 	//void ChangeSwapChainState();
 
-	// 씬을 위한 함수
-	void MoveToNextFrame();
-
 	//CPU와 GPU를 동기화하는 함수이다. 
 	void WaitForGpuComplete();
+
+	// 씬을 위한 함수
+	void MoveToNextFrame();
 
 	//윈도우의 메시지(키보드, 마우스 입력)를 처리하는 함수이다.
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -59,11 +57,11 @@ private:
 	int							m_nWndClientHeight;
 
 	// DXGI 팩토리 인터페이스에 대한 포인터이다.
-	IDXGIFactory4*				m_pdxgiFactory;
+	IDXGIFactory4*				m_pdxgiFactory = NULL;
 	// 스왑 체인 인터페이스에 대한 포인터이다. 주로 디스플레이를 제어하기 필요하다.
-	IDXGISwapChain3*			m_pdxgiSwapChain;
+	IDXGISwapChain3*			m_pdxgiSwapChain = NULL;
 	// Direct3D 디바이스 인터페이스에 대한 포인터이다. 주로 리소스를 생성하기 위하여 필요하다.
-	ID3D12Device*				m_pd3dDevice;
+	ID3D12Device*				m_pd3dDevice = NULL;
 
 	// MSAA 다중 샘플링을 활성화하고 다중 샘플링 레벨을 설정한다.
 	bool						m_bMsaa4xEnable = false;
@@ -76,40 +74,41 @@ private:
 
 	// 렌더 타겟 버퍼, 서술자 힙 인터페이스 포인터, 렌더 타겟 서술자 원소의 크기이다.
 	ID3D12Resource*				m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
-	ID3D12DescriptorHeap*		m_pd3dRtvDescriptorHeap;
+	ID3D12DescriptorHeap*		m_pd3dRtvDescriptorHeap = NULL;
 	UINT						m_nRtvDescriptorIncrementSize;
 
 	// 깊이-스텐실 버퍼, 서술자 힙 인터페이스 포인터, 깊이-스텐실 서술자 원소의 크기이다.
 	ID3D12Resource*				m_pd3dDepthStencilBuffer = NULL;
-	ID3D12DescriptorHeap*		m_pd3dDsvDescriptorHeap;
+	ID3D12DescriptorHeap*		m_pd3dDsvDescriptorHeap = NULL;
 	UINT						m_nDsvDescriptorIncrementSize;
 
 	// 명령 큐, 명령 할당자, 명령 리스트 인터페이스 포인터이다.
-	ID3D12CommandQueue*			m_pd3dCommandQueue;
-	ID3D12CommandAllocator*		m_pd3dCommandAllocator;
-	ID3D12GraphicsCommandList*	m_pd3dCommandList;
+	ID3D12CommandAllocator*		m_pd3dCommandAllocator = NULL;
+	ID3D12CommandQueue*			m_pd3dCommandQueue = NULL;
+	ID3D12GraphicsCommandList*	m_pd3dCommandList = NULL;
 
 	// 펜스 인터페이스 포인터, 펜스의 값, 이벤트 핸들이다. 
 	// 펜스는 GPU와 CPU의 동기화 수단이다. 
 	// GPU가 명령 대기열의 명령들 중 특정 지점까지의 모든 명령을 다 처리할 때까지 CPU를 기다리게 하는 것
 	ID3D12Fence*				m_pd3dFence = NULL;
-	//UINT64		m_nFenceValue;
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
 
+#if defined(_DEBUG)
+	ID3D12Debug* m_pd3dDebugController;
+#endif
+
+	//다음은 게임 프레임워크에서 사용할 타이머이다. 
+	CGameTimer					m_GameTimer;
 	// 씬을 위한 변수
-	//CScene* m_pScene;
-	//shared_ptr<CSceneManager>	m_pScene = NULL;
-	CScene*						m_pScene = NULL;
+	shared_ptr<CSceneManager>	m_pScene = NULL;
+	//CScene*						m_pScene = NULL;
 	CCamera*					m_pCamera = NULL;
 	//플레이어 객체에 대한 포인터이다.
 	CPlayer*					m_pPlayer = NULL;
 
 	//마지막으로 마우스 버튼을 클릭할 때의 마우스 커서의 위치이다. 
 	POINT						m_ptOldCursorPos;
-
-	//다음은 게임 프레임워크에서 사용할 타이머이다. 
-	CGameTimer					m_GameTimer;
 
 	//다음은 프레임 레이트를 주 윈도우의 캡션에 출력하기 위한 문자열이다. 
 	_TCHAR						m_pszFrameRate[50];
