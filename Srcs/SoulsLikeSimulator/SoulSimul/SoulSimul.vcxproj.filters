@@ -103,7 +103,7 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="GameSceneShader.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -150,7 +150,7 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="GameSceneShader.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

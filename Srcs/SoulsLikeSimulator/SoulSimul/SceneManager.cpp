@@ -119,6 +119,16 @@ void CSceneManager::ReleaseObjects()
 	m_qScenes.top()->ReleaseObjects();
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE CSceneManager::CreateConstantBufferView(ID3D12Device* pd3dDevice, ID3D12Resource* pd3dConstantBuffer, UINT nStride)
+{
+	return m_qScenes.top()->CreateConstantBufferView(pd3dDevice, pd3dConstantBuffer, nStride);
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE CSceneManager::CreateConstantBufferView(ID3D12Device* pd3dDevice, D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress, UINT nStride)
+{
+	return m_qScenes.top()->CreateConstantBufferView(pd3dDevice, d3dGpuVirtualAddress, nStride);
+}
+
 bool CSceneManager::ProcessInput(UCHAR* pKeysBuffer)
 {
 	//if (::GetKeyboardState(pKeysBuffer))

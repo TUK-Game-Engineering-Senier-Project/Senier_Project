@@ -48,7 +48,7 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void Animate(float fTimeElapsed);
-	virtual void OnPrepareRender();
+	virtual void OnPrepareRender() {};
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
@@ -75,6 +75,9 @@ public:
 
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
 class CRotatingObject : public CGameObject
 {
 public:
@@ -82,14 +85,30 @@ public:
 	virtual ~CRotatingObject();
 
 private:
-	XMFLOAT3 m_xmf3RotationAxis;
-	float m_fRotationSpeed;
+	XMFLOAT3						m_xmf3RotationAxis;
+	float							m_fRotationSpeed;
 
 public:
 	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
-	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) {
-		m_xmf3RotationAxis =
-			xmf3RotationAxis;
-	}
+	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
+
+	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+};
+
+class CRevolvingObject : public CGameObject
+{
+public:
+	CRevolvingObject(int nMeshes = 1);
+	virtual ~CRevolvingObject();
+
+private:
+	XMFLOAT3						m_xmf3RevolutionAxis;
+	float							m_fRevolutionSpeed;
+
+public:
+	void SetRevolutionSpeed(float fRevolutionSpeed) { m_fRevolutionSpeed = fRevolutionSpeed; }
+	void SetRevolutionAxis(XMFLOAT3 xmf3RevolutionAxis) { m_xmf3RevolutionAxis = xmf3RevolutionAxis; }
+
 	virtual void Animate(float fTimeElapsed);
 };

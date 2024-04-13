@@ -33,7 +33,7 @@ CGameFramework::CGameFramework()
 	_tcscpy_s(m_pszFrameRate, _T("LabProject ("));
 
 	// 씬 객체를 생성하고 씬에 포함될 게임 객체들을 생성한다.
-	m_pScene = make_shared<CSceneManager>();
+	//m_pScene = make_shared<CSceneManager>();
 }
 
 CGameFramework::~CGameFramework()
@@ -51,8 +51,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
 	
-	//CreateRenderTargetViews();
-	CreateDepthStencilView();
+	CoInitialize(NULL);
 
 	//렌더링할 게임 객체를 생성한다. 
 	BuildObjects();
@@ -329,6 +328,37 @@ void CGameFramework::CreateDepthStencilView()
 	//	m_pd3dDevice->CreateDepthStencilView(m_pd3dDepthStencilBuffer, &d3dDepthStencilViewDesc, d3dDsvCPUDescriptorHandle);
 }
 
+void CGameFramework::OnResizeBackBuffers()
+{
+	WaitForGpuComplete();
+
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+
+	for (int i = 0; i < m_nSwapChainBuffers; i++) if (m_ppd3dSwapChainBackBuffers[i]) m_ppd3dSwapChainBackBuffers[i]->Release();
+	if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
+#ifdef _WITH_ONLY_RESIZE_BACKBUFFERS
+	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
+	m_pdxgiSwapChain->GetDesc(&dxgiSwapChainDesc);
+	m_pdxgiSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+	m_nSwapChainBufferIndex = 0;
+#else
+	//m_pdxgiSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
+	m_pdxgiSwapChain->GetDesc(&dxgiSwapChainDesc);
+	m_pdxgiSwapChain->ResizeBuffers(m_nSwapChainBuffers, m_nWndClientWidth, m_nWndClientHeight, dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags);
+	m_nSwapChainBufferIndex = 0;
+#endif
+	CreateRenderTargetViews();
+	CreateDepthStencilView();
+
+	m_pd3dCommandList->Close();
+
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+	WaitForGpuComplete();
+}
+
 void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -336,17 +366,22 @@ void CGameFramework::BuildObjects()
 	//m_pScene = new CMultiSettingScene();
 	//m_pScene = new CSingleSettingScene();
 	//m_pScene = new CScene();
-	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	//if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	m_pScene = new CScene();
+	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 	//CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice,
 	//	m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	//m_pPlayer = pAirplanePlayer;
 	if (!m_pPlayer) {
-		CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
-		m_pPlayer = pMenuPlayer;
+		//CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
+		//m_pPlayer = pMenuPlayer;
+		m_pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
+		if (!m_pCamera) m_pCamera = m_pPlayer->GetCamera();
 	}
 
-	if (!m_pCamera) m_pCamera = m_pPlayer->GetCamera();
+	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = m_pScene->CreateConstantBufferView(m_pd3dDevice, m_pPlayer->m_pd3dcbPlayer, ((sizeof(CB_PLAYER_INFO) + 255) & ~255));
+	m_pPlayer->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
 
 	// 씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다.
 	m_pd3dCommandList->Close();
@@ -472,9 +507,8 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
 
 	//깊이-스텐실 서술자의 CPU 주소를 계산한다.
+	//원하는 값으로 깊이-스텐실(뷰)을 지운다.
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-
-	//원하는 값으로 깊이-스텐실(뷰)을 지운다. 
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	//렌더 타겟 뷰(서술자)와 깊이-스텐실 뷰(서술자)를 출력-병합 단계(OM)에 연결한다.
@@ -544,38 +578,6 @@ void CGameFramework::FrameAdvance()
 
 	//m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 }
-
-//void CGameFramework::ChangeSwapChainState()
-//{
-//	WaitForGpuComplete();
-//
-//	BOOL bFullScreenState = FALSE;
-//	m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
-//	m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
-//
-//	DXGI_MODE_DESC dxgiTargetParameters;
-//	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-//	dxgiTargetParameters.Width = m_nWndClientWidth;
-//	dxgiTargetParameters.Height = m_nWndClientHeight;
-//	dxgiTargetParameters.RefreshRate.Numerator = 60;
-//	dxgiTargetParameters.RefreshRate.Denominator = 1;
-//	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-//	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-//	m_pdxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
-//
-//	for (int i = 0; i < m_nSwapChainBuffers; i++) 
-//		if (m_ppd3dRenderTargetBuffers[i])
-//			m_ppd3dRenderTargetBuffers[i]->Release();
-//
-//	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
-//	m_pdxgiSwapChain->GetDesc(&dxgiSwapChainDesc);
-//	m_pdxgiSwapChain->ResizeBuffers(m_nSwapChainBuffers, m_nWndClientWidth,
-//		m_nWndClientHeight, dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags);
-//
-//	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
-//
-//	CreateRenderTargetViews();
-//}
 
 void CGameFramework::MoveToNextFrame()
 {
@@ -649,8 +651,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				//	m_pCamera = m_pPlayer->ChangeCamera((wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 				break;
 			case VK_ESCAPE:
-				if (m_pScene->GetCurrentSceneState() == SceneState::MAIN_MENU)
-					::PostQuitMessage(0);
+				//if (m_pScene->GetCurrentSceneState() == SceneState::MAIN_MENU)
+				//	::PostQuitMessage(0);
 				break;
 			case VK_RETURN:
 				break;
@@ -658,7 +660,25 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			// “F9” 키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리한다.
 			case VK_F9:
-				//ChangeSwapChainState();
+			{
+				BOOL bFullScreenState = FALSE;
+				m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
+				m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
+
+				DXGI_MODE_DESC dxgiTargetParameters;
+				dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				dxgiTargetParameters.Width = m_nWndClientWidth;
+				dxgiTargetParameters.Height = m_nWndClientHeight;
+				dxgiTargetParameters.RefreshRate.Numerator = 60;
+				dxgiTargetParameters.RefreshRate.Denominator = 1;
+				dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+				dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+				m_pdxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
+
+				OnResizeBackBuffers();
+
+				break;
+			}
 				break;
 			default:
 				break;

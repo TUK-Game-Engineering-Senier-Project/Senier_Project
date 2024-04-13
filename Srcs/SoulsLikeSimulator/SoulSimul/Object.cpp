@@ -85,10 +85,6 @@ void CGameObject::Animate(float fTimeElapsed)
 {
 }
 
-void CGameObject::OnPrepareRender()
-{
-}
-
 void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender();
@@ -210,10 +206,12 @@ void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CRotatingObject::CRotatingObject(int nMeshes)
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_fRotationSpeed = 90.0f;
+	m_fRotationSpeed = 15.0f;
 }
 
 CRotatingObject::~CRotatingObject()
@@ -225,3 +223,25 @@ void CRotatingObject::Animate(float fTimeElapsed)
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
 }
 
+void CRotatingObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CRevolvingObject::CRevolvingObject(int nMeshes)
+{
+	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_fRevolutionSpeed = 0.0f;
+}
+
+CRevolvingObject::~CRevolvingObject()
+{
+}
+
+void CRevolvingObject::Animate(float fTimeElapsed)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed));
+	m_xmf4x4World = Matrix4x4::Multiply(m_xmf4x4World, mtxRotate);
+}

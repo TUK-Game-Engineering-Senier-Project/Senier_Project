@@ -26,6 +26,8 @@ public:
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
 
+	void OnResizeBackBuffers();
+
 	//렌더링할 메쉬와 게임 객체를 생성하고 소멸하는 함수이다. 
 	void BuildObjects();
 	void ReleaseObjects();
@@ -87,9 +89,6 @@ private:
 	ID3D12CommandAllocator*		m_pd3dCommandAllocator;
 	ID3D12GraphicsCommandList*	m_pd3dCommandList;
 
-	// 그래픽스 파이프라인 상태 객체에 대한 포인터이다.
-	ID3D12PipelineState*		m_pd3dPipelineState;
-
 	// 펜스 인터페이스 포인터, 펜스의 값, 이벤트 핸들이다. 
 	// 펜스는 GPU와 CPU의 동기화 수단이다. 
 	// GPU가 명령 대기열의 명령들 중 특정 지점까지의 모든 명령을 다 처리할 때까지 CPU를 기다리게 하는 것
@@ -100,13 +99,14 @@ private:
 
 	// 씬을 위한 변수
 	//CScene* m_pScene;
-	shared_ptr<CSceneManager>	m_pScene = NULL;
-	CCamera* m_pCamera = NULL;
+	//shared_ptr<CSceneManager>	m_pScene = NULL;
+	CScene*						m_pScene = NULL;
+	CCamera*					m_pCamera = NULL;
 	//플레이어 객체에 대한 포인터이다.
-	CPlayer* m_pPlayer = NULL;
+	CPlayer*					m_pPlayer = NULL;
 
 	//마지막으로 마우스 버튼을 클릭할 때의 마우스 커서의 위치이다. 
-	POINT m_ptOldCursorPos;
+	POINT						m_ptOldCursorPos;
 
 	//다음은 게임 프레임워크에서 사용할 타이머이다. 
 	CGameTimer					m_GameTimer;
