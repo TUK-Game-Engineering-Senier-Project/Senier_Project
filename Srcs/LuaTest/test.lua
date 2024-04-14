@@ -11,10 +11,14 @@ function EnemyObject.new(name, hp)
     name = name,
     hp = hp
   }
+
+  -- 해당 EnemyObject의 name을 전역변수로 저장한다.
+  _G[name] = self
+
   return self
 end
 
 -- EnemyObject의 동작 : 대미지를 받는다.
 function EnemyObject:TakeDamage(amount)
-    -- 추가 예정
+    self.hp = self.hp - amount
 end
