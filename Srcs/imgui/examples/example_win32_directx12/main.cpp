@@ -88,6 +88,9 @@ int main(int, char**)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    // 한글 폰트
+    ImFont* font = io.Fonts->AddFontFromFileTTF("C:\\windows\\Fonts\\malgun.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesKorean());
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -101,8 +104,7 @@ int main(int, char**)
         DXGI_FORMAT_R8G8B8A8_UNORM, g_pd3dSrvDescHeap,
         g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
         g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
-
-    // Load Fonts
+// Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
     // - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
@@ -118,6 +120,7 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
 
+    
     // Our state
     bool show_demo_window = true;
     bool save_window = false;
@@ -187,7 +190,8 @@ int main(int, char**)
             ImGui::Begin("test preset");                         
 
             ImGui::Text("player preset");               // 한글 안됨 폰트 찾아야함
-      
+            ImGui::Text("안녕하세요! ImGui를 사용하여 한글 텍스트를 출력합니다.");
+                
 
             ImGui::SliderInt("hp", &hp, 0, 1000);            // hp
             ImGui::SliderInt("damage", &damage, 0, 100);
@@ -199,7 +203,7 @@ int main(int, char**)
             ImGui::SliderInt("running_speed", &running_speed, 0, 100);
 
             //
-            ImGui::Checkbox("key_merge", &key_merge);
+            ImGui::Checkbox("키 통합", &key_merge);
             ImGui::SameLine();
             ImGui::Checkbox("use_jump", &use_jump);
 
