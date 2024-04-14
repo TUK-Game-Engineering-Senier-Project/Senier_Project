@@ -27,6 +27,7 @@ void CMainSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Resource/UI/sample-button.jpg", RESOURCE_TEXTURE2D, 0);
 
 
+	m_nObjects = 3;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	for (int i = 0; i < UI_MAIN_TEXTURE - 1; i++) pScene->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 3);
 
@@ -40,7 +41,6 @@ void CMainSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	CPlaneTextureMesh* pBackGroundMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f);
 	CPlaneTextureMesh* pButtonMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, UI_MAIN_SIGLESETTING_BUTTON_WIDTH, UI_MAIN_SIGLESETTING_BUTTON_HEIGHT, 0.f);
 
-	m_nObjects = 3;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbGameObjects->GetGPUVirtualAddress();
@@ -61,7 +61,7 @@ void CMainSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	m_ppObjects[2] = new CGameObject();
 	m_ppObjects[2]->SetMesh(0, pButtonMesh);
-	m_ppObjects[2]->SetMaterial(ppMaterials[2]);
+	m_ppObjects[2]->SetMaterial(ppMaterials[1]);
 	m_ppObjects[2]->SetPosition(UI_MAIN_MULTISETTING_BUTTON_x, UI_MAIN_MULTISETTING_BUTTON_y, 0.f);
 	d3dCbvGPUDescriptorHandle = pScene->CreateConstantBufferView(pd3dDevice, d3dGpuVirtualAddress + (((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255) * 2), ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
 	m_ppObjects[2]->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
