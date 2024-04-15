@@ -96,7 +96,7 @@ void CSingleSetSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	for (int i = 0; i < UI_SINGLE_TEXTURE; i++) pScene->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 3);
 
-	CMaterial* ppMaterials[UI_MAIN_TEXTURE - 1];
+	CMaterial* ppMaterials[UI_SINGLE_TEXTURE];
 	for (int i = 0; i < UI_SINGLE_TEXTURE; i++)
 	{
 		ppMaterials[i] = new CMaterial();
@@ -123,8 +123,6 @@ void CSingleSetSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	m_ppObjects[1]->SetPosition(UI_SINGLE_START_BUTTON_x, UI_SINGLE_START_BUTTON_y, 0.f);
 	d3dCbvGPUDescriptorHandle = pScene->CreateConstantBufferView(pd3dDevice, d3dGpuVirtualAddress + (((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255) * 1), ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
 	m_ppObjects[1]->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,8 +178,8 @@ void CMulitSetSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	}
 
 	CPlaneTextureMesh* pBackGroundMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f);
-	CPlaneTextureMesh* pButtonMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, UI_MULTI_MULTISETTING_INTERFACE_1_x, UI_MULTI_MULTISETTING_INTERFACE_1_y, 0.f);
-	CPlaneTextureMesh* pUIMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, UI_MULTI_START_BUTTON_WIDTH, UI_MULTI_START_BUTTON_HEIGHT, 0.f);
+	CPlaneTextureMesh* pButtonMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, UI_MULTI_START_BUTTON_WIDTH, UI_MULTI_START_BUTTON_HEIGHT, 0.f);
+	CPlaneTextureMesh* pUIMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, UI_MULTI_MULTISETTING_INTERFACE_1_WIDTH, UI_MULTI_MULTISETTING_INTERFACE_1_HEIGHT, 0.f);
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
@@ -212,10 +210,8 @@ void CMulitSetSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_ppObjects[3]->SetMesh(0, pUIMesh);
 	m_ppObjects[3]->SetMaterial(ppMaterials[2]);
 	m_ppObjects[3]->SetPosition(UI_MULTI_MULTISETTING_INTERFACE_2_x, UI_MULTI_MULTISETTING_INTERFACE_2_y, 0.f);
-	d3dCbvGPUDescriptorHandle = pScene->CreateConstantBufferView(pd3dDevice, d3dGpuVirtualAddress + (((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255) * 2), ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
+	d3dCbvGPUDescriptorHandle = pScene->CreateConstantBufferView(pd3dDevice, d3dGpuVirtualAddress + (((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255) * 3), ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
 	m_ppObjects[3]->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

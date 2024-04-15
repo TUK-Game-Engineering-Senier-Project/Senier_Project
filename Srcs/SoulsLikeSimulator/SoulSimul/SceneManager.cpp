@@ -93,8 +93,9 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			break;
 
 		case VK_ESCAPE:
-			if (m_CurrentState != SceneState::MAIN_MENU)
+			if (m_CurrentState != SceneState::MAIN_MENU) {
 				EndCurrentScene();
+			}
 			break;
 
 		default:
