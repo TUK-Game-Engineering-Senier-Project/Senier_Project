@@ -471,11 +471,13 @@ CMenuPlayer::CMenuPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pCamera = new CCamera();
 	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	//m_pCamera->GenerateOrthographicMatrix(1.0f, 500.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	m_pCamera->GenerateOrthographicMatrix(1.0f, 500.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	// 카메라의 위치 설정
 	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -2.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -25.0f), XMFLOAT3(0.0f, 0.0f,
 		0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+	if (m_pCamera) m_pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 CMenuPlayer::~CMenuPlayer()

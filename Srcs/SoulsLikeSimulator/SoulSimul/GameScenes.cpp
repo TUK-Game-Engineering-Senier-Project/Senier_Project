@@ -27,7 +27,7 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	int nObjects = 3;
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, nObjects + 1, 1);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, nObjects + 1, UI_MAIN_TEXTURE);
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
@@ -85,6 +85,9 @@ void CSingleSettingScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	int nObjects = 2;
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, nObjects + 1, UI_SINGLE_TEXTURE);
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
@@ -174,6 +177,9 @@ void CMultiSettingScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 {
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	int nObjects = 4;
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, nObjects + 1, UI_MULTI_TEXTURE);
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];

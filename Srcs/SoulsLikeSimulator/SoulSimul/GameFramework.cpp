@@ -368,8 +368,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			//	m_pCamera = m_pPlayer->ChangeCamera((wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 			break;
 		case VK_ESCAPE:
-			//if (m_pScene->GetCurrentSceneState() == SceneState::MAIN_MENU)
-			::PostQuitMessage(0);
+			if (m_pScene->GetCurrentSceneState() == SceneState::MAIN_MENU)
+				::PostQuitMessage(0);
 			break;
 		case VK_RETURN:
 			break;
@@ -484,16 +484,16 @@ void CGameFramework::BuildObjects()
 	//m_pScene = new CScene();
 	//m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
-	m_pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
-	m_pCamera = m_pPlayer->GetCamera();
+	//m_pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
+	//m_pCamera = m_pPlayer->GetCamera();
 
-	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
-	//if (!m_pPlayer) {
-	//	CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
-	//	m_pPlayer = pMenuPlayer;
-	//	if (!m_pCamera) m_pCamera = m_pPlayer->GetCamera();
-	//}
+	if (!m_pPlayer) {
+		CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
+		m_pPlayer = pMenuPlayer;
+		if (!m_pCamera) m_pCamera = m_pPlayer->GetCamera();
+	}
 
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = m_pScene->CreateConstantBufferView(m_pd3dDevice, m_pPlayer->m_pd3dcbPlayer, ((sizeof(CB_PLAYER_INFO) + 255) & ~255));
 	m_pPlayer->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
@@ -634,13 +634,13 @@ void CGameFramework::FrameAdvance()
 
 	//렌더링 코드는 여기에 추가될 것이다.***
 	m_pScene->Render(m_pd3dCommandList, m_pCamera);
-
-	//3인칭 카메라일 때 플레이어가 항상 보이도록 렌더링한다. 
-#ifdef _WITH_PLAYER_TOP
-	//렌더 타겟은 그대로 두고 깊이 버퍼를 1.0으로 지우고 플레이어를 렌더링하면 플레이어는 무조건 그려질 것이다. 
-		m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle,
-			D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-#endif
+//
+//	//3인칭 카메라일 때 플레이어가 항상 보이도록 렌더링한다. 
+//#ifdef _WITH_PLAYER_TOP
+//	//렌더 타겟은 그대로 두고 깊이 버퍼를 1.0으로 지우고 플레이어를 렌더링하면 플레이어는 무조건 그려질 것이다. 
+//		m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle,
+//			D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+//#endif
 
 	//3인칭 카메라일 때 플레이어를 렌더링한다. 
 	//if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
