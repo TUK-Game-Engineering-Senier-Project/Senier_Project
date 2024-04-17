@@ -7,6 +7,7 @@ class CSceneManager
 private:
 	stack<shared_ptr<CScene>>	m_qScenes;
 	SceneState					m_CurrentState;
+	CPlayer*					m_pPlayer = NULL;
 
 public:
 	CSceneManager();
@@ -35,5 +36,6 @@ public:
 	ID3D12RootSignature* GetGraphicsRootSignature();
 
 	SceneState GetCurrentSceneState() const { return m_CurrentState; }
+	CPlayer* GetPlayer() const { return m_pPlayer; }
+	void	SetPlayer();
 };
-

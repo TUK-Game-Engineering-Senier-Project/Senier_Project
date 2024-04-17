@@ -498,8 +498,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 	if (!m_pPlayer) {
-		CMenuPlayer* pMenuPlayer = new CMenuPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, 1);
-		m_pPlayer = pMenuPlayer;
+		m_pPlayer = m_pScene->GetPlayer();
 		if (!m_pCamera) m_pCamera = m_pPlayer->GetCamera();
 	}
 
@@ -522,7 +521,6 @@ void CGameFramework::BuildObjects()
 
 void CGameFramework::ReleaseObjects()
 {
-	if (m_pPlayer) delete m_pPlayer;
 	if (m_pScene) m_pScene->ReleaseObjects();
 
 	// юс╫ц

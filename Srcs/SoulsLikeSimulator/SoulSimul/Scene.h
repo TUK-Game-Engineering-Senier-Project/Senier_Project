@@ -2,6 +2,7 @@
 
 #include "Timer.h"
 #include "Shader.h"
+#include "Player.h"
 
 class CScene
 {
@@ -32,6 +33,7 @@ public:
 	void ReleaseUploadBuffers();
 
 	SceneState GetSceneState() const { return m_SceneState; }
+	CPlayer* GetPlayer() const { return m_pPlayer; }
 
 public:
 	void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
@@ -49,11 +51,8 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSrvDescriptorStartHandle() { return(m_d3dSrvCPUDescriptorStartHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorStartHandle() { return(m_d3dSrvGPUDescriptorStartHandle); }
 
-public:
-	CPlayer*							m_pPlayer = NULL;
-
 protected:
-	
+	CPlayer*							m_pPlayer = NULL;
 
 	//배치(Batch) 처리를 하기 위하여 씬을 셰이더들의 리스트로 표현한다. 
 	CShader**							m_ppShaders = NULL;

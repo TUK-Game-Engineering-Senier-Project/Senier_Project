@@ -26,6 +26,9 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
+	CMenuPlayer* pMenuPlayer = new CMenuPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, 1);
+	m_pPlayer = pMenuPlayer;
+
 	int nObjects = 3;
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, nObjects + 1, UI_MAIN_TEXTURE);
 
@@ -54,6 +57,12 @@ void CMainScene::ReleaseObjects()
 			m_ppShaders[i]->Release();
 		}
 		delete[] m_ppShaders;
+	}
+	if (m_pPlayer)
+	{
+		m_pPlayer->ReleaseShaderVariables();
+		m_pPlayer->ReleaseUploadBuffers();
+		delete[] m_pPlayer;
 	}
 
 	ReleaseShaderVariables();
@@ -145,6 +154,19 @@ void CSinglePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	int nObjects = 2;
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, nObjects + 1, UI_SINGLE_TEXTURE);
+
+	m_nShaders = 1;
+	m_ppShaders = new CShader * [m_nShaders];
+	CSingleSetSceneShader* pSingleSetSceneShader = new CSingleSetSceneShader[m_nShaders];
+	pSingleSetSceneShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pSingleSetSceneShader->BuildObjects(pd3dDevice, pd3dCommandList, this, NULL);
+
+	m_ppShaders[0] = pSingleSetSceneShader;
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CSinglePlayScene::ReleaseObjects()

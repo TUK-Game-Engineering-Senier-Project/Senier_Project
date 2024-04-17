@@ -58,8 +58,11 @@ void CSceneManager::EndCurrentScene()
 {
 	if (m_qScenes.size() > 1)
 	{
+		m_qScenes.top()->ReleaseUploadBuffers();
+		//m_qScenes.top()->ReleaseObjects();
 		m_qScenes.pop();
 		m_CurrentState = m_qScenes.top()->GetSceneState();
+		m_pPlayer = m_qScenes.top()->GetPlayer();
 	}
 }
 
@@ -113,11 +116,18 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 void CSceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_qScenes.top()->BuildObjects(pd3dDevice, pd3dCommandList);
+	m_pPlayer = m_qScenes.top()->GetPlayer();
 }
 
 void CSceneManager::ReleaseObjects()
 {
-	m_qScenes.top()->ReleaseObjects();
+	while (m_qScenes.size() == 0)
+	{
+		//m_qScenes.top()->ReleaseUploadBuffers();
+		m_qScenes.top()->ReleaseObjects();
+		m_qScenes.pop();
+		m_CurrentState = m_qScenes.top()->GetSceneState();
+	}
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE CSceneManager::CreateConstantBufferView(ID3D12Device* pd3dDevice, ID3D12Resource* pd3dConstantBuffer, UINT nStride)
@@ -162,5 +172,10 @@ void CSceneManager::ReleaseUploadBuffers()
 ID3D12RootSignature* CSceneManager::GetGraphicsRootSignature()
 {
 	return m_qScenes.top()->GetGraphicsRootSignature();
+}
+
+void CSceneManager::SetPlayer()
+{
+	m_pPlayer = m_qScenes.top()->GetPlayer();
 }
 
