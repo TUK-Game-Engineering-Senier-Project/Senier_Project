@@ -138,6 +138,35 @@ CSinglePlaySceneShader::~CSinglePlaySceneShader()
 
 void CSinglePlaySceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CScene* pScene, void* pContext)
 {
+	CTexture* ppTextures[1];
+	// 배경화면
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Resource/UI/sand.png", RESOURCE_TEXTURE2D, 0);
+
+	m_nObjects = 1;
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	for (int i = 0; i < 1; i++) pScene->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 3);
+
+	CMaterial* ppMaterials[1];
+	for (int i = 0; i < 1; i++)
+	{
+		ppMaterials[i] = new CMaterial();
+		ppMaterials[i]->SetTexture(ppTextures[i]);
+	}
+
+	CPlaneTextureMesh* pFloorMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, 1024, 1024, 0.f);
+	
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbGameObjects->GetGPUVirtualAddress();
+
+	m_ppObjects[0] = new CGameObject();
+	m_ppObjects[0]->SetMesh(0, pFloorMesh);
+	m_ppObjects[0]->SetMaterial(ppMaterials[0]);
+	m_ppObjects[0]->Rotate(90.f, 0, 0);
+	m_ppObjects[0]->SetPosition(0.f, 0.f, 0.f);
+	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = pScene->CreateConstantBufferView(pd3dDevice, d3dGpuVirtualAddress + (((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255) * 0), ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
+	m_ppObjects[0]->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -3,7 +3,7 @@
 
 CSceneManager::CSceneManager()
 {
-	shared_ptr<CScene> pScene = make_shared<CMainScene>();
+	shared_ptr<CScene> pScene = make_shared<CSinglePlayScene>();
 	//shared_ptr<CScene> pScene = make_shared<CMultiSettingScene>();
 	m_CurrentState = pScene->GetSceneState();
 

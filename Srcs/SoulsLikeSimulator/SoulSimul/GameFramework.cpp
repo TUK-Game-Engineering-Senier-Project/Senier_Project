@@ -405,21 +405,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		break;
 	}
 	if (m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam)) {
-		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-		m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-
-		// 씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다.
-		m_pd3dCommandList->Close();
-		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
-		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
-
-		// 그래픽 명령 리스트들이 모두 실행될 때까지 기다린다
-		WaitForGpuComplete();
-
-		//그래픽 리소스들을 생성하는 과정에 생성된 업로드 버퍼들을 소멸시킨다. 
-		if (m_pScene) m_pScene->ReleaseUploadBuffers();
-
-		m_GameTimer.Reset();
+		BuildObjects();
 	}
 }
 
@@ -497,10 +483,8 @@ void CGameFramework::BuildObjects()
 
 	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
-	if (!m_pPlayer) {
-		m_pPlayer = m_pScene->GetPlayer();
-		if (!m_pCamera) m_pCamera = m_pPlayer->GetCamera();
-	}
+	m_pPlayer = m_pScene->GetPlayer();
+	m_pCamera = m_pPlayer->GetCamera();
 
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = m_pScene->CreateConstantBufferView(m_pd3dDevice, m_pPlayer->m_pd3dcbPlayer, ((sizeof(CB_PLAYER_INFO) + 255) & ~255));
 	m_pPlayer->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
@@ -642,14 +626,14 @@ void CGameFramework::FrameAdvance()
 	m_pScene->Render(m_pd3dCommandList, m_pCamera);
 //
 //	//3인칭 카메라일 때 플레이어가 항상 보이도록 렌더링한다. 
-//#ifdef _WITH_PLAYER_TOP
-//	//렌더 타겟은 그대로 두고 깊이 버퍼를 1.0으로 지우고 플레이어를 렌더링하면 플레이어는 무조건 그려질 것이다. 
-//		m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle,
-//			D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-//#endif
+#ifdef _WITH_PLAYER_TOP
+	//렌더 타겟은 그대로 두고 깊이 버퍼를 1.0으로 지우고 플레이어를 렌더링하면 플레이어는 무조건 그려질 것이다. 
+		m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle,
+			D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+#endif
 
 	//3인칭 카메라일 때 플레이어를 렌더링한다. 
-	//if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	/*현재 렌더 타겟에 대한 렌더링이 끝나기를 기다린다.
 	GPU가 렌더 타겟(버퍼)을 더 이상 사용하지 않으면 렌더 타겟의 상태는 

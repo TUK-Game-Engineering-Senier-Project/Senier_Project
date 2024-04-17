@@ -393,8 +393,8 @@ CCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		//m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-		m_pCamera->GenerateOrthographicMatrix(1.0f, 500.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		//m_pCamera->GenerateOrthographicMatrix(1.0f, 500.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f,
 			1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -507,4 +507,50 @@ CCamera* CMenuPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	//	1.0f);
 	//m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	return (NULL);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+
+CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes) : CPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext, nMeshes)
+{
+	SetFriction(250.0f);
+	SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	SetMaxVelocityXZ(125.0f);
+	SetMaxVelocityY(400.0f);
+
+	// 카메라 부분
+	m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, THIRD_PERSON_CAMERA);
+	// 3인칭 카메라의 지연 효과를 설정한다. 값을 0.25f 대신에 0.0f와 1.0f로 설정한 결과를 비교하기 바란다. 
+	m_pCamera->SetTimeLag(0.25f);
+	m_pCamera->SetOffset(XMFLOAT3(0.0f, 180.0f, -450.0f));
+	m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f,
+		1.0f);
+	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+
+	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
+	//플레이어를 시간의 경과에 따라 갱신(위치와 방향을 변경: 속도, 마찰력, 중력 등을 처리)한다. 
+	Update(0.f);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CCubeMeshDiffused* pPlayerMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 42.0f, 180.0f, 20.0f);
+	SetMesh(0, pPlayerMesh);
+	UINT ncbElementBytes = ((sizeof(CB_PLAYER_INFO) + 255) & ~255); //256의 배수
+
+	CPlayerShader* pShader = new CPlayerShader();
+	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	SetShader(pShader);
+}
+
+CMainPlayer::~CMainPlayer()
+{
+}
+
+void CMainPlayer::OnPrepareRender()
+{
+	CPlayer::OnPrepareRender();
 }
