@@ -141,7 +141,7 @@ void CSinglePlaySceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 	CTexture* ppTextures[1];
 	// 배경화면
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Resource/UI/sand.png", RESOURCE_TEXTURE2D, 0);
+	ppTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Resource/UI/sand.dds", RESOURCE_TEXTURE2D, 0);
 
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
