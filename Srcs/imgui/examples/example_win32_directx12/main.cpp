@@ -17,6 +17,10 @@
 #include <dxgi1_4.h>
 #include <tchar.h>
 
+#include <string>
+#include <fstream>
+#include <iostream>
+//#include <mysql/mysql.h>
 
 #ifdef _DEBUG
 #define DX12_ENABLE_DEBUG_LAYER
@@ -26,8 +30,6 @@
 #include <dxgidebug.h>
 #pragma comment(lib, "dxguid.lib")
 #endif
-
-bool testbool = false;
 
 struct FrameContext
 {
@@ -63,6 +65,8 @@ void WaitForLastSubmittedFrame();
 FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+
+
 // Main code
 int main(int, char**)
 {
@@ -89,10 +93,11 @@ int main(int, char**)
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-    // 한글 폰트
-    ImFont* font = io.Fonts->AddFontFromFileTTF("C:\\windows\\Fonts\\malgun.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesKorean());
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+
+  
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -104,29 +109,20 @@ int main(int, char**)
         DXGI_FORMAT_R8G8B8A8_UNORM, g_pd3dSrvDescHeap,
         g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
         g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
-// Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != nullptr);
 
     
-    // Our state
-    bool show_demo_window = true;
+    // 상태
     bool save_window = false;
     bool load_window = false;
-    bool save = false;
+
+    bool m_save_window = false;
+    bool monster_load_window = false;
+    bool pattern_window = false;
+
+
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+
 
     // Main loop
     bool done = false;
@@ -167,64 +163,72 @@ int main(int, char**)
         static int shield = 1;
         static int weapon = 4;
 
-        //save
-        static int save_hp; // 0~1000
-        static int save_damage;
-        static int save_def_degree;
-        static int save_farring_speed;
-        static int save_avoid_decision;
-        static int save_attack_speed;
-        static int save_speed;
-        static int save_running_speed;
-
-        static bool save_key_merge ;
-        static bool save_use_jump;
-
-        static int save_shield ;
-        static int save_weapon ;
-
+       
         
         // 메인 ui
         {
          
-            ImGui::Begin("test preset");                         
-
-            ImGui::Text("player preset");               // 한글 안됨 폰트 찾아야함
-            ImGui::Text("안녕하세요! ImGui를 사용하여 한글 텍스트를 출력합니다.");
+            ImGui::Begin("player preset");                         
                 
+            ImGui::Text("player preset");
 
-            ImGui::SliderInt("hp", &hp, 0, 1000);            // hp
-            ImGui::SliderInt("damage", &damage, 0, 100);
-            ImGui::SliderInt("def_degree", &def_degree, 0, 100);
-            ImGui::SliderInt("farring_speed", &farring_speed, 0, 100);
-            ImGui::SliderInt("avoid_decision", &avoid_decision, 0, 100);
-            ImGui::SliderInt("attack_speed", &attack_speed, 0, 100);
-            ImGui::SliderInt("speed", &speed, 0, 100);
-            ImGui::SliderInt("running_speed", &running_speed, 0, 100);
+            ImGui::SetCursorPos(ImVec2(200, 50)); 
+            ImGui::Text("hp");
+            ImGui::SliderInt("##hp", &hp, 0, 1000);
+
+            ImGui::SetCursorPos(ImVec2(200, 100));
+            ImGui::Text("damage");
+            ImGui::SliderInt("##damage", &damage, 0, 100);
+
+            ImGui::SetCursorPos(ImVec2(200, 150));
+            ImGui::Text("def_degree");
+            ImGui::SliderInt("##def_degree", &def_degree, 0, 100);
+
+            ImGui::SetCursorPos(ImVec2(200, 200));
+            ImGui::Text("farring_speed");
+            ImGui::SliderInt("##farring_speed", &farring_speed, 0, 100);
+
+            ImGui::SetCursorPos(ImVec2(200, 250));
+            ImGui::Text("avoid_decision");
+            ImGui::SliderInt("##avoid_decision", &avoid_decision, 0, 100);
+
+            ImGui::SetCursorPos(ImVec2(200, 300));
+            ImGui::Text("attack_speed");
+            ImGui::SliderInt("##attack_speed", &attack_speed, 0, 100);
+
+            ImGui::SetCursorPos(ImVec2(200, 350));
+            ImGui::Text("speed");
+            ImGui::SliderInt("##speed", &speed, 0, 100);
+
+            ImGui::SetCursorPos(ImVec2(200, 400));
+            ImGui::Text("running_speed");
+            ImGui::SliderInt("##running_speed", &running_speed, 0, 100);
 
             //
-            ImGui::Checkbox("키 통합", &key_merge);
-            ImGui::SameLine();
+            ImGui::Checkbox("key merge", &key_merge);
             ImGui::Checkbox("use_jump", &use_jump);
 
             //
-            ImGui::RadioButton("small", &shield, 0);
+            ImGui::Text("shield");
+            ImGui::RadioButton("small##shield", &shield, 0);
             ImGui::SameLine();
-            ImGui::RadioButton("midium", &shield, 1);
+            ImGui::RadioButton("midium##shield", &shield, 1);
             ImGui::SameLine();
-            ImGui::RadioButton("big", &shield, 2);
+            ImGui::RadioButton("big##shield", &shield, 2);
 
-            ImGui::RadioButton("small", &weapon, 3);  // weapon버튼 오류있음
+            ImGui::Text("weapon");
+            ImGui::RadioButton("small##weapon", &weapon, 3);  // weapon버튼 오류있음
             ImGui::SameLine();
-            ImGui::RadioButton("midium", &weapon, 4);
+            ImGui::RadioButton("midium##weapon", &weapon, 4);
             ImGui::SameLine();
-            ImGui::RadioButton("big", &weapon, 5);
+            ImGui::RadioButton("big##weapon", &weapon, 5);
 
             //
             if (ImGui::Button("save"))
             {
                 save_window = true; // 창 바꿔야 할 듯
             }
+
             ImGui::SameLine();
             if (ImGui::Button("load"))
             {
@@ -235,82 +239,338 @@ int main(int, char**)
             ImGui::End();
         }
 
-        // save window
+        std::string save_filename;
+
         if (save_window)
         {
-            ImGui::Begin("save preset", &save_window);
-            ImGui::Text("save preset");
-            if (ImGui::Button("save"))
+            ImGui::Begin("Save Preset", &save_window);
+            ImGui::Text("Enter filename to save:");
+
+            static char filename_buf[256] = { 0 }; // 버퍼 크기는 필요에 따라 조정 가능
+
+            ImGui::InputText("##filename", filename_buf, IM_ARRAYSIZE(filename_buf));
+
+            if (ImGui::Button("Save") && filename_buf[0] != '\0')
             {
-                save_hp = hp;
-                save_damage = damage;
-                save_def_degree = def_degree;
-                save_farring_speed = farring_speed;
-                save_avoid_decision = avoid_decision;
-                save_attack_speed = attack_speed;
-                save_speed = speed;
-                save_running_speed = running_speed;
+                save_filename = filename_buf;
 
-                save_key_merge = key_merge;
-                save_use_jump = use_jump;
+                // 여기에 데이터 저장하는 코드 추가
+                std::ofstream file(save_filename.c_str());
+                if (file.is_open())
+                {
+                    file << "hp: " << hp << std::endl;
+                    file << "damage: " << damage << std::endl;
+                    file << "def_degree: " << def_degree << std::endl;
+                    file << "farring_speed: " << farring_speed << std::endl;
+                    file << "avoid_decision: " << avoid_decision << std::endl;
+                    file << "attack_speed: " << attack_speed << std::endl;
+                    file << "speed: " << speed << std::endl;
+                    file << "running_speed: " << running_speed << std::endl;
 
-                save_shield = shield;
-                save_weapon = weapon;
+                    file << "key_merge: " << key_merge << std::endl;
+                    file << "use_jump: " << use_jump << std::endl;
+
+                    file << "shield: " << shield << std::endl;
+                    file << "weapon: " << weapon << std::endl;
+
+                    file.close();
+                }
+                else
+                {
+                    // 파일 열기 실패 처리
+                }
+
+                // 저장 후 창 닫기
+                save_window = false;
             }
 
-            if (ImGui::Button("close"))
+            ImGui::SameLine();
+            if (ImGui::Button("Close"))
             {
                 save_window = false;
             }
+
             ImGui::End();
         }
 
-        // load window
+
         if (load_window)
         {
-            ImGui::Begin("save preset", &load_window);
-            ImGui::Text("save preset");
-            if (ImGui::Button("load 1"))
+            static char filename_buf[256] = { 0 }; // 파일명을 입력할 버퍼
+            static char textBuffer[256] = { 0 }; // 파일 내용을 출력할 버퍼
+
+            ImGui::Begin("Load Preset", &load_window);
+            ImGui::Text("Enter filename to load:");
+
+            ImGui::InputText("##filename", filename_buf, IM_ARRAYSIZE(filename_buf));
+
+            if (ImGui::Button("Load") && filename_buf[0] != '\0')
             {
-                hp = 700;
-                damage = 70;
-                def_degree = 40;
-                farring_speed = 20;
-                avoid_decision = 30;
-                attack_speed = 80;
-                speed = 10;
-                running_speed = 30;
+                std::ifstream file(filename_buf);
+                if (file.is_open())
+                {
+                    std::string line;
+                    while (std::getline(file, line))
+                    {
+                        // ':'를 기준으로 문자열을 파싱하여 변수에 할당
+                        std::size_t pos = line.find(':');
+                        if (pos != std::string::npos)
+                        {
+                            std::string key = line.substr(0, pos); // 변수명
+                            std::string value_str = line.substr(pos + 1); // 값
 
-                key_merge = false;
-                use_jump = true;
+                            // 공백 제거
+                            key.erase(std::remove_if(key.begin(), key.end(), ::isspace), key.end());
+                            value_str.erase(std::remove_if(value_str.begin(), value_str.end(), ::isspace), value_str.end());
 
-                shield = 0;
-                weapon = 5;
+                            // 값을 숫자로 변환하여 변수에 할당
+                            if (key == "hp")
+                            {
+                                hp = std::stoi(value_str);
+                            }
+                            else if (key == "damage")
+                            {
+                                damage = std::stoi(value_str);
+                            }
+                            else if (key == "def_degree")
+                            {
+                                def_degree = std::stoi(value_str);
+                            }
+                            else if (key == "farring_speed")
+                            {
+                                farring_speed = std::stoi(value_str);
+                            }
+                            else if (key == "avoid_decision")
+                            {
+                                avoid_decision = std::stoi(value_str);
+                            }
+
+                            else if (key == "attack_speed")
+                            {
+                                attack_speed = std::stoi(value_str);
+                            }
+                            else if (key == "speed")
+                            {
+                                speed = std::stoi(value_str);
+                            }
+                            else if (key == "running_speed")
+                            {
+                                running_speed = std::stoi(value_str);
+                            }
+                            else if (key == "key_merge")
+                            {
+                                key_merge = std::stoi(value_str);
+                            }
+                            else if (key == "use_jump")
+                            {
+                                use_jump = std::stoi(value_str);
+                            }
+                            else if (key == "shield")
+                            {
+                                shield = std::stoi(value_str);
+                            }
+                            else if (key == "weapon")
+                            {
+                                weapon = std::stoi(value_str);
+                            }
+                        }
+                    }
+                    file.close();
+                }
+                else
+                {
+                    // 파일 열기 실패 처리
+                }
             }
-            if (ImGui::Button("load"))
+
+            ImGui::InputTextMultiline("##filecontents", textBuffer, IM_ARRAYSIZE(textBuffer), ImVec2(300, 200), ImGuiInputTextFlags_ReadOnly);
+
+            ImGui::SameLine();
+            if (ImGui::Button("Close"))
             {
-                hp = save_hp;
-                damage = save_damage;
-                def_degree = save_def_degree;
-                farring_speed = save_farring_speed;
-                avoid_decision = save_avoid_decision;
-                attack_speed = save_attack_speed;
-                speed = save_speed;
-                running_speed = save_running_speed;
-
-                key_merge = save_key_merge;
-                use_jump = save_use_jump;
-
-                shield = save_shield;
-                weapon = save_weapon;
+                load_window = false;
             }
 
-            if (ImGui::Button("close"))
-            {
-               load_window = false;
-            }
             ImGui::End();
         }
+
+      /* {
+            // monster
+            {
+
+                ImGui::Begin("monster preset");
+
+                ImGui::Text("monster preset");
+
+                ImGui::SetCursorPos(ImVec2(250, 50));
+                ImGui::Text("hp");
+                ImGui::SliderInt("##hp", &hp, 0, 1000);
+
+                ImGui::SetCursorPos(ImVec2(250, 100));
+                ImGui::Text("damage");
+                ImGui::SliderInt("##damage", &damage, 0, 100);
+
+                ImGui::SetCursorPos(ImVec2(250, 300));
+                ImGui::Text("attack_speed");
+                ImGui::SliderInt("##attack_speed", &attack_speed, 0, 100);
+
+
+
+                //
+                if (ImGui::Button("pattern")) {
+                    pattern_window = true;
+                }
+                if (ImGui::Button("save"))
+                {
+                    save_window = true; // 창 바꿔야 할 듯
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("load"))
+                {
+                    load_window = true;
+                }
+
+
+
+                ImGui::End();
+            }
+
+
+            std::string m_save_filename;
+
+            if (m_save_window)
+            {
+                ImGui::Begin("Save Preset##monster", &m_save_window);
+                ImGui::Text("Enter filename to save:");
+
+                static char filename_buf[256] = { 0 }; // 버퍼 크기는 필요에 따라 조정 가능
+
+                ImGui::InputText("##filename_monster", filename_buf, IM_ARRAYSIZE(filename_buf));
+
+                if (ImGui::Button("Save") && filename_buf[0] != '\0')
+                {
+                    m_save_filename = filename_buf;
+
+                    // 여기에 데이터 저장하는 코드 추가
+                    std::ofstream file(m_save_filename.c_str());
+                    if (file.is_open())
+                    {
+                        file << "hp: " << hp << std::endl;
+                        file << "damage: " << damage << std::endl;
+                        file << "attack_speed: " << attack_speed << std::endl;
+
+
+
+                        file.close();
+                    }
+                    else
+                    {
+                        // 파일 열기 실패 처리
+                    }
+
+                    // 저장 후 창 닫기
+                    save_window = false;
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Close"))
+                {
+                    save_window = false;
+                }
+
+                ImGui::End();
+            }
+
+
+            if (load_window)
+            {
+                static char filename_buf[256] = { 0 }; // 파일명을 입력할 버퍼
+                static char textBuffer[256] = { 0 }; // 파일 내용을 출력할 버퍼
+
+                ImGui::Begin("Load Preset", &load_window);
+                ImGui::Text("Enter filename to load:");
+
+                ImGui::InputText("##filename", filename_buf, IM_ARRAYSIZE(filename_buf));
+
+                if (ImGui::Button("Load") && filename_buf[0] != '\0')
+                {
+                    std::ifstream file(filename_buf);
+                    if (file.is_open())
+                    {
+                        std::string line;
+                        while (std::getline(file, line))
+                        {
+                            // ':'를 기준으로 문자열을 파싱하여 변수에 할당
+                            std::size_t pos = line.find(':');
+                            if (pos != std::string::npos)
+                            {
+                                std::string key = line.substr(0, pos); // 변수명
+                                std::string value_str = line.substr(pos + 1); // 값
+
+                                // 공백 제거
+                                key.erase(std::remove_if(key.begin(), key.end(), ::isspace), key.end());
+                                value_str.erase(std::remove_if(value_str.begin(), value_str.end(), ::isspace), value_str.end());
+
+                                // 값을 숫자로 변환하여 변수에 할당
+                                if (key == "hp")
+                                {
+                                    hp = std::stoi(value_str);
+                                }
+                                else if (key == "damage")
+                                {
+                                    damage = std::stoi(value_str);
+                                }
+                            
+                                else if (key == "attack_speed")
+                                {
+                                    attack_speed = std::stoi(value_str);
+                                }
+                                else if (key == "speed")
+                                {
+                                    speed = std::stoi(value_str);
+                                }
+                                else if (key == "running_speed")
+                                {
+                                    running_speed = std::stoi(value_str);
+                                }
+                                else if (key == "key_merge")
+                                {
+                                    key_merge = std::stoi(value_str);
+                                }
+                                else if (key == "use_jump")
+                                {
+                                    use_jump = std::stoi(value_str);
+                                }
+                                else if (key == "shield")
+                                {
+                                    shield = std::stoi(value_str);
+                                }
+                                else if (key == "weapon")
+                                {
+                                    weapon = std::stoi(value_str);
+                                }
+                            }
+                        }
+                        file.close();
+                    }
+                    else
+                    {
+                        // 파일 열기 실패 처리
+                    }
+                }
+
+                ImGui::InputTextMultiline("##filecontents", textBuffer, IM_ARRAYSIZE(textBuffer), ImVec2(300, 200), ImGuiInputTextFlags_ReadOnly);
+
+                ImGui::SameLine();
+                if (ImGui::Button("Close"))
+                {
+                    load_window = false;
+                }
+
+                ImGui::End();
+            }
+        }*/
 
 
       
@@ -320,6 +580,11 @@ int main(int, char**)
         FrameContext* frameCtx = WaitForNextFrameResources();
         UINT backBufferIdx = g_pSwapChain->GetCurrentBackBufferIndex();
         frameCtx->CommandAllocator->Reset();
+
+
+        ID3D12DescriptorHeap* ppHeaps[] = { g_pd3dSrvDescHeap };
+        g_pd3dCommandList->SetDescriptorHeaps(ARRAYSIZE(ppHeaps), ppHeaps);
+        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), g_pd3dCommandList);
 
         D3D12_RESOURCE_BARRIER barrier = {};
         barrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -603,3 +868,4 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
+
