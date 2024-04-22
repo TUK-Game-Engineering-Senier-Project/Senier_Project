@@ -1,0 +1,28 @@
+﻿  SoulSimul.cpp
+C:\Users\Seungwan\Desktop\fbxLoadTest\Client\Stdafx.h(96,2): warning C4091: 'extern ': 변수를 선언하지 않으면 'Player' 왼쪽은 무시됩니다.
+  (소스 파일 'SoulSimul.cpp'을(를) 컴파일하는 중)
+  
+libfbxsdk-mt.lib(IMaterial.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(IMaterial.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(WriteUtil.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(WriteUtil.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(ReadUtil.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(ReadUtil.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(MetaDataMap.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(MetaDataMap.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(AwImpl.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(AwImpl.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(half.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(half.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(awOSFSAllocator.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(awOSFSAllocator.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(awCacheFileAccessor.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(awCacheFileAccessor.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(awCacheChannel.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(awCacheChannel.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(awUtilInitializer.cpp.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(awUtilInitializer.cpp.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(fbxgeometryconverter.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(fbxgeometryconverter.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(fbxlight.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(fbxlight.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(fbxlayer.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(fbxlayer.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(kfcurve.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(kfcurve.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(fbxviconbase.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(fbxviconbase.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(fbxwriterfbx5.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(fbxwriterfbx5.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(3dsmset.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(3dsmset.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(3dslites.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(3dslites.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(3dscamr.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(3dscamr.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(fbxwriter3ds.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(fbxwriter3ds.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(fbxprogress.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(fbxprogress.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(fbxpropertyhandle.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(fbxpropertyhandle.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libfbxsdk-mt.lib(fbxpropertydef.cxx.obj) : warning LNK4099: '' PDB를 'libfbxsdk-mt.lib(fbxpropertydef.cxx.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+  Client.vcxproj -> C:\Users\Seungwan\Desktop\fbxLoadTest\x64\Debug\Client.exe
