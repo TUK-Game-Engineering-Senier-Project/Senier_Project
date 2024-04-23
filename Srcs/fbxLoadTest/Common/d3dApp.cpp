@@ -49,19 +49,19 @@ void KeyBoardDown(unsigned char key, int x, int y)
 	{
 		// ¿Ãµø
 		case VK_LEFT:
-			player[0].rotate_y = 0.5 * XM_PI;
+			player[0].rotate_y = 1.5 * XM_PI;
 			player[0].pos_x -= 0.5;
 			break;
 		case VK_RIGHT:
-			player[0].rotate_y = 1.5 * XM_PI;
+			player[0].rotate_y = 0.5 * XM_PI;
 			player[0].pos_x += 0.5;
 			break;
 		case VK_UP:
-			player[0].rotate_y = 1.0 * XM_PI;
+			player[0].rotate_y = 0.0 * XM_PI;
 			player[0].pos_z += 0.5;
 			break;
 		case VK_DOWN:
-			player[0].rotate_y = 0.0 * XM_PI;
+			player[0].rotate_y = 1.0 * XM_PI;
 			player[0].pos_z -= 0.5;
 			break;
 	}

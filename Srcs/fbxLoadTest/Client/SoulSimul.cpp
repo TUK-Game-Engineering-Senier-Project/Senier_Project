@@ -2,7 +2,12 @@
 // SoulSimul.cpp by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 
-// [게임 플레이 메인 cpp 파일]
+// 기존 Client파일에서 서버 연결 제거하고 상하좌우 이동만 남겨둔 버전
+// void SoulSimul::BuildPlayerGeometry() 함수 내부 참고
+// fbx sdk 다운로드시 있던 sample 폴더에 있는 humanoid.fbx 사용
+// humanoid.fbx는 Client 폴더 내에 있음, 위치 변경시 변경된 위치 적용하기
+// 여기 있는, 방패나 무기를 언급하는 코드는 현재 의미 없음
+// fbx sdk 사용시 #include <fbxsdk.h>를 필수로 할 것
 
 #include "../Common/d3dApp.h"
 #include "../Common/MathHelper.h"
@@ -632,66 +637,107 @@ void SoulSimul::BuildShapeGeometry()
 
 void SoulSimul::BuildPlayerGeometry()
 {
+	// FBX SDK 초기화
+	FbxManager* sdkManager = FbxManager::Create();
+	FbxIOSettings* ios = FbxIOSettings::Create(sdkManager, IOSROOT);
+	sdkManager->SetIOSettings(ios);
 
-	////// 수정하기 //////
+	// importer 생성
+	FbxImporter* importer = FbxImporter::Create(sdkManager, "");
 
-	std::ifstream fin("Models/skull.txt");
+	// 불러올 파일명
+	const char* filename = "humanoid.fbx";
 
-	if(!fin)
+	// importer 초기화 오류시 종료
+	if (!importer->Initialize(filename, -1, sdkManager->GetIOSettings()))
 	{
-		MessageBox(0, L"Models/skull.txt not found.", 0, 0);
+		importer->Destroy();
+		sdkManager->Destroy();
 		return;
 	}
 
-	UINT vcount = 0;
-	UINT tcount = 0;
-	std::string ignore;
+	// 불러온 데이터를 저장할 scene 만들기
+	FbxScene* scene = FbxScene::Create(sdkManager, "Scene");
 
-	fin >> ignore >> vcount;
-	fin >> ignore >> tcount;
-	fin >> ignore >> ignore >> ignore >> ignore;
+	// scene import하기
+	importer->Import(scene);
+	importer->Destroy();
 
-	std::vector<Vertex> vertices(vcount);
-	for(UINT i = 0; i < vcount; ++i)
+	FbxNode* rootNode = scene->GetRootNode();
+	FbxNode* meshNode = nullptr;
+
+	if (rootNode)
 	{
-		fin >> vertices[i].Pos.x >> vertices[i].Pos.y >> vertices[i].Pos.z;
-		fin >> vertices[i].Normal.x >> vertices[i].Normal.y >> vertices[i].Normal.z;
+		for (int i = 0; i < rootNode->GetChildCount(); ++i)
+		{
+			meshNode = rootNode->GetChild(i);
+			if (meshNode->GetNodeAttribute() && meshNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
+				break;
+			meshNode = nullptr;
+		}
 	}
 
-	fin >> ignore;
-	fin >> ignore;
-	fin >> ignore;
-
-	std::vector<std::int32_t> indices(3 * tcount);
-	for(UINT i = 0; i < tcount; ++i)
+	if (!meshNode)
 	{
-		fin >> indices[i * 3 + 0] >> indices[i * 3 + 1] >> indices[i * 3 + 2];
+		scene->Destroy();
+		sdkManager->Destroy();
+		return;
 	}
 
-	fin.close();
+	// mesh에서 vertex 및 index 데이터 추출
+	FbxMesh* mesh = static_cast<FbxMesh*>(meshNode->GetNodeAttribute());
+	if (!mesh)
+	{
+		scene->Destroy();
+		sdkManager->Destroy();
+		return;
+	}
 
-	//
-	// Pack the indices of all the meshes into one index buffer.
-	//
+	int numVertices = mesh->GetControlPointsCount();
+	FbxVector4* vertices = mesh->GetControlPoints();
+	int numIndices = mesh->GetPolygonVertexCount();
+	int* indices = mesh->GetPolygonVertices();
 
-	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+	std::vector<Vertex> vertexData;
+	std::vector<std::int32_t> indexData;
 
-	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::int32_t);
+	for (int i = 0; i < numVertices; ++i)
+	{
+		Vertex vertex;
+
+		// fbx 파일 불러올 때 크기 배율은 여기서 조정
+		float scaleMul = 0.1f; 
+
+		vertex.Pos = DirectX::XMFLOAT3(static_cast<float>(vertices[i][0]) * scaleMul,
+			static_cast<float>(vertices[i][1]) * scaleMul,
+			static_cast<float>(vertices[i][2]) * scaleMul);
+		vertex.Normal = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); // You need to calculate normals if not provided in the FBX file
+		vertexData.push_back(vertex);
+	}
+
+	for (int i = 0; i < numIndices; ++i)
+	{
+		indexData.push_back(indices[i]);
+	}
+
+	// vertex 버퍼 및 index 버퍼 생성하고 계산 처리
+	const UINT vbByteSize = static_cast<UINT>(vertexData.size()) * sizeof(Vertex);
+	const UINT ibByteSize = static_cast<UINT>(indexData.size()) * sizeof(std::int32_t);
 
 	auto geo = std::make_unique<MeshGeometry>();
 	geo->Name = "playerGeo";
 
 	ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->VertexBufferCPU));
-	CopyMemory(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+	CopyMemory(geo->VertexBufferCPU->GetBufferPointer(), vertexData.data(), vbByteSize);
 
 	ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->IndexBufferCPU));
-	CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+	CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indexData.data(), ibByteSize);
 
 	geo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-		mCommandList.Get(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
+		mCommandList.Get(), vertexData.data(), vbByteSize, geo->VertexBufferUploader);
 
 	geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-		mCommandList.Get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
+		mCommandList.Get(), indexData.data(), ibByteSize, geo->IndexBufferUploader);
 
 	geo->VertexByteStride = sizeof(Vertex);
 	geo->VertexBufferByteSize = vbByteSize;
@@ -699,13 +745,17 @@ void SoulSimul::BuildPlayerGeometry()
 	geo->IndexBufferByteSize = ibByteSize;
 
 	SubmeshGeometry submesh;
-	submesh.IndexCount = (UINT)indices.size();
+	submesh.IndexCount = static_cast<UINT>(indexData.size());
 	submesh.StartIndexLocation = 0;
 	submesh.BaseVertexLocation = 0;
 
 	geo->DrawArgs["skull"] = submesh;
 
 	mGeometries[geo->Name] = std::move(geo);
+
+	// scene과 sdkManager 데이터 정리
+	scene->Destroy();
+	sdkManager->Destroy();
 }
 
 void SoulSimul::BuildPSOs()
