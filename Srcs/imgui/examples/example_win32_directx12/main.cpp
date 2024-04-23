@@ -394,9 +394,24 @@ int main(int, char**)
             ImGui::End();
         }
 
-      /* {
+      {
+            static int monster = 1;
+            static int m_hp = 500;
+            static int m_damage = 50;
+            static int m_attack_speed = 50;
+            static int a1 = 50;
+            static int a2 = 50;
+            static int a3 = 50;
+            static int a4 = 50;
+            static int a5 = 50;
+            static int a6 = 50;
+            static int a7 = 50;
+            static int a8 = 50;
+            static int a9 = 50;
+
             // monster
             {
+
 
                 ImGui::Begin("monster preset");
 
@@ -410,16 +425,67 @@ int main(int, char**)
                 ImGui::Text("damage");
                 ImGui::SliderInt("##damage", &damage, 0, 100);
 
-                ImGui::SetCursorPos(ImVec2(250, 300));
+                ImGui::SetCursorPos(ImVec2(250, 150));
                 ImGui::Text("attack_speed");
                 ImGui::SliderInt("##attack_speed", &attack_speed, 0, 100);
 
 
 
                 //
-                if (ImGui::Button("pattern")) {
-                    pattern_window = true;
+                ImGui::Text("monster");
+                ImGui::RadioButton("small##monster", &monster, 0);
+                ImGui::SameLine();
+                ImGui::RadioButton("midium##monster", &monster, 1);
+                ImGui::SameLine();
+                ImGui::RadioButton("big##monster", &monster, 2);
+
+                //
+                ImGui::Text("pattern");
+                switch (monster)
+                {
+                case 0:
+                    ImGui::SetCursorPos(ImVec2(250, 300));
+                    ImGui::Text("a1");
+                    ImGui::SliderInt("##a1", &a1, 0, 100);
+
+                    ImGui::SetCursorPos(ImVec2(250, 350));
+                    ImGui::Text("a2");
+                    ImGui::SliderInt("##a2", &a2, 0, 100);
+
+                    ImGui::SetCursorPos(ImVec2(250, 400));
+                    ImGui::Text("a3");
+                    ImGui::SliderInt("##a3", &a3, 0, 100);
+                    break;
+                case 1:
+                    ImGui::SetCursorPos(ImVec2(250, 300));
+                    ImGui::Text("a4");
+                    ImGui::SliderInt("##a4", &a4, 0, 100);
+
+                    ImGui::SetCursorPos(ImVec2(250, 350));
+                    ImGui::Text("a5");
+                    ImGui::SliderInt("##a5", &a5, 0, 100);
+
+                    ImGui::SetCursorPos(ImVec2(250, 400));
+                    ImGui::Text("a6");
+                    ImGui::SliderInt("##a6", &a6, 0, 100);
+                    break;
+                case 2:
+                    ImGui::SetCursorPos(ImVec2(250, 300));
+                    ImGui::Text("a7");
+                    ImGui::SliderInt("##a7", &a7, 0, 100);
+
+                    ImGui::SetCursorPos(ImVec2(250, 350));
+                    ImGui::Text("a8");
+                    ImGui::SliderInt("##a8", &a8, 0, 100);
+
+                    ImGui::SetCursorPos(ImVec2(250, 400));
+                    ImGui::Text("a9");
+                    ImGui::SliderInt("##a9", &a9, 0, 100);
+                    break;
+                default:
+                    break;
                 }
+
                 if (ImGui::Button("save"))
                 {
                     save_window = true; // 창 바꿔야 할 듯
@@ -459,6 +525,19 @@ int main(int, char**)
                         file << "hp: " << hp << std::endl;
                         file << "damage: " << damage << std::endl;
                         file << "attack_speed: " << attack_speed << std::endl;
+
+
+                        file << "a1" << a1 << std::endl;
+                        file << "a2" << a2 << std::endl;
+                        file << "a3" << a3 << std::endl;
+                        file << "a4" << a4 << std::endl;
+                        file << "a5" << a5 << std::endl;
+                        file << "a6" << a6 << std::endl;
+                        file << "a7" << a7 << std::endl;
+                        file << "a8" << a8 << std::endl;
+                        file << "a9" << a9 << std::endl;
+
+
 
 
 
@@ -526,30 +605,44 @@ int main(int, char**)
                                 {
                                     attack_speed = std::stoi(value_str);
                                 }
-                                else if (key == "speed")
+                                else if (key == "a1")
                                 {
-                                    speed = std::stoi(value_str);
+                                    a1 = std::stoi(value_str);
                                 }
-                                else if (key == "running_speed")
+
+                                else if (key == "a2")
                                 {
-                                    running_speed = std::stoi(value_str);
+                                    a2 = std::stoi(value_str);
                                 }
-                                else if (key == "key_merge")
+                                else if (key == "a3")
                                 {
-                                    key_merge = std::stoi(value_str);
+                                    a3 = std::stoi(value_str);
                                 }
-                                else if (key == "use_jump")
+                                else if (key == "a4")
                                 {
-                                    use_jump = std::stoi(value_str);
+                                    a4 = std::stoi(value_str);
                                 }
-                                else if (key == "shield")
+                                else if (key == "a5")
                                 {
-                                    shield = std::stoi(value_str);
+                                    a5 = std::stoi(value_str);
                                 }
-                                else if (key == "weapon")
+                                else if (key == "a6")
                                 {
-                                    weapon = std::stoi(value_str);
+                                    a6 = std::stoi(value_str);
                                 }
+                                else if (key == "a7")
+                                {
+                                    a7 = std::stoi(value_str);
+                                }
+                                else if (key == "a8")
+                                {
+                                    a8 = std::stoi(value_str);
+                                }
+                                else if (key == "a9")
+                                {
+                                    a9 = std::stoi(value_str);
+                                }
+
                             }
                         }
                         file.close();
@@ -570,8 +663,8 @@ int main(int, char**)
 
                 ImGui::End();
             }
-        }*/
-
+        }
+        //
 
       
         // Rendering
