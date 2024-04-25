@@ -37,6 +37,8 @@
 
 #include <DXGIDebug.h>
 
+#include <fbxsdk.h>
+
 #include "Define.h"
 
 using namespace std;
