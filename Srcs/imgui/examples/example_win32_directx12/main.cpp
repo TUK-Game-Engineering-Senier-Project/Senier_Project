@@ -111,7 +111,7 @@ int main(int, char**)
         g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
     
-    // »óÅÂ
+    // ï¿½ï¿½ï¿½ï¿½
     bool save_window = false;
     bool load_window = false;
 
@@ -148,24 +148,26 @@ int main(int, char**)
 
         // default
         //static float f = 0.0f;
-        static int hp = 500; // 0~1000
-        static int damage = 50;
-        static int def_degree = 50;
-        static int farring_speed = 50;
-        static int avoid_decision = 50;
-        static int attack_speed = 50;
-        static int speed = 50;
-        static int running_speed = 50;
+        static int P_Hp = 500; // 0~1000
+        static int P_Damage = 50;
+        static int P_DefDegree = 50;
+        static int P_FarringSpeed = 50;
+        static int P_AvoidDecision = 50;
+        static int P_AttackSpeed = 50;
+        static int P_Speed = 50;
+        static int P_RunningSpeed = 50;
 
         static bool key_merge = true;
         static bool use_jump = true;
 
         static int shield = 1;
-        static int weapon = 4;
+        static int weapon = 1;
 
+        static char PlayerID[20];
+        static char PresetName[20];
        
         
-        // ¸ÞÀÎ ui
+        // ï¿½ï¿½ï¿½ï¿½ ui
         {
          
             ImGui::Begin("player preset");                         
@@ -174,35 +176,35 @@ int main(int, char**)
 
             ImGui::SetCursorPos(ImVec2(200, 50)); 
             ImGui::Text("hp");
-            ImGui::SliderInt("##hp", &hp, 0, 1000);
+            ImGui::SliderInt("##hp", &P_Hp, 0, 1000);
 
             ImGui::SetCursorPos(ImVec2(200, 100));
             ImGui::Text("damage");
-            ImGui::SliderInt("##damage", &damage, 0, 100);
+            ImGui::SliderInt("##damage", &P_Damage, 0, 100);
 
             ImGui::SetCursorPos(ImVec2(200, 150));
             ImGui::Text("def_degree");
-            ImGui::SliderInt("##def_degree", &def_degree, 0, 100);
+            ImGui::SliderInt("##def_degree", &P_DefDegree, 0, 100);
 
             ImGui::SetCursorPos(ImVec2(200, 200));
             ImGui::Text("farring_speed");
-            ImGui::SliderInt("##farring_speed", &farring_speed, 0, 100);
+            ImGui::SliderInt("##farring_speed", &P_FarringSpeed, 0, 100);
 
             ImGui::SetCursorPos(ImVec2(200, 250));
             ImGui::Text("avoid_decision");
-            ImGui::SliderInt("##avoid_decision", &avoid_decision, 0, 100);
+            ImGui::SliderInt("##avoid_decision", &P_AvoidDecision, 0, 100);
 
             ImGui::SetCursorPos(ImVec2(200, 300));
             ImGui::Text("attack_speed");
-            ImGui::SliderInt("##attack_speed", &attack_speed, 0, 100);
+            ImGui::SliderInt("##attack_speed", &P_AttackSpeed, 0, 100);
 
             ImGui::SetCursorPos(ImVec2(200, 350));
             ImGui::Text("speed");
-            ImGui::SliderInt("##speed", &speed, 0, 100);
+            ImGui::SliderInt("##speed", &P_Speed, 0, 100);
 
             ImGui::SetCursorPos(ImVec2(200, 400));
             ImGui::Text("running_speed");
-            ImGui::SliderInt("##running_speed", &running_speed, 0, 100);
+            ImGui::SliderInt("##running_speed", &P_RunningSpeed, 0, 100);
 
             //
             ImGui::Checkbox("key merge", &key_merge);
@@ -217,16 +219,16 @@ int main(int, char**)
             ImGui::RadioButton("big##shield", &shield, 2);
 
             ImGui::Text("weapon");
-            ImGui::RadioButton("small##weapon", &weapon, 3);  // weapon¹öÆ° ¿À·ùÀÖÀ½
+            ImGui::RadioButton("small##weapon", &weapon, 0);  // weaponï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             ImGui::SameLine();
-            ImGui::RadioButton("midium##weapon", &weapon, 4);
+            ImGui::RadioButton("midium##weapon", &weapon, 1);
             ImGui::SameLine();
-            ImGui::RadioButton("big##weapon", &weapon, 5);
+            ImGui::RadioButton("big##weapon", &weapon, 2);
 
             //
             if (ImGui::Button("save"))
             {
-                save_window = true; // Ã¢ ¹Ù²ã¾ß ÇÒ µí
+                save_window = true; // Ã¢ ï¿½Ù²ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½
             }
 
             ImGui::SameLine();
@@ -246,7 +248,7 @@ int main(int, char**)
             ImGui::Begin("Save Preset", &save_window);
             ImGui::Text("Enter filename to save:");
 
-            static char filename_buf[256] = { 0 }; // ¹öÆÛ Å©±â´Â ÇÊ¿ä¿¡ µû¶ó Á¶Á¤ °¡´É
+            static char filename_buf[256] = { 0 }; // ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ï¿½ ï¿½Ê¿ä¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
             ImGui::InputText("##filename", filename_buf, IM_ARRAYSIZE(filename_buf));
 
@@ -254,18 +256,18 @@ int main(int, char**)
             {
                 save_filename = filename_buf;
 
-                // ¿©±â¿¡ µ¥ÀÌÅÍ ÀúÀåÇÏ´Â ÄÚµå Ãß°¡
+                // ï¿½ï¿½ï¿½â¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Úµï¿½ ï¿½ß°ï¿½
                 std::ofstream file(save_filename.c_str());
                 if (file.is_open())
                 {
-                    file << "hp: " << hp << std::endl;
-                    file << "damage: " << damage << std::endl;
-                    file << "def_degree: " << def_degree << std::endl;
-                    file << "farring_speed: " << farring_speed << std::endl;
-                    file << "avoid_decision: " << avoid_decision << std::endl;
-                    file << "attack_speed: " << attack_speed << std::endl;
-                    file << "speed: " << speed << std::endl;
-                    file << "running_speed: " << running_speed << std::endl;
+                    file << "hp: " << P_Hp << std::endl;
+                    file << "damage: " << P_Damage << std::endl;
+                    file << "def_degree: " << P_DefDegree << std::endl;
+                    file << "farring_speed: " << P_FarringSpeed << std::endl;
+                    file << "avoid_decision: " << P_AvoidDecision << std::endl;
+                    file << "attack_speed: " << P_AttackSpeed << std::endl;
+                    file << "speed: " << P_Speed << std::endl;
+                    file << "running_speed: " << P_RunningSpeed << std::endl;
 
                     file << "key_merge: " << key_merge << std::endl;
                     file << "use_jump: " << use_jump << std::endl;
@@ -277,10 +279,10 @@ int main(int, char**)
                 }
                 else
                 {
-                    // ÆÄÀÏ ¿­±â ½ÇÆÐ Ã³¸®
+                    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
                 }
 
-                // ÀúÀå ÈÄ Ã¢ ´Ý±â
+                // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Ã¢ ï¿½Ý±ï¿½
                 save_window = false;
             }
 
@@ -296,8 +298,8 @@ int main(int, char**)
 
         if (load_window)
         {
-            static char filename_buf[256] = { 0 }; // ÆÄÀÏ¸íÀ» ÀÔ·ÂÇÒ ¹öÆÛ
-            static char textBuffer[256] = { 0 }; // ÆÄÀÏ ³»¿ëÀ» Ãâ·ÂÇÒ ¹öÆÛ
+            static char filename_buf[256] = { 0 }; // ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            static char textBuffer[256] = { 0 }; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
             ImGui::Begin("Load Preset", &load_window);
             ImGui::Text("Enter filename to load:");
@@ -312,50 +314,50 @@ int main(int, char**)
                     std::string line;
                     while (std::getline(file, line))
                     {
-                        // ':'¸¦ ±âÁØÀ¸·Î ¹®ÀÚ¿­À» ÆÄ½ÌÇÏ¿© º¯¼ö¿¡ ÇÒ´ç
+                        // ':'ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½Ä½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½
                         std::size_t pos = line.find(':');
                         if (pos != std::string::npos)
                         {
-                            std::string key = line.substr(0, pos); // º¯¼ö¸í
-                            std::string value_str = line.substr(pos + 1); // °ª
+                            std::string key = line.substr(0, pos); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                            std::string value_str = line.substr(pos + 1); // ï¿½ï¿½
 
-                            // °ø¹é Á¦°Å
+                            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                             key.erase(std::remove_if(key.begin(), key.end(), ::isspace), key.end());
                             value_str.erase(std::remove_if(value_str.begin(), value_str.end(), ::isspace), value_str.end());
 
-                            // °ªÀ» ¼ýÀÚ·Î º¯È¯ÇÏ¿© º¯¼ö¿¡ ÇÒ´ç
+                            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú·ï¿½ ï¿½ï¿½È¯ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½
                             if (key == "hp")
                             {
-                                hp = std::stoi(value_str);
+                                P_Hp = std::stoi(value_str);
                             }
                             else if (key == "damage")
                             {
-                                damage = std::stoi(value_str);
+                                P_Damage = std::stoi(value_str);
                             }
                             else if (key == "def_degree")
                             {
-                                def_degree = std::stoi(value_str);
+                                P_DefDegree = std::stoi(value_str);
                             }
                             else if (key == "farring_speed")
                             {
-                                farring_speed = std::stoi(value_str);
+                                P_FarringSpeed = std::stoi(value_str);
                             }
                             else if (key == "avoid_decision")
                             {
-                                avoid_decision = std::stoi(value_str);
+                                P_AvoidDecision = std::stoi(value_str);
                             }
 
                             else if (key == "attack_speed")
                             {
-                                attack_speed = std::stoi(value_str);
+                                P_AttackSpeed = std::stoi(value_str);
                             }
                             else if (key == "speed")
                             {
-                                speed = std::stoi(value_str);
+                                P_Speed = std::stoi(value_str);
                             }
                             else if (key == "running_speed")
                             {
-                                running_speed = std::stoi(value_str);
+                                P_RunningSpeed = std::stoi(value_str);
                             }
                             else if (key == "key_merge")
                             {
@@ -379,7 +381,7 @@ int main(int, char**)
                 }
                 else
                 {
-                    // ÆÄÀÏ ¿­±â ½ÇÆÐ Ã³¸®
+                    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
                 }
             }
 
@@ -419,15 +421,15 @@ int main(int, char**)
 
                 ImGui::SetCursorPos(ImVec2(250, 50));
                 ImGui::Text("hp");
-                ImGui::SliderInt("##hp", &hp, 0, 1000);
+                ImGui::SliderInt("##hp", &P_Hp, 0, 1000);
 
                 ImGui::SetCursorPos(ImVec2(250, 100));
                 ImGui::Text("damage");
-                ImGui::SliderInt("##damage", &damage, 0, 100);
+                ImGui::SliderInt("##damage", &P_Damage, 0, 100);
 
                 ImGui::SetCursorPos(ImVec2(250, 150));
                 ImGui::Text("attack_speed");
-                ImGui::SliderInt("##attack_speed", &attack_speed, 0, 100);
+                ImGui::SliderInt("##attack_speed", &P_AttackSpeed, 0, 100);
 
 
 
@@ -488,7 +490,7 @@ int main(int, char**)
 
                 if (ImGui::Button("save"))
                 {
-                    save_window = true; // Ã¢ ¹Ù²ã¾ß ÇÒ µí
+                    save_window = true; // Ã¢ ï¿½Ù²ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½
                 }
 
                 ImGui::SameLine();
@@ -510,7 +512,7 @@ int main(int, char**)
                 ImGui::Begin("Save Preset##monster", &m_save_window);
                 ImGui::Text("Enter filename to save:");
 
-                static char filename_buf[256] = { 0 }; // ¹öÆÛ Å©±â´Â ÇÊ¿ä¿¡ µû¶ó Á¶Á¤ °¡´É
+                static char filename_buf[256] = { 0 }; // ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ï¿½ ï¿½Ê¿ä¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
                 ImGui::InputText("##filename_monster", filename_buf, IM_ARRAYSIZE(filename_buf));
 
@@ -518,13 +520,13 @@ int main(int, char**)
                 {
                     m_save_filename = filename_buf;
 
-                    // ¿©±â¿¡ µ¥ÀÌÅÍ ÀúÀåÇÏ´Â ÄÚµå Ãß°¡
+                    // ï¿½ï¿½ï¿½â¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Úµï¿½ ï¿½ß°ï¿½
                     std::ofstream file(m_save_filename.c_str());
                     if (file.is_open())
                     {
-                        file << "hp: " << hp << std::endl;
-                        file << "damage: " << damage << std::endl;
-                        file << "attack_speed: " << attack_speed << std::endl;
+                        file << "hp: " << P_Hp << std::endl;
+                        file << "damage: " << P_Damage << std::endl;
+                        file << "attack_speed: " << P_AttackSpeed << std::endl;
 
 
                         file << "a1" << a1 << std::endl;
@@ -545,10 +547,10 @@ int main(int, char**)
                     }
                     else
                     {
-                        // ÆÄÀÏ ¿­±â ½ÇÆÐ Ã³¸®
+                        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
                     }
 
-                    // ÀúÀå ÈÄ Ã¢ ´Ý±â
+                    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Ã¢ ï¿½Ý±ï¿½
                     save_window = false;
                 }
 
@@ -564,8 +566,8 @@ int main(int, char**)
 
             if (load_window)
             {
-                static char filename_buf[256] = { 0 }; // ÆÄÀÏ¸íÀ» ÀÔ·ÂÇÒ ¹öÆÛ
-                static char textBuffer[256] = { 0 }; // ÆÄÀÏ ³»¿ëÀ» Ãâ·ÂÇÒ ¹öÆÛ
+                static char filename_buf[256] = { 0 }; // ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+                static char textBuffer[256] = { 0 }; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
                 ImGui::Begin("Load Preset", &load_window);
                 ImGui::Text("Enter filename to load:");
@@ -580,30 +582,30 @@ int main(int, char**)
                         std::string line;
                         while (std::getline(file, line))
                         {
-                            // ':'¸¦ ±âÁØÀ¸·Î ¹®ÀÚ¿­À» ÆÄ½ÌÇÏ¿© º¯¼ö¿¡ ÇÒ´ç
+                            // ':'ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½Ä½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½
                             std::size_t pos = line.find(':');
                             if (pos != std::string::npos)
                             {
-                                std::string key = line.substr(0, pos); // º¯¼ö¸í
-                                std::string value_str = line.substr(pos + 1); // °ª
+                                std::string key = line.substr(0, pos); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                                std::string value_str = line.substr(pos + 1); // ï¿½ï¿½
 
-                                // °ø¹é Á¦°Å
+                                // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                                 key.erase(std::remove_if(key.begin(), key.end(), ::isspace), key.end());
                                 value_str.erase(std::remove_if(value_str.begin(), value_str.end(), ::isspace), value_str.end());
 
-                                // °ªÀ» ¼ýÀÚ·Î º¯È¯ÇÏ¿© º¯¼ö¿¡ ÇÒ´ç
+                                // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú·ï¿½ ï¿½ï¿½È¯ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½
                                 if (key == "hp")
                                 {
-                                    hp = std::stoi(value_str);
+                                    P_Hp = std::stoi(value_str);
                                 }
                                 else if (key == "damage")
                                 {
-                                    damage = std::stoi(value_str);
+                                    P_Damage = std::stoi(value_str);
                                 }
                             
                                 else if (key == "attack_speed")
                                 {
-                                    attack_speed = std::stoi(value_str);
+                                    P_AttackSpeed = std::stoi(value_str);
                                 }
                                 else if (key == "a1")
                                 {
@@ -649,7 +651,7 @@ int main(int, char**)
                     }
                     else
                     {
-                        // ÆÄÀÏ ¿­±â ½ÇÆÐ Ã³¸®
+                        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
                     }
                 }
 
