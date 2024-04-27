@@ -12,7 +12,10 @@ using namespace DirectX;
 // ----- 추가한 내용 시작 부분 ----- //
 
 int g_id; // 플레이어 ID
-Player player[2]; // 플레이어 2인
+Character player[2]; // 플레이어 2인
+Character enemy_s;   // 소형 적
+Character enemy_m;   // 중형 적
+Character enemy_l;   // 대형 적
 
 constexpr auto ZKEY = 0x5A; // z키
 

@@ -57,7 +57,7 @@
     <ClCompile Include="FrameResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SoulSimul.cpp">
+    <ClCompile Include="1_SoulSimul.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

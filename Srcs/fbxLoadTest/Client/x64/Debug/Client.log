@@ -1,5 +1,0 @@
-﻿  SoulSimul.cpp
-C:\Users\Seungwan\Desktop\fbxLoadTest\Client\Stdafx.h(96,2): warning C4091: 'extern ': 변수를 선언하지 않으면 'Player' 왼쪽은 무시됩니다.
-  (소스 파일 'SoulSimul.cpp'을(를) 컴파일하는 중)
-  
-  Client.vcxproj -> C:\Users\Seungwan\Desktop\fbxLoadTest\x64\Debug\Client.exe

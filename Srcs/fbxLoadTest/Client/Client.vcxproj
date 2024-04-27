@@ -33,7 +33,7 @@
     <ClCompile Include="..\Common\GeometryUtility.cxx" />
     <ClCompile Include="..\Common\MathHelper.cpp" />
     <ClCompile Include="FrameResource.cpp" />
-    <ClCompile Include="SoulSimul.cpp" />
+    <ClCompile Include="1_SoulSimul.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Common\AnimationUtility.h" />
