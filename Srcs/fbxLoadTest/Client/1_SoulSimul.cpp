@@ -8,16 +8,20 @@
 // 여기 있는, 방패나 무기를 언급하는 코드는 현재 의미 없음
 // fbx sdk 사용시 #include <fbxsdk.h>를 필수로 할 것
 
-// UpdatePlayer를 UpdateObject로 확장, 추후 다른 이동하는 오브젝트에도 적용 용도로 확장함
-// 이 함수는 Character 구조체를 매개변수로 받아 구조체의 배율, 회전, 위치 값을 사용한다.
-
 // 추가한 것들
-// void SoulSimul::UpdateObject(const char* name, const char* mat, const char* geo, Character c)
 // void SoulSimul::BuildFbxGeometry(const char* filename, const char* subMeshName, const char* geoName, 
 //     float scaleMulX, float scaleMulY, float scaleMulZ);
-// void SoulSimul::BuildItem(const char* name, const char* mat, const char* geo);
+// void SoulSimul::BuildObject(const char* name, const char* mat, const char* geo, Object c)
 
 // Player 클래스를 Character 클래스로 수정
+// 어차피 바닥도 fbx로 불러올 것이기 때문에 
+// - UpdateObject와 BuildItem을 BuildObject로 통합함
+// 지금 바닥이라 되어있는 건 중앙을 표시하는 건 작은 직육면체
+
+// <할 것>
+// 적 오브젝트의 동작 (행동 트리)
+// 동작에 따른 애니메이션
+
 
 #include "../Common/d3dApp.h"
 #include "../Common/MathHelper.h"
@@ -37,6 +41,7 @@ const int gNumFrameResources = 3;
 // 각 오브젝트 인덱스
 constexpr char INDEXPLAYER = 0;
 constexpr char INDEXFLOOR = 1;
+constexpr char INDEXENEMY = 2;
 
 // Lightweight structure stores parameters to draw a shape.
 // This will vary from app-to-app.
@@ -72,6 +77,9 @@ struct RenderItem
     int BaseVertexLocation = 0;
 };
 
+// RenderItem 모음 벡터
+std::vector<std::unique_ptr<RenderItem>> moveAbleItems;
+
 class SoulSimul : public D3DApp
 {
 public:
@@ -91,8 +99,8 @@ private:
     virtual void OnMouseUp(WPARAM btnState, int x, int y)override;
     virtual void OnMouseMove(WPARAM btnState, int x, int y)override;
 
-	// 오브젝트 업데이트
-	void UpdateObject(const char* name, const char* mat, const char* geo, Character c);
+	// 오브젝트 빌드
+	void BuildObject(const char* name, const char* mat, const char* geo, Object c, const int code);
 
 	// 카메라 업데이트 (플레이어 위치 확정된 뒤)
 	void UpdateCamera(const GameTimer& gt);
@@ -218,7 +226,19 @@ bool SoulSimul::Initialize()
 
 	// 플레이어 모양 빌드 
 	// 매개변수 : 파일명, subMesh 이름, geo 이름, 불러올 때 크기 배율
-	BuildFbxGeometry("humanoid.fbx", "player", "playerGeo", 0.03f, 0.03f, 0.03f);
+	BuildFbxGeometry("sample_humanoid.fbx", "player", "playerGeo", 0.017f, 0.017f, 0.017f);
+	player[0].pos_x = -3.0f;
+	player[0].pos_z = -4.0f;
+
+	// ### 중형 적 빌드 (임시)
+	BuildFbxGeometry("sample_humanoid.fbx", "enemy_m", "enemy_mGeo", 0.025f, 0.025f, 0.025f);
+	enemy_m.pos_x = 4.0f;
+	enemy_m.pos_z = 7.0f;
+
+	// ### 바닥 빌드 (임시)
+	BuildFbxGeometry("sample_box.fbx", "floor", "floor_mGeo", 0.04f, 0.02f, 0.04f);
+	floorobj.pos_x = 0.0f; // (고정) 중심
+	floorobj.pos_z = 0.0f; // (고정) 중심
 
 	BuildMaterials();
     BuildRenderItems();
@@ -247,10 +267,13 @@ void SoulSimul::OnResize()
 
 void SoulSimul::Update(const GameTimer& gt)
 {
-	// 오브젝트 업데이트
-	UpdateObject("player", "playerMat", "playerGeo", player[0]); // 플레이어 1
+	// 플레이어 빌드 
+	BuildObject("player", "playerMat", "playerGeo", player[0], INDEXPLAYER);
 	// ### 여기에 다른 플레이어를 추가할 것
-	// ### 여기에 업데이트되는 오브젝트들을 추가할 것
+
+	// ### 중형 적 빌드 (임시)
+	BuildObject("enemy_m", "enemy_mMat", "enemy_mGeo", enemy_m, INDEXENEMY);
+	// ### 여기에 다른 적을 추가할 것
 
 	// 카메라 업데이트 (오브젝트들 위치 확정된 뒤)
 	UpdateCamera(gt);
@@ -391,8 +414,8 @@ void SoulSimul::UpdateCamera(const GameTimer& gt)
 	float fPlayerPosZ = player[g_id].pos_z;
 
     // 플레이어로부터 카메라 위치
-    float fBehindPlayer = 12.0f;                // 플레이어로부터 뒤 거리
-    float fAbovePlayer  = player[g_id].fRadius; // 플레이어로부터 위 거리 
+    float fBehindPlayer = 12.0f; // 플레이어로부터 뒤 거리
+    float fAbovePlayer  = 10.0f; // 플레이어로부터 위 거리 
 
 	// 카메라 위치 좌표값
     float cameraPosX = fPlayerPosX + fBehindPlayer * cosf(mTheta);
@@ -827,7 +850,7 @@ void SoulSimul::BuildMaterial(char* name, int index,
 // 재질 전체 build
 void SoulSimul::BuildMaterials()
 {
-	// 바닥
+	// 바닥 재질
 	BuildMaterial
 	(
 		"floorMat", INDEXFLOOR,             // material 이름 및 인덱스
@@ -835,7 +858,7 @@ void SoulSimul::BuildMaterials()
 		XMFLOAT3(0.02f, 0.02f, 0.02f), 0.2f // FresnelR0, Roughness
 	);
 
-	// 플레이어
+	// 플레이어 재질
 	BuildMaterial
 	(
 		"playerMat", INDEXPLAYER,           // material 이름 및 인덱스
@@ -843,68 +866,68 @@ void SoulSimul::BuildMaterials()
 		XMFLOAT3(0.05f, 0.05f, 0.05f), 0.3f // FresnelR0, Roughness
 	);
 
+	// ### 중형 적 재질 (임시)
+	BuildMaterial
+	(
+		"enemy_mMat", INDEXENEMY,           // material 이름 및 인덱스
+		XMFLOAT4(0.5f, 1.0f, 0.5f, 1.0f),   // DiffuseAlbedo
+		XMFLOAT3(0.05f, 0.05f, 0.05f), 0.4f // FresnelR0, Roughness
+	);
+
 	// ### 필요시 재질 추가하기 (BuildMaterial())
 }
 
-// 오브젝트 빌드 (코드 간략화)
-void SoulSimul::BuildItem(const char* name, const char* mat, const char* geo)
-{
-	auto item = std::make_unique<RenderItem>();
-
-	item->World = MathHelper::Identity4x4();
-	XMStoreFloat4x4(&item->TexTransform, XMMatrixScaling(8.0f, 8.0f, 1.0f));
-	item->ObjCBIndex = INDEXFLOOR;
-	item->TexTransform = MathHelper::Identity4x4();
-	item->Mat = mMaterials[mat].get();
-	item->Geo = mGeometries[geo].get();
-	item->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	item->IndexCount = item->Geo->DrawArgs[name].IndexCount;
-	item->StartIndexLocation = item->Geo->DrawArgs[name].StartIndexLocation;
-	item->BaseVertexLocation = item->Geo->DrawArgs[name].BaseVertexLocation;
-
-	mAllRitems.push_back(std::move(item));
-}
-
-// 오브젝트 업데이트 (업데이트가 필요한 오브젝트에 한정)
+// 오브젝트 빌드
 // Character 클래스 값을 입력받는 이유는 
 // - 해당 클래스에서 배율, 회전, 위치 값을 받아 사용하기 때문이다.
 
-void SoulSimul::UpdateObject(const char* name, const char* mat, const char* geo, Character c)
+void SoulSimul::BuildObject(const char* name, const char* mat, const char* geo, Object obj, const int code)
 {
+	// objcode는 BuildObject 각 객체를 구분하기 위한 int형 코드
+
+	// 크기 조정
+	if (code >= moveAbleItems.size()) {
+		moveAbleItems.resize(code + 1);
+	}
+
 	// RenderItem 아이템 변수
-	auto moveAbleItem = std::make_unique<RenderItem>();
+	moveAbleItems[code] = std::make_unique<RenderItem>();
 
 	// 오브젝트 갱신
 	XMStoreFloat4x4
 	(
-		// 오브젝트 배율, 회전, 위치에 맞춰 지정
-		&moveAbleItem->World,
-		XMMatrixScaling(c.scale_x, c.scale_y, c.scale_z)
-		* XMMatrixRotationRollPitchYaw(c.rotate_x, c.rotate_y, c.rotate_z)
-		* XMMatrixTranslation(c.pos_x, c.pos_y, c.pos_z)
+		// 불러온 Character c에 해당하는 배율, 회전, 위치에 맞춰 지정
+		&moveAbleItems[code]->World,
+		XMMatrixScaling(obj.scale_x, obj.scale_y, obj.scale_z)
+		* XMMatrixRotationRollPitchYaw(obj.rotate_x, obj.rotate_y, obj.rotate_z)
+		* XMMatrixTranslation(obj.pos_x, obj.pos_y, obj.pos_z)
 	);
 
 	// BuildItem 코드와 거의 동일
 
-	moveAbleItem->TexTransform = MathHelper::Identity4x4();
-	moveAbleItem->ObjCBIndex = INDEXPLAYER; // 플레이어 인덱스
-	moveAbleItem->Mat = mMaterials[mat].get();
-	moveAbleItem->Geo = mGeometries[geo].get();
-	moveAbleItem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	moveAbleItem->IndexCount = moveAbleItem->Geo->DrawArgs[name].IndexCount;
-	moveAbleItem->StartIndexLocation = moveAbleItem->Geo->DrawArgs[name].StartIndexLocation;
-	moveAbleItem->BaseVertexLocation = moveAbleItem->Geo->DrawArgs[name].BaseVertexLocation;
-	mAllRitems.push_back(std::move(moveAbleItem));
+	moveAbleItems[code]->TexTransform = MathHelper::Identity4x4();
+	moveAbleItems[code]->ObjCBIndex = code; // 여기서 code는 각 오브젝트에 따라 다름
+	moveAbleItems[code]->Mat = mMaterials[mat].get();
+	moveAbleItems[code]->Geo = mGeometries[geo].get();
+	moveAbleItems[code]->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	moveAbleItems[code]->IndexCount = moveAbleItems[code]->Geo->DrawArgs[name].IndexCount;
+	moveAbleItems[code]->StartIndexLocation = moveAbleItems[code]->Geo->DrawArgs[name].StartIndexLocation;
+	moveAbleItems[code]->BaseVertexLocation = moveAbleItems[code]->Geo->DrawArgs[name].BaseVertexLocation;
+	mAllRitems.push_back(std::move(moveAbleItems[code]));
 }
 
 void SoulSimul::BuildRenderItems()
 {
-	// 바닥 격자 그리기
-	BuildItem("floor", "floorMat", "shapeGeo");
+	// (여기서 최초로 업데이트 안 해주면 오류 남)
 
-	// 플레이어 업데이트 
-	// (여기서 최초로 안 그려주면 오류 남)
-	UpdateObject("player", "playerMat", "playerGeo", player[0]);
+	// 플레이어 빌드 
+	BuildObject("player", "playerMat", "playerGeo", player[0], INDEXPLAYER);
+
+	// ### 중형 적 빌드 (임시)
+	BuildObject("enemy_m", "enemy_mMat", "enemy_mGeo", enemy_m, INDEXENEMY);
+
+	// 바닥 빌드 (여기서 유일하게 빌드한 다음 업데이트하지 않음)
+	BuildObject("floor", "enemy_mMat", "floor_mGeo", floorobj, INDEXFLOOR);
 
 	// All the render items are opaque.
 	for(auto& e : mAllRitems)

@@ -6,6 +6,7 @@
 #define _CRT_SECURE_NO_WARNINGS // 구형 C 함수 사용 시 경고 끄기
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // 구형 소켓 API 사용 시 경고 끄기
 
+#include <vector>
 #include <mutex>      // 서버 구성용 뮤텍스 헤더
 #include <winsock2.h> // 윈속2 메인 헤더
 #include <ws2tcpip.h> // 윈속2 확장 헤더
@@ -38,8 +39,10 @@ extern constexpr char SC_KEY_INPUT = 1;
 extern constexpr char SC_PLAYER_ROTATE = 2;
 extern constexpr char SC_SEND_PLAYER = 3;
 
-// 동작
-extern constexpr char ACTION_NONE = 100;
+// 적 동작
+extern constexpr char ACTION_NONE = 100; // 정지 상태
+extern constexpr char ACTION_MOVETOPLAYER = 101; // 플레이어를 향해 이동
+extern constexpr char ACTION_ATTACKPLAYER = 102; // 플레이어 공격
 
 // 입력 패킷
 struct INPUT_PACKET
@@ -81,29 +84,28 @@ struct SEND_PLAYER
 
 /* ----- 여기부터 추가된 부분 ----- */
 
-// 캐릭터 구조체
-extern struct Character
+// 오브젝트 구조체
+
+extern struct Object
 {
 	float scale_x{ 1.0f }, scale_y{ 1.0f }, scale_z{ 1.0f };    // 크기 배율
 	float rotate_x{ 0.0f }, rotate_y{ 0.0f }, rotate_z{ 0.0f }; // 회전 각도
 	float pos_x{ 0.0f }, pos_y{ 0.0f }, pos_z{ 0.0f };          // 위치
-	float move_x{ 0.0f }, move_y{ 0.0f }, move_z{ 0.0f };       // 이동 거리
 
-	// (적 캐릭터에게는 필요없음)
-	float fRadius{ 10.0f }; // 시야 위치
+	// '플레이어' 오브젝트용
+	bool bNowMoving{ false }; // 현재 이동중 여부
 
-	bool bNowMoving{ false };       // 현재 이동중 여부
+	// '적' 오브젝트용
 	char cNowAction{ ACTION_NONE }; // 현재 동작
-
-	// float color_r{}, color_g{}, color_b{};
 };
 
 // 이 부분의 본래 선언 위치는 d3dApp.cpp이다.
 extern int g_id; // 플레이어 ID
-extern Character player[2]; // 플레이어 2인
-extern Character enemy_s;   // 소형 적
-extern Character enemy_m;   // 중형 적
-extern Character enemy_l;   // 대형 적
+extern Object floorobj;  // 바닥
+extern Object player[2]; // 플레이어 2인
+extern Object enemy_s;   // 소형 적
+extern Object enemy_m;   // 중형 적
+extern Object enemy_l;   // 대형 적
 
 #endif 
 
