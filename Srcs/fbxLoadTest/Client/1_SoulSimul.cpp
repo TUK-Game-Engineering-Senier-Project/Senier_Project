@@ -232,8 +232,8 @@ bool SoulSimul::Initialize()
 
 	// ### 중형 적 빌드 (임시)
 	BuildFbxGeometry("sample_humanoid.fbx", "enemy_m", "enemy_mGeo", 0.025f, 0.025f, 0.025f);
-	enemy_m.pos_x = 4.0f;
-	enemy_m.pos_z = 7.0f;
+	enemy_m.pos_x = 1.0f;
+	enemy_m.pos_z = 2.0f;
 
 	// ### 바닥 빌드 (임시)
 	BuildFbxGeometry("sample_box.fbx", "floor", "floor_mGeo", 0.04f, 0.02f, 0.04f);
@@ -267,6 +267,12 @@ void SoulSimul::OnResize()
 
 void SoulSimul::Update(const GameTimer& gt)
 {
+	// ### 적 동작 업데이트 (임시)
+	enemy_m.BehaviorTree();               // 행동 트리 갱신
+	enemy_m.DoAction(enemy_m.cNowAction); // 행동 트리에 따른 동작 수행
+	
+	// --- 동작이 업데이트된 후에 오브젝트를 업데이트함 ---
+
 	// 플레이어 빌드 
 	BuildObject("player", "playerMat", "playerGeo", player[0], INDEXPLAYER);
 	// ### 여기에 다른 플레이어를 추가할 것

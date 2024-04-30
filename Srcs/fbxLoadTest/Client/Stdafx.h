@@ -39,10 +39,8 @@ extern constexpr char SC_KEY_INPUT = 1;
 extern constexpr char SC_PLAYER_ROTATE = 2;
 extern constexpr char SC_SEND_PLAYER = 3;
 
-// 적 동작
-extern constexpr char ACTION_NONE = 100; // 정지 상태
-extern constexpr char ACTION_MOVETOPLAYER = 101; // 플레이어를 향해 이동
-extern constexpr char ACTION_ATTACKPLAYER = 102; // 플레이어 공격
+// 적 동작 (기본 상태 / 플레이어에게 이동 / 플레이어를 공격)
+enum ACTION { DEFAULT, MOVETOPLAYER, ATTACKPLAYER }; 
 
 // 입력 패킷
 struct INPUT_PACKET
@@ -64,7 +62,7 @@ struct MOVE_PACKET
 
 	bool bNowMoving{ false }; // 현재 이동중 여부
 
-	char cNowAction{ ACTION_NONE }; // 현재 동작
+	char cNowAction{ ACTION::DEFAULT }; // 현재 동작
 };
 
 
@@ -84,6 +82,8 @@ struct SEND_PLAYER
 
 /* ----- 여기부터 추가된 부분 ----- */
 
+enum OBJECT_DIR{LEFT, RIGHT, UP, DOWN};
+
 // 오브젝트 구조체
 
 extern struct Object
@@ -96,7 +96,13 @@ extern struct Object
 	bool bNowMoving{ false }; // 현재 이동중 여부
 
 	// '적' 오브젝트용
-	char cNowAction{ ACTION_NONE }; // 현재 동작
+	char cNowAction   { ACTION::DEFAULT }; // 현재 동작
+	char nowLookingDir{ OBJECT_DIR::UP  }; // 현재 바라보는 위치
+
+	int behaviorpoint = 0; // 행동치 (임시)
+
+	void DoAction(char c); // 오브젝트 동작 수행
+	void BehaviorTree();   // 행동 트리
 };
 
 // 이 부분의 본래 선언 위치는 d3dApp.cpp이다.
