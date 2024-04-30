@@ -382,3 +382,110 @@ CPlaneTextureMesh::CPlaneTextureMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 CPlaneTextureMesh::~CPlaneTextureMesh()
 {
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+CFbxMesh::CFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
+{
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices.get(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	m_pd3dIndexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pIndices.get(), sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+}
+
+CFbxMesh::~CFbxMesh()
+{
+}
+
+void CFbxMesh::BuildFbxGeometry(const char* filename, const char* subMeshName, const char* geoName, float scaleMulX, float scaleMulY, float scaleMulZ)
+{
+	// Initialize the SDK manager. This object handles memory management.
+	FbxManager* lSdkManager = FbxManager::Create();
+
+	// Create the IO settings object.
+	FbxIOSettings* ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
+	lSdkManager->SetIOSettings(ios);
+
+	// Create an importer using the SDK manager.
+	FbxImporter* lImporter = FbxImporter::Create(lSdkManager, "");
+
+	// Use the first argument as the filename for the importer.
+	if (!lImporter->Initialize(filename, -1, lSdkManager->GetIOSettings())) {
+		std::cout << "Call to FbxImporter::Initialize() failed." << std::endl;
+		std::cout << "Error returned: " << lImporter->GetStatus().GetErrorString() << std::endl;
+		exit(-1);
+	}
+	// Create a new scene so that it can be populated by the imported file.
+	FbxScene* lScene = FbxScene::Create(lSdkManager, "myScene");
+	// Import the contents of the file into the scene.
+	lImporter->Import(lScene);
+	// The file is imported; so get rid of the importer.
+	lImporter->Destroy();
+
+
+	FbxNode* rootNode = lScene->GetRootNode();
+	FbxNode* meshNode = nullptr;
+
+	if (rootNode)
+	{
+		for (int i = 0; i < rootNode->GetChildCount(); ++i)
+		{
+			meshNode = rootNode->GetChild(i);
+			if (meshNode->GetNodeAttribute() && meshNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
+				break;
+			meshNode = nullptr;
+		}
+	}
+
+	// mesh에서 vertex 및 index 데이터 추출
+	FbxMesh* mesh = meshNode->GetMesh();
+	if (!mesh)
+	{
+		lScene->Destroy();
+		lSdkManager->Destroy();
+		return;
+	}
+
+	// 법선 데이터를 로드
+	FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
+	bool directMapping = normalElement->GetMappingMode() == FbxGeometryElement::eByControlPoint;
+	bool indexToDirect = normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect;
+
+	m_nStride = sizeof(CFbxVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	m_nVertices = mesh->GetControlPointsCount();
+	FbxVector4* vertices = mesh->GetControlPoints();
+	m_nIndices = mesh->GetPolygonVertexCount();
+	int* indices = mesh->GetPolygonVertices();
+
+	m_pVertices = make_unique<CFbxVertex[]>(m_nVertices);
+	m_pIndices = std::make_unique<int[]>(m_nIndices);
+
+	for (int i = 0; i < m_nVertices; ++i) {
+		int normalIndex = directMapping ? i : normalElement->GetIndexArray().GetAt(i);
+		FbxVector4 normal = normalElement->GetDirectArray().GetAt(normalIndex);
+		m_pVertices[i] = CFbxVertex(XMFLOAT3(
+			static_cast<float>(vertices[i][0] * scaleMulX), static_cast<float>(vertices[i][1] * scaleMulY), static_cast<float>(vertices[i][2] * scaleMulZ))
+			, XMFLOAT3(static_cast<float>(normal[0]), static_cast<float>(normal[1]), static_cast<float>(normal[2])));
+	}
+
+	for (int i = 0; i < m_nIndices; ++i) {
+		m_pIndices[i] = indices[i];
+	}
+	// Destroy the SDK manager and all the other objects it was handling.
+	lScene->Destroy();
+	lSdkManager->Destroy();
+
+}

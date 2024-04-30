@@ -61,6 +61,18 @@ public:
 	~CDiffused2TexturedVertex() { }
 };
 
+class CFbxVertex : public CVertex
+{
+public:
+	XMFLOAT3						m_xmf3Normal;
+
+public:
+	CFbxVertex(){ m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);}
+	CFbxVertex(float x, float y, float z, XMFLOAT3 xmf3Normal) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf3Normal = xmf3Normal; }
+	CFbxVertex(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f)){ m_xmf3Position = xmf3Position; m_xmf3Normal = xmf3Normal; }
+	~CFbxVertex(){}
+};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CMesh
@@ -162,3 +174,20 @@ public:
 	CPlaneTextureMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CPlaneTextureMesh();
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+class CFbxMesh : public CMesh
+{
+public:
+	CFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~CFbxMesh();
+
+	void BuildFbxGeometry(const char* filename, const char* subMeshName, const char* geoName, float scaleMulX, float scaleMulY, float scaleMulZ);
+
+private:
+	unique_ptr<CFbxVertex[]> m_pVertices;
+	unique_ptr<int[]> m_pIndices;
+};
+
