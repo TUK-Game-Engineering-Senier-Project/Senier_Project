@@ -16,15 +16,19 @@ CMainSceneShader::~CMainSceneShader()
 {
 }
 
+// ui 이미지
 void CMainSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CScene* pScene, void* pContext)
 {
 	CTexture* ppTextures[UI_MAIN_TEXTURE];
 	// 배경화면
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Resource/UI/sample-background.jpg", RESOURCE_TEXTURE2D, 0);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Resource/UI/MainScreen.png", RESOURCE_TEXTURE2D, 0);
 	// 버튼
 	ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Resource/UI/sample-button.jpg", RESOURCE_TEXTURE2D, 0);
+	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Resource/UI/SinglePlay.png", RESOURCE_TEXTURE2D, 0);
+	// 버튼
+	ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Resource/UI/MultiPlay.png", RESOURCE_TEXTURE2D, 0);
 
 
 	m_nObjects = 3;
@@ -39,7 +43,8 @@ void CMainSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	}
 
 	CPlaneTextureMesh* pBackGroundMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f);
-	CPlaneTextureMesh* pButtonMesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, UI_MAIN_SIGLESETTING_BUTTON_WIDTH, UI_MAIN_SIGLESETTING_BUTTON_HEIGHT, 0.f);
+	CPlaneTextureMesh* pButton1Mesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, UI_MAIN_SIGLESETTING_BUTTON_WIDTH, UI_MAIN_SIGLESETTING_BUTTON_HEIGHT, 0.f);
+	CPlaneTextureMesh* pButton2Mesh = new CPlaneTextureMesh(pd3dDevice, pd3dCommandList, UI_MAIN_MULTISETTING_BUTTON_WIDTH, UI_MAIN_MULTISETTING_BUTTON_HEIGHT, 0.f);
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
@@ -53,15 +58,15 @@ void CMainSceneShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_ppObjects[0]->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
 
 	m_ppObjects[1] = new CGameObject();
-	m_ppObjects[1]->SetMesh(0, pButtonMesh);
+	m_ppObjects[1]->SetMesh(0, pButton1Mesh);
 	m_ppObjects[1]->SetMaterial(ppMaterials[1]);
 	m_ppObjects[1]->SetPosition(UI_MAIN_SIGLESETTING_BUTTON_x, UI_MAIN_SIGLESETTING_BUTTON_y, 0.f);
 	d3dCbvGPUDescriptorHandle = pScene->CreateConstantBufferView(pd3dDevice, d3dGpuVirtualAddress + (((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255) * 1), ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
 	m_ppObjects[1]->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
 
 	m_ppObjects[2] = new CGameObject();
-	m_ppObjects[2]->SetMesh(0, pButtonMesh);
-	m_ppObjects[2]->SetMaterial(ppMaterials[1]);
+	m_ppObjects[2]->SetMesh(0, pButton2Mesh);
+	m_ppObjects[2]->SetMaterial(ppMaterials[2]);
 	m_ppObjects[2]->SetPosition(UI_MAIN_MULTISETTING_BUTTON_x, UI_MAIN_MULTISETTING_BUTTON_y, 0.f);
 	d3dCbvGPUDescriptorHandle = pScene->CreateConstantBufferView(pd3dDevice, d3dGpuVirtualAddress + (((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255) * 2), ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
 	m_ppObjects[2]->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
