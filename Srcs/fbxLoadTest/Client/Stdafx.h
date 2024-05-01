@@ -84,6 +84,20 @@ struct SEND_PLAYER
 
 enum OBJECT_DIR{LEFT, RIGHT, UP, DOWN};
 
+// 위치
+extern struct Position
+{
+	float x;
+	float y;
+	float z;
+
+	Position(float in_x, float in_y, float in_z) {
+		x = in_x;
+		y = in_y;
+		z = in_z;
+	}
+};
+
 // 오브젝트 구조체
 
 extern struct Object
@@ -97,9 +111,13 @@ extern struct Object
 
 	// '적' 오브젝트용
 	char cNowAction   { ACTION::DEFAULT }; // 현재 동작
-	char nowLookingDir{ OBJECT_DIR::UP  }; // 현재 바라보는 위치
+	char cNowLookingDir{ OBJECT_DIR::UP  }; // 현재 바라보는 위치
 
 	int behaviorpoint = 0; // 행동치 (임시)
+
+	bool bSetMove = false; // 이동 경로 설정 여부
+
+	bool IfLookingPlayer(char dir, Position enemyPos, Position playerPos); // 플레이어를 보고 있는지 여부
 
 	void DoAction(char c); // 오브젝트 동작 수행
 	void BehaviorTree();   // 행동 트리
