@@ -184,10 +184,20 @@ public:
 	CFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CFbxMesh();
 
-	void BuildFbxGeometry(const char* filename, const char* subMeshName, const char* geoName, float scaleMulX, float scaleMulY, float scaleMulZ);
+	void BuildFbxGeometry(const char* filename, float scaleMulX, float scaleMulY, float scaleMulZ);
 
-private:
+protected:
 	unique_ptr<CFbxVertex[]> m_pVertices;
 	unique_ptr<int[]> m_pIndices;
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+class CPlayerFbxMesh : public CFbxMesh
+{
+public:
+	CPlayerFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~CPlayerFbxMesh();
+
+};

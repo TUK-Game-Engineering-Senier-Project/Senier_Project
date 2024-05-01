@@ -388,7 +388,7 @@ CPlaneTextureMesh::~CPlaneTextureMesh()
 
 CFbxMesh::CFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
 {
-
+	BuildFbxGeometry("./Resource/Character/character.fbx", fWidth, fHeight, fDepth);
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices.get(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
@@ -406,7 +406,7 @@ CFbxMesh::~CFbxMesh()
 {
 }
 
-void CFbxMesh::BuildFbxGeometry(const char* filename, const char* subMeshName, const char* geoName, float scaleMulX, float scaleMulY, float scaleMulZ)
+void CFbxMesh::BuildFbxGeometry(const char* filename, float scaleMulX, float scaleMulY, float scaleMulZ)
 {
 	// Initialize the SDK manager. This object handles memory management.
 	FbxManager* lSdkManager = FbxManager::Create();
@@ -488,4 +488,25 @@ void CFbxMesh::BuildFbxGeometry(const char* filename, const char* subMeshName, c
 	lScene->Destroy();
 	lSdkManager->Destroy();
 
+}
+
+CPlayerFbxMesh::CPlayerFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CFbxMesh(pd3dDevice, pd3dCommandList)
+{
+	BuildFbxGeometry("./Resource/Character/character.fbx", fWidth, fHeight, fDepth);
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices.get(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	m_pd3dIndexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pIndices.get(), sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+}
+
+CPlayerFbxMesh::~CPlayerFbxMesh()
+{
 }

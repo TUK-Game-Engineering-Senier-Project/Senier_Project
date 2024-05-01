@@ -535,7 +535,8 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	CCubeMeshDiffused* pPlayerMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 42.0f, 180.0f, 20.0f);
+	//CCubeMeshDiffused* pPlayerMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 42.0f, 180.0f, 20.0f);	
+	CPlayerFbxMesh* pPlayerMesh = new CPlayerFbxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f);
 	SetMesh(0, pPlayerMesh);
 	UINT ncbElementBytes = ((sizeof(CB_PLAYER_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
 
