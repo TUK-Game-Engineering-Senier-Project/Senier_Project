@@ -8,12 +8,13 @@
 constexpr float XM_PI = 3.141592654f; // 원주율
 
 constexpr float LOOKINGAREA = 8.0f; // 적 시야
+constexpr float ATTACKAREA = 2.2f; // 적 공격 범위
 constexpr float DIROFFSET = 0.24f; // 적 방향 보정
 constexpr float DEFAULTWALKLENGTH = 0.005f; // 순찰시 한 번에 이동하는 거리
 constexpr float FOLLOWWALKLENGTH = 0.012f; // 한 번에 이동하는 거리
 
 // 시야에 플레이어가 들어왔는지 확인
-bool Object::IfLookingPlayer(char dir, Position enemyPos, Position playerPos)
+bool Object::IfLookingPlayer(char dir, Position enemyPos, Position playerPos, float areaLength)
 {
 	float px = playerPos.x;
 	float pz = playerPos.z;
@@ -37,7 +38,7 @@ bool Object::IfLookingPlayer(char dir, Position enemyPos, Position playerPos)
 	{
 	case OBJECT_DIR::LEFT:
 
-		if ((angle >= 225.0f && angle < 315.0f) && (fDist <= LOOKINGAREA)) {
+		if ((angle >= 225.0f && angle < 315.0f) && (fDist <= areaLength)) {
 			return true; 
 		}
 		else { return false; }
@@ -46,7 +47,7 @@ bool Object::IfLookingPlayer(char dir, Position enemyPos, Position playerPos)
 
 	case OBJECT_DIR::RIGHT:
 
-		if ((angle >= 45.0f && angle < 135.0f) && (fDist <= LOOKINGAREA)) {
+		if ((angle >= 45.0f && angle < 135.0f) && (fDist <= areaLength)) {
 			return true;
 		}
 		else { return false; }
@@ -55,7 +56,7 @@ bool Object::IfLookingPlayer(char dir, Position enemyPos, Position playerPos)
 
 	case OBJECT_DIR::UP:
 
-		if ((angle >= 315.0f || angle < 45.0f) && (fDist <= LOOKINGAREA)) {
+		if ((angle >= 315.0f || angle < 45.0f) && (fDist <= areaLength)) {
 			return true;
 		}
 		else { return false; }
@@ -64,7 +65,7 @@ bool Object::IfLookingPlayer(char dir, Position enemyPos, Position playerPos)
 
 	case OBJECT_DIR::DOWN:
 
-		if ((angle >= 135.0f && angle < 225.0f) && (fDist <= LOOKINGAREA)) {
+		if ((angle >= 135.0f && angle < 225.0f) && (fDist <= areaLength)) {
 			return true;
 		}
 		else { return false; }
@@ -74,7 +75,7 @@ bool Object::IfLookingPlayer(char dir, Position enemyPos, Position playerPos)
 }
 
 // 오브젝트 동작 수행
-void Object::DoAction(char c)
+void Object::DoAction(char cAction)
 {
 	// 플레이어 위치 / 적 위치
 	Position playerPos = Position(player[0].pos_x, player[0].pos_y, player[0].pos_z);
@@ -85,16 +86,18 @@ void Object::DoAction(char c)
 	float fDist = 0.0f;
 
 	// 현재 동작에 따른 동작 수행
-	switch (c) 
+	switch (cAction)
 	{
 
+	// 기본 (대기) 동작
 	case ACTION::DEFAULT:
-		// 기본 동작 (### 임시)
+		// 기본 (대기) 동작 (### 임시)
 		// # 위->오른쪽->아래->왼쪽 으로 순찰(?) 도는 동작
 
 		// 행동치와 행동치에 따른 동작
 		if (behaviorpoint < 2000) behaviorpoint++;
 		else behaviorpoint = 0;
+
 		switch (behaviorpoint) {
 		case 0: cNowLookingDir = OBJECT_DIR::UP; break;
 		case 500: cNowLookingDir = OBJECT_DIR::RIGHT; break;
@@ -128,6 +131,7 @@ void Object::DoAction(char c)
 
 		break;
 
+	// 플레이어를 향해 이동
 	case ACTION::MOVETOPLAYER:
 
 		// 적이 플레이어를 향해 (8방향) 바라보도록 설정
@@ -163,32 +167,50 @@ void Object::DoAction(char c)
 
 		break;
 
+	// 플레이어 공격
 	case ACTION::ATTACKPLAYER:
-		// (예정) 플레이어 공격
-		break;
 
+		// 행동치와 행동치에 따른 동작
+
+		if (behaviorpoint < 70) { behaviorpoint++; }
+		else { behaviorpoint = 0; }
+
+		if (behaviorpoint < 50) {
+			// 회전 모션 (선딜레이?)
+			rotate_y -= (2.0f * XM_PI / 50);
+		}
+		else if (behaviorpoint < 70) {
+			// 후 공격 (플레이어 밀쳐내기)
+			player[0].pos_x += dx * 2;
+			player[0].pos_z += dz * 2;
+			behaviorpoint = 0;
+		}
+
+		break;
 	}
 }
 
 // 행동 트리
 void Object::BehaviorTree()
 {
-	// 플레이어 위치 / 적 위치
+	// (현재) 플레이어 위치 / 적 위치
 	Position PlayerPos = Position(player[0].pos_x, player[0].pos_y, player[0].pos_z);
 	Position enemyPos = Position(pos_x, pos_y, pos_z);
 
-	// 플레이어를 바라보고 있다면 (사분면 시야 안에 있다면)
-	// 플레이어에게 이동한다.
-	if (IfLookingPlayer(cNowLookingDir, PlayerPos, enemyPos)) {
-		cNowAction = ACTION::MOVETOPLAYER;
-	}
-
-	// (예정) 조건을 만족하면 플레이어를 공격한다.
-	else if (false) {
+	// 공격 범위 내에 있다면 플레이어를 공격한다.
+	// ### 임시로 '플레이어 이동' 동작과 같은 함수를
+	// ### - 공격 범위로 적용함 (사분면 시야 내)
+	if (IfLookingPlayer(cNowLookingDir, PlayerPos, enemyPos, ATTACKAREA)) {
 		cNowAction = ACTION::ATTACKPLAYER;
 	}
 
-	// Default 동작을 맨 마지막에 수행한다.
+	// 플레이어를 바라보고 있다면 (사분면 시야 안에 있다면)
+	// 플레이어에게 이동한다.
+	 else if (IfLookingPlayer(cNowLookingDir, PlayerPos, enemyPos, LOOKINGAREA)) {
+		cNowAction = ACTION::MOVETOPLAYER;
+	}
+
+	// Default (기본 : 대기) 동작을 맨 마지막에 수행한다.
 	else {
 		cNowAction = ACTION::DEFAULT;
 	}

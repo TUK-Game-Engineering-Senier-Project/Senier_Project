@@ -117,10 +117,11 @@ extern struct Object
 
 	bool bSetMove = false; // 이동 경로 설정 여부
 
-	bool IfLookingPlayer(char dir, Position enemyPos, Position playerPos); // 플레이어를 보고 있는지 여부
+	// 플레이어를 보고 있는지 여부
+	bool IfLookingPlayer(char dir, Position enemyPos, Position playerPos, float areaLength); 
 
-	void DoAction(char c); // 오브젝트 동작 수행
-	void BehaviorTree();   // 행동 트리
+	void DoAction(char cAction); // 동작 수행
+	void BehaviorTree(); // 행동 트리
 };
 
 // 이 부분의 본래 선언 위치는 d3dApp.cpp이다.
