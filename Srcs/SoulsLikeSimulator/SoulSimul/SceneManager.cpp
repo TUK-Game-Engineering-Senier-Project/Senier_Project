@@ -65,8 +65,54 @@ void CSceneManager::EndCurrentScene()
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	return m_qScenes.top()->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	bool b_change = false;
+	shared_ptr<CScene> pScene;
+
+	// 클릭한 좌표
+	int x = LOWORD(lParam);
+	int y = HIWORD(lParam);
+
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+		::SetCapture(hWnd);
+		if (m_CurrentState == SceneState::MAIN_MENU) {
+
+			// 클릭한 좌표가 싱글 플레이 버튼의 영역에 속하는지 확인
+			if (x >= UI_MAIN_SIGLESETTING_BUTTON_x + 250 &&
+				x <= UI_MAIN_SIGLESETTING_BUTTON_x + UI_MAIN_SIGLESETTING_BUTTON_WIDTH  +250 &&
+				y >= UI_MAIN_SIGLESETTING_BUTTON_y + 250 &&
+				y <= UI_MAIN_SIGLESETTING_BUTTON_y + UI_MAIN_SIGLESETTING_BUTTON_HEIGHT + 250) {
+				StartScene(SceneState::SINGLE_SETTING);
+				b_change = true;
+			}
+			else if (x >= UI_MAIN_MULTISETTING_BUTTON_x + 250 &&
+				x <= UI_MAIN_MULTISETTING_BUTTON_x + UI_MAIN_MULTISETTING_BUTTON_WIDTH + 250 &&
+				y >= UI_MAIN_MULTISETTING_BUTTON_y + 250 +(2*150) &&
+				y <= UI_MAIN_MULTISETTING_BUTTON_y + UI_MAIN_MULTISETTING_BUTTON_HEIGHT + 250 + (2 * 150)) {
+				StartScene(SceneState::MULTI_SETTING);
+				b_change = true;
+			}
+		}
+		
+		break;
+	case WM_RBUTTONDOWN:
+	case WM_LBUTTONUP:
+		::ReleaseCapture();
+		break;
+	case WM_RBUTTONUP:
+		
+	case WM_MOUSEMOVE:
+		break;
+	default:
+		break;
+	}
+
+	if (m_qScenes.top()->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam))
+		b_change = true;
+	return b_change;
 }
+
 
 bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
