@@ -18,11 +18,6 @@
 // - UpdateObject와 BuildItem을 BuildObject로 통합함
 // 지금 바닥이라 되어있는 건 중앙을 표시하는 건 작은 직육면체
 
-// <할 것>
-// 적 오브젝트의 동작 (행동 트리)
-// 동작에 따른 애니메이션
-
-
 #include "../Common/d3dApp.h"
 #include "../Common/MathHelper.h"
 #include "../Common/UploadBuffer.h"
@@ -30,6 +25,8 @@
 #include "FrameResource.h"
 
 #include <fbxsdk.h>
+
+#include "LuaEnemyObject.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
@@ -253,6 +250,18 @@ bool SoulSimul::Initialize()
     // Wait until initialization is complete.
     FlushCommandQueue();
 
+	// ----- Lua 열기 -----
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
+	luaL_loadfile(L, "LuaEnemyObject.lua");
+	lua_pcall(L, 0, 0, 0);
+
+	// 적 오브젝트 추가
+	lua_newEnemy(L, "enemy_m", 100, enemy_m.pos_x, enemy_m.pos_y, enemy_m.pos_z);
+
+	lua_close(L);
+	// ----- lua 닫기 -----
+
     return true;
 }
  
@@ -267,9 +276,21 @@ void SoulSimul::OnResize()
 
 void SoulSimul::Update(const GameTimer& gt)
 {
-	// ### 적 동작 업데이트 (임시)
+	// ----- Lua 열기 -----
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
+	luaL_loadfile(L, "LuaEnemyObject.lua");
+	lua_pcall(L, 0, 0, 0);
+
+	// ### 이 두 동작을 Lua 코드로 만들어 대체할 것
 	enemy_m.BehaviorTree();               // 행동 트리 갱신
 	enemy_m.DoAction(enemy_m.cNowAction); // 행동 트리에 따른 동작 수행
+
+	// (예정) 적 정보 업데이트
+	// lua_update(L, enemyname);
+
+	lua_close(L);
+	// ----- lua 닫기 -----
 	
 	// --- 동작이 업데이트된 후에 오브젝트를 업데이트함 ---
 

@@ -63,6 +63,9 @@
     <ClCompile Include="Stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LuaEnemyObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Common\AnimationUtility.h">
@@ -107,5 +110,11 @@
     <ClInclude Include="Stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LuaEnemyObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LuaEnemyObject.lua" />
   </ItemGroup>
 </Project>
