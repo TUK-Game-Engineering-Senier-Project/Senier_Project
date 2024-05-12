@@ -4,6 +4,9 @@
 // - C / C++ - 일반 - 추가 포함 디렉터리 설정 : include 경로 C : \lua - 5.4.2_Win64_vc17_lib\include 지정
 // - 속성 - 링커 - 일반 - 추가 라이브러리 디렉터리 설정 : lub54.lib 경로 C : \lua - 5.4.2_Win64_vc17_lib 지정
 
+// lua_State* L = luaL_newstate(); 는 SoulSimul.cpp에 있음
+// 생성자에서 lua를 열고 소멸자에서 lua를 닫는다
+
 #pragma once
 
 extern "C" {

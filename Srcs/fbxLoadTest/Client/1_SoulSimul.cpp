@@ -40,6 +40,9 @@ constexpr char INDEXPLAYER = 0;
 constexpr char INDEXFLOOR = 1;
 constexpr char INDEXENEMY = 2;
 
+// lua 사용
+lua_State* L = luaL_newstate();
+
 // Lightweight structure stores parameters to draw a shape.
 // This will vary from app-to-app.
 struct RenderItem
@@ -197,12 +200,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 SoulSimul::SoulSimul(HINSTANCE hInstance)
 	: D3DApp(hInstance)
 {
+	// ----- Lua 열기 -----
+	luaL_openlibs(L);
+	luaL_loadfile(L, "LuaEnemyObject.lua");
+	lua_pcall(L, 0, 0, 0);
 }
 
 SoulSimul::~SoulSimul()
 {
     if(md3dDevice != nullptr)
         FlushCommandQueue();
+
+	// ----- lua 닫기 -----
+	lua_close(L);
 }
 
 bool SoulSimul::Initialize()
@@ -221,12 +231,6 @@ bool SoulSimul::Initialize()
     BuildShadersAndInputLayout();
     BuildShapeGeometry();
 
-	// ----- Lua 열기 -----
-	lua_State* L = luaL_newstate();
-	luaL_openlibs(L);
-	luaL_loadfile(L, "LuaEnemyObject.lua");
-	lua_pcall(L, 0, 0, 0);
-
 	// 적 오브젝트 추가 (체력, 좌표)
 	lua_newEnemy(L, "enemy_m", 100, 5.0f, 0.0f, 2.0f);
 
@@ -241,13 +245,14 @@ bool SoulSimul::Initialize()
 	enemy_m.pos_x = lua_getX(L, "enemy_m");
 	enemy_m.pos_z = lua_getZ(L, "enemy_m");
 
+	char debugMessage[100];
+	sprintf_s(debugMessage, "value: %f\n", enemy_m.pos_x);
+	OutputDebugStringA(debugMessage);
+
 	// ### 바닥 빌드 (임시)
 	BuildFbxGeometry("sample_box.fbx", "floor", "floor_mGeo", 0.04f, 0.02f, 0.04f);
 	floorobj.pos_x = 0.0f; // (고정) 중심
 	floorobj.pos_z = 0.0f; // (고정) 중심
-
-	lua_close(L);
-	// ----- lua 닫기 -----
 
 	BuildMaterials();
     BuildRenderItems();
@@ -276,21 +281,13 @@ void SoulSimul::OnResize()
 
 void SoulSimul::Update(const GameTimer& gt)
 {
-	// ----- Lua 열기 -----
-	lua_State* L = luaL_newstate();
-	luaL_openlibs(L);
-	luaL_loadfile(L, "LuaEnemyObject.lua");
-	lua_pcall(L, 0, 0, 0);
-
 	// ### 이 두 동작을 Lua 코드로 만들어 대체할 것
-	enemy_m.BehaviorTree();               // 행동 트리 갱신
-	enemy_m.DoAction(enemy_m.cNowAction); // 행동 트리에 따른 동작 수행
+	// enemy_m.BehaviorTree();               // 행동 트리 갱신
+	// enemy_m.DoAction(enemy_m.cNowAction); // 행동 트리에 따른 동작 수행
 
-	// (예정) 적 정보 업데이트
-	// lua_update(L, enemyname);
-
-	lua_close(L);
-	// ----- lua 닫기 -----
+	// 적 정보 업데이트
+	enemy_m.pos_x = lua_getX(L, "enemy_m");
+	enemy_m.pos_z = lua_getZ(L, "enemy_m");
 	
 	// --- 동작이 업데이트된 후에 오브젝트를 업데이트함 ---
 

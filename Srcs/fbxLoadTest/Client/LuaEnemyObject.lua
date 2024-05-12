@@ -1,6 +1,14 @@
 -- EnemyObject 테이블을 만든다
 EnemyObject = {}
 
+-- 상수들 
+local PI = 3.141592654 -- 원주율
+local LOOKINGAREA = 8.0 -- 적 시야
+local ATTACKAREA = 2.2 -- 적 공격 범위
+local DIROFFSET = 0.24 -- 적 방향 보정
+local DEFAULTWALKLENGTH = 0.005 -- 순찰시 한 번에 이동하는 거리
+local FOLLOWWALKLENGTH = 0.012 -- 한 번에 이동하는 거리
+
 -- 새로운 EnemyObject를 생성하여 초기화한다.
 function EnemyObject.new(name, hp, x, y, z)
   local self = {

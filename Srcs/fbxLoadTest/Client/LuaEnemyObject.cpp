@@ -25,6 +25,8 @@ void lua_newEnemy(lua_State* L, const char* name, int hp, float x, float y, floa
 	lua_pop(L, 1);
 }
 
+#include <windows.h> 
+
 float lua_getX(lua_State* L, const char* name)
 {
     // getX 함수를 스택에 올린다
