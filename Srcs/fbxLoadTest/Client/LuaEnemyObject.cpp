@@ -25,6 +25,69 @@ void lua_newEnemy(lua_State* L, const char* name, int hp, float x, float y, floa
 	lua_pop(L, 1);
 }
 
+float lua_getX(lua_State* L, const char* name)
+{
+    // getX 함수를 스택에 올린다
+    lua_getglobal(L, "getX");
+
+    // name을 스택에 올린다
+    lua_pushstring(L, name);
+
+	// name에 해당하는 오브젝트의 getX를 실행한다
+	lua_pcall(L, 1, 1, 0);
+
+    // 받아온 값을 저장한다
+    float x = static_cast<float>(lua_tonumber(L, -1));
+
+    // 스택에 있는 받아온 값을 지운다
+    lua_pop(L, 1);
+
+	// 값을 반환한다
+    return x;
+}
+
+float lua_getY(lua_State* L, const char* name)
+{
+	// getY 함수를 스택에 올린다
+	lua_getglobal(L, "getY");
+
+	// name을 스택에 올린다
+	lua_pushstring(L, name);
+
+	// name에 해당하는 오브젝트의 getX를 실행한다
+	lua_pcall(L, 1, 1, 0);
+
+	// 받아온 값을 저장한다
+	float y = static_cast<float>(lua_tonumber(L, -1));
+
+	// 스택에 있는 받아온 값을 지운다
+	lua_pop(L, 1);
+
+	// 값을 반환한다
+	return y;
+}
+
+float lua_getZ(lua_State* L, const char* name)
+{
+	// getZ 함수를 스택에 올린다
+	lua_getglobal(L, "getZ");
+
+	// name을 스택에 올린다
+	lua_pushstring(L, name);
+
+	// name에 해당하는 오브젝트의 getX를 실행한다
+	lua_pcall(L, 1, 1, 0);
+
+	// 받아온 값을 저장한다
+	float z = static_cast<float>(lua_tonumber(L, -1));
+
+	// 스택에 있는 받아온 값을 지운다
+	lua_pop(L, 1);
+
+	// 값을 반환한다
+	return z;
+}
+
 // (예정) 적 정보를 업데이트하는 함수 
 void lua_update(lua_State* L) {
 	// ### 작성 예정

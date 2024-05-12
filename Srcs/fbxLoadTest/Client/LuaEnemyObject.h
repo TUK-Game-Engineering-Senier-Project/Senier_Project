@@ -17,5 +17,10 @@ extern "C" {
 // 새로운 적을 생성하는 함수
 void lua_newEnemy(lua_State* L, const char* name, int hp, float x, float y, float z);
 
+// 적 위치 정보를 가져오는 함수
+float lua_getX(lua_State* L, const char* name);
+float lua_getY(lua_State* L, const char* name);
+float lua_getZ(lua_State* L, const char* name);
+
 // (예정) 적 정보를 업데이트하는 함수 
 void lua_update(lua_State* L);

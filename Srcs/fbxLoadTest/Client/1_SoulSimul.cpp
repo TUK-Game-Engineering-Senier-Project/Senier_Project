@@ -221,6 +221,15 @@ bool SoulSimul::Initialize()
     BuildShadersAndInputLayout();
     BuildShapeGeometry();
 
+	// ----- Lua 열기 -----
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
+	luaL_loadfile(L, "LuaEnemyObject.lua");
+	lua_pcall(L, 0, 0, 0);
+
+	// 적 오브젝트 추가 (체력, 좌표)
+	lua_newEnemy(L, "enemy_m", 100, 5.0f, 0.0f, 2.0f);
+
 	// 플레이어 모양 빌드 
 	// 매개변수 : 파일명, subMesh 이름, geo 이름, 불러올 때 크기 배율
 	BuildFbxGeometry("sample_humanoid.fbx", "player", "playerGeo", 0.017f, 0.017f, 0.017f);
@@ -229,13 +238,16 @@ bool SoulSimul::Initialize()
 
 	// ### 중형 적 빌드 (임시)
 	BuildFbxGeometry("sample_humanoid.fbx", "enemy_m", "enemy_mGeo", 0.025f, 0.025f, 0.025f);
-	enemy_m.pos_x = 1.0f;
-	enemy_m.pos_z = 2.0f;
+	enemy_m.pos_x = lua_getX(L, "enemy_m");
+	enemy_m.pos_z = lua_getZ(L, "enemy_m");
 
 	// ### 바닥 빌드 (임시)
 	BuildFbxGeometry("sample_box.fbx", "floor", "floor_mGeo", 0.04f, 0.02f, 0.04f);
 	floorobj.pos_x = 0.0f; // (고정) 중심
 	floorobj.pos_z = 0.0f; // (고정) 중심
+
+	lua_close(L);
+	// ----- lua 닫기 -----
 
 	BuildMaterials();
     BuildRenderItems();
@@ -249,18 +261,6 @@ bool SoulSimul::Initialize()
 
     // Wait until initialization is complete.
     FlushCommandQueue();
-
-	// ----- Lua 열기 -----
-	lua_State* L = luaL_newstate();
-	luaL_openlibs(L);
-	luaL_loadfile(L, "LuaEnemyObject.lua");
-	lua_pcall(L, 0, 0, 0);
-
-	// 적 오브젝트 추가
-	lua_newEnemy(L, "enemy_m", 100, enemy_m.pos_x, enemy_m.pos_y, enemy_m.pos_z);
-
-	lua_close(L);
-	// ----- lua 닫기 -----
 
     return true;
 }

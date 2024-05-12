@@ -26,3 +26,32 @@ function EnemyObject:update(state, x, y, z)
    self.z = z
 end
 
+-- x좌표 가져오기
+function getX(name)
+    local enemy = _G[name]
+    if enemy then
+        return enemy.x
+    else
+        return nil
+    end
+end
+
+-- y좌표 가져오기
+function getY(name)
+    local enemy = _G[name]
+    if enemy then
+        return enemy.y
+    else
+        return nil
+    end
+end
+
+-- z좌표 가져오기
+function getZ(name)
+    local enemy = _G[name]
+    if enemy then
+        return enemy.z
+    else
+        return nil
+    end
+end
