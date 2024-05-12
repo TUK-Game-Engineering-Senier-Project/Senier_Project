@@ -245,10 +245,6 @@ bool SoulSimul::Initialize()
 	enemy_m.pos_x = lua_getX(L, "enemy_m");
 	enemy_m.pos_z = lua_getZ(L, "enemy_m");
 
-	char debugMessage[100];
-	sprintf_s(debugMessage, "value: %f\n", enemy_m.pos_x);
-	OutputDebugStringA(debugMessage);
-
 	// ### 바닥 빌드 (임시)
 	BuildFbxGeometry("sample_box.fbx", "floor", "floor_mGeo", 0.04f, 0.02f, 0.04f);
 	floorobj.pos_x = 0.0f; // (고정) 중심
@@ -281,11 +277,14 @@ void SoulSimul::OnResize()
 
 void SoulSimul::Update(const GameTimer& gt)
 {
-	// ### 이 두 동작을 Lua 코드로 만들어 대체할 것
-	// enemy_m.BehaviorTree();               // 행동 트리 갱신
-	// enemy_m.DoAction(enemy_m.cNowAction); // 행동 트리에 따른 동작 수행
+	// ### 전부 lua로 옮긴 뒤 Stdafx.cpp 지우기
+	// enemy_m.BehaviorTree();               
+	// enemy_m.DoAction(enemy_m.cNowAction); 
 
-	// 적 정보 업데이트
+	lua_doFunction(L, "enemy_m", "BehaviorTree"); // 행동 트리 갱신
+	lua_doFunction(L, "enemy_m", "DoAction");     // 행동 트리에 따른 동작 수행
+
+	// 적 위치 업데이트
 	enemy_m.pos_x = lua_getX(L, "enemy_m");
 	enemy_m.pos_z = lua_getZ(L, "enemy_m");
 	

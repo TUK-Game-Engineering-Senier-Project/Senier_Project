@@ -30,7 +30,7 @@ void lua_newEnemy(lua_State* L, const char* name, int hp, float x, float y, floa
 float lua_getX(lua_State* L, const char* name)
 {
     // getX 함수를 스택에 올린다
-    lua_getglobal(L, "getX");
+    lua_getglobal(L, "GetX");
 
     // name을 스택에 올린다
     lua_pushstring(L, name);
@@ -51,7 +51,7 @@ float lua_getX(lua_State* L, const char* name)
 float lua_getY(lua_State* L, const char* name)
 {
 	// getY 함수를 스택에 올린다
-	lua_getglobal(L, "getY");
+	lua_getglobal(L, "GetY");
 
 	// name을 스택에 올린다
 	lua_pushstring(L, name);
@@ -72,7 +72,7 @@ float lua_getY(lua_State* L, const char* name)
 float lua_getZ(lua_State* L, const char* name)
 {
 	// getZ 함수를 스택에 올린다
-	lua_getglobal(L, "getZ");
+	lua_getglobal(L, "GetZ");
 
 	// name을 스택에 올린다
 	lua_pushstring(L, name);
@@ -90,7 +90,15 @@ float lua_getZ(lua_State* L, const char* name)
 	return z;
 }
 
-// (예정) 적 정보를 업데이트하는 함수 
-void lua_update(lua_State* L) {
-	// ### 작성 예정
+// LuaEnemyObject.lua에 있는 함수 실행
+void lua_doFunction(lua_State* L, const char* enemyName, const char* funcName)
+{
+	// funcName 함수를 스택에 올린다
+	lua_getglobal(L, funcName);
+
+	// enemyName을 스택에 올린다
+	lua_pushstring(L, enemyName);
+
+	// enemyName에 해당하는 오브젝트의 funcName 함수를 실행한다
+	lua_pcall(L, 1, 0, 0);
 }

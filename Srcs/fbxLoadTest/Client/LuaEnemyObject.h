@@ -25,5 +25,5 @@ float lua_getX(lua_State* L, const char* name);
 float lua_getY(lua_State* L, const char* name);
 float lua_getZ(lua_State* L, const char* name);
 
-// (예정) 적 정보를 업데이트하는 함수 
-void lua_update(lua_State* L);
+// LuaEnemyObject.lua에 있는 함수 실행
+void lua_doFunction(lua_State* L, const char* enemyName, const char* funcName);
