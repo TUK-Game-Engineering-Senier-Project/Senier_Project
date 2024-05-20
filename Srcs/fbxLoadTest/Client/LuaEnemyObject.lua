@@ -26,30 +26,14 @@ function EnemyObject.new(name, hp, x, y, z)
   return self
 end
 
--- x좌표 가져오기
-function GetX(name)
-    local enemy = _G[name]
-    if enemy then
+-- 데이터 가져오기
+function GetData(enemyName, dataName)
+    local enemy = _G[enemyName]
+    if dataName == "x" then
         return enemy.x
-    else
-        return nil
-    end
-end
-
--- y좌표 가져오기
-function GetY(name)
-    local enemy = _G[name]
-    if enemy then
+    elseif dataName == "y" then
         return enemy.y
-    else
-        return nil
-    end
-end
-
--- z좌표 가져오기
-function GetZ(name)
-    local enemy = _G[name]
-    if enemy then
+    elseif dataName == "z" then
         return enemy.z
     else
         return nil
@@ -57,8 +41,8 @@ function GetZ(name)
 end
 
 -- 행동 트리
-function BehaviorTree(name)
-    local enemy = _G[name]
+function BehaviorTree(enemyName)
+    local enemy = _G[enemyName]
 
     -- (예정) 공격 범위 내에 있다면 플레이어를 공격한다
     if false then

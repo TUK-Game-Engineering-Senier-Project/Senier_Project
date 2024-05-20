@@ -242,8 +242,8 @@ bool SoulSimul::Initialize()
 
 	// ### 중형 적 빌드 (임시)
 	BuildFbxGeometry("sample_humanoid.fbx", "enemy_m", "enemy_mGeo", 0.025f, 0.025f, 0.025f);
-	enemy_m.pos_x = lua_getX(L, "enemy_m");
-	enemy_m.pos_z = lua_getZ(L, "enemy_m");
+	enemy_m.pos_x = lua_getFuncFloat(L, "enemy_m", "GetData", "x");
+	enemy_m.pos_z = lua_getFuncFloat(L, "enemy_m", "GetData", "z");
 
 	// ### 바닥 빌드 (임시)
 	BuildFbxGeometry("sample_box.fbx", "floor", "floor_mGeo", 0.04f, 0.02f, 0.04f);
@@ -281,12 +281,12 @@ void SoulSimul::Update(const GameTimer& gt)
 	// enemy_m.BehaviorTree();               
 	// enemy_m.DoAction(enemy_m.cNowAction); 
 
-	lua_doFunction(L, "enemy_m", "BehaviorTree"); // 행동 트리 갱신
-	lua_doFunction(L, "enemy_m", "DoAction");     // 행동 트리에 따른 동작 수행
+	lua_doFunc(L, "enemy_m", "BehaviorTree"); // 행동 트리 갱신
+	lua_doFunc(L, "enemy_m", "DoAction");     // 행동 트리에 따른 동작 수행
 
 	// 적 위치 업데이트
-	enemy_m.pos_x = lua_getX(L, "enemy_m");
-	enemy_m.pos_z = lua_getZ(L, "enemy_m");
+	enemy_m.pos_x = lua_getFuncFloat(L, "enemy_m", "GetData", "x");
+	enemy_m.pos_z = lua_getFuncFloat(L, "enemy_m", "GetData", "z");
 	
 	// --- 동작이 업데이트된 후에 오브젝트를 업데이트함 ---
 

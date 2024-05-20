@@ -20,10 +20,8 @@ extern "C" {
 // 새로운 적을 생성하는 함수
 void lua_newEnemy(lua_State* L, const char* name, int hp, float x, float y, float z);
 
-// 적 위치 정보를 가져오는 함수
-float lua_getX(lua_State* L, const char* name);
-float lua_getY(lua_State* L, const char* name);
-float lua_getZ(lua_State* L, const char* name);
+// LuaEnemyObject.lua에 있는 함수를 실행하여 dataName (float) 값을 가져온다
+float lua_getFuncFloat(lua_State* L, const char* enemyName, const char* funcName, const char* dataName);
 
-// LuaEnemyObject.lua에 있는 함수 실행
-void lua_doFunction(lua_State* L, const char* enemyName, const char* funcName);
+// LuaEnemyObject.lua에 있는 함수를 실행한다
+void lua_doFunc(lua_State* L, const char* enemyName, const char* funcName);

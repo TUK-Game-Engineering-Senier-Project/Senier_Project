@@ -48,50 +48,33 @@ float lua_getX(lua_State* L, const char* name)
     return x;
 }
 
-float lua_getY(lua_State* L, const char* name)
+// LuaEnemyObject.lua에 있는 함수를 실행하여 dataName (float) 값을 가져온다
+float lua_getFuncFloat(lua_State* L, const char* enemyName, const char* funcName, const char* dataName)
 {
-	// getY 함수를 스택에 올린다
-	lua_getglobal(L, "GetY");
+	// funcName을 스택에 올린다
+	lua_getglobal(L, funcName);
 
-	// name을 스택에 올린다
-	lua_pushstring(L, name);
+	// enemyName을 스택에 올린다
+	lua_pushstring(L, enemyName);
 
-	// name에 해당하는 오브젝트의 getX를 실행한다
-	lua_pcall(L, 1, 1, 0);
+	// dataName을 스택에 올린다
+	lua_pushstring(L, dataName);
+
+	// name에 해당하는 오브젝트의 getData(enemyName, dataName)를 실행한다
+	lua_pcall(L, 2, 1, 0);
 
 	// 받아온 값을 저장한다
-	float y = static_cast<float>(lua_tonumber(L, -1));
+	float f = static_cast<float>(lua_tonumber(L, -1));
 
 	// 스택에 있는 받아온 값을 지운다
 	lua_pop(L, 1);
 
 	// 값을 반환한다
-	return y;
+	return f;
 }
 
-float lua_getZ(lua_State* L, const char* name)
-{
-	// getZ 함수를 스택에 올린다
-	lua_getglobal(L, "GetZ");
-
-	// name을 스택에 올린다
-	lua_pushstring(L, name);
-
-	// name에 해당하는 오브젝트의 getX를 실행한다
-	lua_pcall(L, 1, 1, 0);
-
-	// 받아온 값을 저장한다
-	float z = static_cast<float>(lua_tonumber(L, -1));
-
-	// 스택에 있는 받아온 값을 지운다
-	lua_pop(L, 1);
-
-	// 값을 반환한다
-	return z;
-}
-
-// LuaEnemyObject.lua에 있는 함수 실행
-void lua_doFunction(lua_State* L, const char* enemyName, const char* funcName)
+// LuaEnemyObject.lua에 있는 함수를 실행한다
+void lua_doFunc(lua_State* L, const char* enemyName, const char* funcName)
 {
 	// funcName 함수를 스택에 올린다
 	lua_getglobal(L, funcName);
