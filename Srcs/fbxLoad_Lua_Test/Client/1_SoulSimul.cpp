@@ -277,18 +277,22 @@ void SoulSimul::OnResize()
 
 void SoulSimul::Update(const GameTimer& gt)
 {
-	// ### 전부 lua로 옮긴 뒤 Stdafx.cpp 지우기
-	// enemy_m.BehaviorTree();               
-	// enemy_m.DoAction(enemy_m.cNowAction); 
+	lua_BehaviorTree(L, "enemy_m", player[0].pos_x, player[0].pos_z); // 행동 트리 갱신
+	lua_DoAction(L, "enemy_m"); // 행동 트리에 따른 동작 수행
 
-	lua_doFunc(L, "enemy_m", "BehaviorTree"); // 행동 트리 갱신
-	lua_doFunc(L, "enemy_m", "DoAction");     // 행동 트리에 따른 동작 수행
+	// --- 적 데이터 업데이트 ---
 
 	// 적 위치 업데이트
-	enemy_m.pos_x = lua_getFuncFloat(L, "enemy_m", "GetData", "x");
-	enemy_m.pos_z = lua_getFuncFloat(L, "enemy_m", "GetData", "z");
+	enemy_m.pos_x = lua_getFuncFloat(L, "enemy_m", "GetData", "pos_x");
+	enemy_m.pos_y = lua_getFuncFloat(L, "enemy_m", "GetData", "pos_y");
+	enemy_m.pos_z = lua_getFuncFloat(L, "enemy_m", "GetData", "pos_z");
+
+	// 적 회전 업데이트
+	enemy_m.rotate_x = lua_getFuncFloat(L, "enemy_m", "GetData", "rotate_x");
+	enemy_m.rotate_y = lua_getFuncFloat(L, "enemy_m", "GetData", "rotate_y");
+	enemy_m.rotate_z = lua_getFuncFloat(L, "enemy_m", "GetData", "rotate_z");
 	
-	// --- 동작이 업데이트된 후에 오브젝트를 업데이트함 ---
+	// --- 적 데이터가 업데이트된 후에 오브젝트를 업데이트함 ---
 
 	// 플레이어 빌드 
 	BuildObject("player", "playerMat", "playerGeo", player[0], INDEXPLAYER);

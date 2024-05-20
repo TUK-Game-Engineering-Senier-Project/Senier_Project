@@ -1,9 +1,7 @@
 #include "Stdafx.h"
 
-// [추가한 내용들]
-// bool Object::IfLookingPlayer(char dir, Position enemyPos, Position playerPos)
-// void Object::DoAction(char c)
-// void Object::BehaviorTree()
+// LuaEnemyObject.lua 및 LuaEnemyObject.cpp로
+// 완전히 옮긴 뒤 이 파일은 삭제할 예정
 
 constexpr float XM_PI = 3.141592654f; // 원주율
 
@@ -36,14 +34,6 @@ bool Object::IfLookingPlayer(char dir, Position enemyPos, Position playerPos, fl
 
 	switch (dir)
 	{
-	case OBJECT_DIR::LEFT:
-
-		if ((angle >= 225.0f && angle < 315.0f) && (fDist <= areaLength)) {
-			return true; 
-		}
-		else { return false; }
-
-		break;
 
 	case OBJECT_DIR::RIGHT:
 
