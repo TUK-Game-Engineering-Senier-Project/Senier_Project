@@ -24,9 +24,20 @@ void lua_newEnemy(lua_State* L, const char* enemyName, int hp, float x, float y,
 void lua_BehaviorTree(lua_State* L, const char* enemyName, float px, float pz);
 
 // 적 동작 수행
-void lua_DoAction(lua_State* L, const char* enemyName);
+void lua_DoAction(lua_State* L, const char* enemyName, float px, float pz);
 
 // LuaEnemyObject.lua에 있는 함수를 실행하여 dataName (float) 값을 가져온다
 float lua_getFuncFloat(lua_State* L, const char* enemyName, const char* funcName, const char* dataName);
 
+
+
+
+
+// --- ### 테스트용 [출력] 데이터 표시 장치 ---
+// --- ### 사용 완료 후 지울 것 ---
+
+#include <windows.h>
+void LuaDebugOutput(const char* message);
+int LuaDebugOutputWrapper(lua_State* L);
+void lua_registerLuaDebugOutput(lua_State* L);
 

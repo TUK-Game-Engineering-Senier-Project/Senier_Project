@@ -3,11 +3,11 @@ EnemyObject = {}
 
 -- 상수들 
 local PI = 3.141592654 -- 원주율
-local LOOKINGAREA = 8.0 -- 적 시야
+local LOOKINGAREA = 6.0 -- 적 시야
 local ATTACKAREA = 2.2 -- 적 공격 범위
 local DIROFFSET = 0.24 -- 적 방향 보정
 local DEFAULTWALKLENGTH = 0.005 -- 순찰시 한 번에 이동하는 거리
-local FOLLOWWALKLENGTH = 0.012 -- 한 번에 이동하는 거리
+local FOLLOWWALKLENGTH = 0.012 -- 플레이어 추격시 이동하는 거리
 
 -- [[새로운 EnemyObject를 생성하여 초기화]]
 
@@ -55,16 +55,16 @@ end
 
 -- [[시야에 플레이어가 들어왔는지 확인]]
 
-function ifLookingPlayer(enemyName, px, pz, areaLength)
+function IfLookingPlayer(enemyName, px, pz, areaLength)
 
     local enemy = _G[enemyName]
-    local ex = enemy.pos_x
-    local ez = enemy.pos_z
-    local dir = enemy.dir
 
-    local dx = ex - px
-	local dz = ez - pz
-	local dist =  math.sqrt(dx * dx + dz * dz)
+    -- 사용할 지역변수들
+    local ex = enemy.pos_x -- 적 x좌표
+    local ez = enemy.pos_z -- 적 z좌표
+    local dx = px - ex -- x좌표 차이
+	local dz = pz - ez -- z좌표 차이
+	local dist = math.sqrt(dx * dx + dz * dz) -- 적과 플레이어 사이 거리
 
     -- 플레이어와 적 사이 각도 구하기
 	local angle = math.atan2(dz, dx) * (180 / PI)
@@ -77,29 +77,31 @@ function ifLookingPlayer(enemyName, px, pz, areaLength)
     -- 바라보는 방향에 따라 시야 범위(대각 사분면) 내이면
 	-- true를 반환하고 그렇지 않으면 false를 반환
 
-    if dir == "LEFT" then		
-        if angle >= 225 and angle < 315 and dist <= areaLength then
+    if enemy.dir == "LEFT" then		
+        if angle >= 135 and angle < 225 and dist <= areaLength then
 			return true 
 		else 
             return false
         end
         
-    elseif dir == "RIGHT" then		
+    elseif enemy.dir == "RIGHT" then		
+        if angle >= 315 and dist <= areaLength then
+			return true 
+        elseif angle < 45 and dist <= areaLength then
+			return true
+		else 
+            return false
+        end
+
+    elseif enemy.dir == "DOWN" then		
+        if angle >= 225 and angle < 315 and dist <= areaLength then
+			return true 
+		else 
+            return false
+        end
+
+    elseif enemy.dir == "UP" then		
         if angle >= 45 and angle < 135 and dist <= areaLength then
-			return true 
-		else 
-            return false
-        end
-
-    elseif dir == "UP" then		
-        if (angle >= 315 or angle < 45) and dist <= areaLength then
-			return true 
-		else 
-            return false
-        end
-
-    elseif dir == "DOWN" then		
-        if angle >= 135 and angle < 225 and dist <= areaLength then
 			return true 
 		else 
             return false
@@ -120,8 +122,7 @@ function BehaviorTree(enemyName, px, pz)
 
     -- (예정) 플레이어를 바라보고 있다면 (사분면 시야 안에 있다면)
 	-- 플레이어에게 이동한다
-    elseif false then
-    -- elseif IfLookingPlayer(enemyName, px, pz, LOOKINGAREA) then
+    elseif IfLookingPlayer(enemyName, px, pz, LOOKINGAREA) then
         enemy.nowState = "MOVETOPLAYER"
 
     -- Default (기본 대기) 동작을 맨 마지막에 수행한다
@@ -136,8 +137,16 @@ end
 -- 행동치
 local behaviorpoint = 0
 
-function DoAction(name)
+function DoAction(name, px, pz)
     local enemy = _G[name]
+
+    -- 사용할 지역변수들
+    local ex = enemy.pos_x -- 적 x좌표
+    local ez = enemy.pos_z -- 적 z좌표
+    local dir = enemy.dir -- 적 방향
+    local dx = px - ex -- x좌표 차이
+	local dz = pz - ez -- z좌표 차이
+	local dist = math.sqrt(dx * dx + dz * dz) -- 적과 플레이어 사이 거리
 	 
     -- 현재 동작에 따른 동작 수행
 
@@ -145,7 +154,51 @@ function DoAction(name)
         enemy.nowState = "ATTACKPLAYER"
 
     elseif enemy.nowState == "MOVETOPLAYER" then
-        enemy.nowState = "MOVETOPLAYER"
+        
+        -- 적이 플레이어를 향해 (8방향) 바라보도록 설정
+
+        if dx > 0.0 then
+            if dz > 0.0 then
+                enemy.rotate_y = 0.25 * PI
+            elseif dz < 0.0 then
+                enemy.rotate_y = 0.75 * PI
+            else
+                enemy.rotate_y = 0.5 * PI
+            end
+
+        elseif dx < 0.0 then
+            if dz > 0.0 then
+                enemy.rotate_y = 1.75 * PI
+            elseif dz < 0.0 then
+                enemy.rotate_y = 1.25 * PI
+            else
+                enemy.rotate_y = 1.5 * PI
+            end
+
+        else
+            if dz > 0.0 then
+                enemy.rotate_y = 1.0 * PI
+            else
+                enemy.rotate_y = 0.0 * PI
+            end
+
+        end
+
+        -- 적 이동 거리 지정
+		if dist ~= 0.0 then
+			dx = dx / dist
+			dz = dz / dist
+		end
+		enemy.pos_x = enemy.pos_x + dx * FOLLOWWALKLENGTH
+		enemy.pos_z = enemy.pos_z + dz * FOLLOWWALKLENGTH
+
+        -- 위치 보정
+        if enemy.pos_x >= px - DIROFFSET and enemy.pos_x <= px + DIROFFSET then
+            enemy.pos_x = px
+        end 
+        if enemy.pos_z >= pz - DIROFFSET and enemy.pos_z <= pz + DIROFFSET then
+            enemy.pos_z = pz
+        end
 
     elseif enemy.nowState == "DEFAULT" then
         
@@ -186,3 +239,10 @@ function DoAction(name)
         end
     end
 end
+
+
+
+-- ### 테스트용 [출력] 데이터 표시 장치
+-- ### 사용 완료 후 지울 것
+
+-- LuaDebugOutput("MOVETOPLAYER\n")

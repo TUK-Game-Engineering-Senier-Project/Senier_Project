@@ -41,16 +41,18 @@ void lua_BehaviorTree(lua_State* L, const char* enemyName, float px, float pz)
 }
 
 // 적 동작 수행
-void lua_DoAction(lua_State* L, const char* enemyName)
+void lua_DoAction(lua_State* L, const char* enemyName, float px, float pz)
 {
 	// 함수 이름을 스택에 올린다
 	lua_getglobal(L, "DoAction");
 
 	// 매개변수들을 스택에 올린다
 	lua_pushstring(L, enemyName);
+	lua_pushnumber(L, px);
+	lua_pushnumber(L, pz);
 
-	// 매개변수 1개와 반환값 1개를 가지는 함수를 실행한다.
-	lua_pcall(L, 1, 1, 0);
+	// 매개변수 3개와 반환값 1개를 가지는 함수를 실행한다
+	lua_pcall(L, 3, 1, 0);
 }
 
 // LuaEnemyObject.lua에 있는 함수를 실행하여 dataName (float) 값을 가져온다
@@ -102,4 +104,22 @@ bool lua_ifLookingPlayer(lua_State* L, const char* enemyName, const char* dir, f
 
 	// bool 결과값을 반환한다
 	return b;
+}
+
+
+
+
+// --- ### 테스트용 [출력] 데이터 표시 장치 ---
+// --- ### 사용 완료 후 지울 것 ---
+
+void LuaDebugOutput(const char* message) {
+	OutputDebugStringA(message);
+}
+int LuaDebugOutputWrapper(lua_State* L) {
+	const char* message = lua_tostring(L, 1);
+	LuaDebugOutput(message);
+	return 0; 
+}
+void lua_registerLuaDebugOutput(lua_State* L) {
+	lua_register(L, "LuaDebugOutput", LuaDebugOutputWrapper); // Register the wrapper function
 }

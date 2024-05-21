@@ -204,6 +204,10 @@ SoulSimul::SoulSimul(HINSTANCE hInstance)
 	luaL_openlibs(L);
 	luaL_loadfile(L, "LuaEnemyObject.lua");
 	lua_pcall(L, 0, 0, 0);
+
+	// ### 테스트 [출력]용 함수 lua에 등록
+	lua_registerLuaDebugOutput(L);
+
 }
 
 SoulSimul::~SoulSimul()
@@ -278,7 +282,7 @@ void SoulSimul::OnResize()
 void SoulSimul::Update(const GameTimer& gt)
 {
 	lua_BehaviorTree(L, "enemy_m", player[0].pos_x, player[0].pos_z); // 행동 트리 갱신
-	lua_DoAction(L, "enemy_m"); // 행동 트리에 따른 동작 수행
+	lua_DoAction(L, "enemy_m", player[0].pos_x, player[0].pos_z);     // 행동 트리에 따른 동작 수행
 
 	// --- 적 데이터 업데이트 ---
 
