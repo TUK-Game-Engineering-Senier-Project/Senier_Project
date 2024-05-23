@@ -47,6 +47,7 @@ void info_show(const char* title, const char* text)
 }
 
 // 패킷에 키보드 누른 입력값을 전송
+
 void KeyBoardDown(unsigned char key, int x, int y)
 {
 	switch (key)

@@ -80,7 +80,7 @@ float lua_getFuncFloat(lua_State* L, const char* enemyName, const char* funcName
 	return f;
 }
 
-// LuaEnemyObject.lua에 있는 lua_ifLookingPlayer 함수를 실행한다
+// LuaEnemyObject.lua에 있는 IfLookingPlayer 함수를 실행한다
 bool lua_ifLookingPlayer(lua_State* L, const char* enemyName, const char* dir, float px, float pz, float areaLength) 
 {
 	// 함수 이름을 스택에 올린다
@@ -93,7 +93,7 @@ bool lua_ifLookingPlayer(lua_State* L, const char* enemyName, const char* dir, f
 	lua_pushnumber(L, pz);
 	lua_pushnumber(L, areaLength);
 
-	// 매개변수 5개와 반환값 1개를 가지는 함수를 실행한다.
+	// 매개변수 5개와 반환값 1개를 가지는 함수를 실행한다
 	lua_pcall(L, 5, 1, 0);
 
 	// 받아온 값을 저장한다
@@ -106,12 +106,42 @@ bool lua_ifLookingPlayer(lua_State* L, const char* enemyName, const char* dir, f
 	return b;
 }
 
+// LuaEnemyObject.lua에 있는 GetPlayerPosition 함수를 실행한다
+void lua_getPlayerPosition(lua_State* L, Position& playerPosition) 
+{
+	// GetPlayerPosition 함수를 스택에 올린다
+	lua_getglobal(L, "GetPlayerPosition");
 
+	// 매개변수 3개와 반환값 1개를 가지는 함수를 실행한다.
+	lua_pcall(L, 0, 3, 0);
+
+	// 좌표 값을 받아온 뒤 lua 스택에서 지운다
+	playerPosition.z = static_cast<float>(lua_tonumber(L, -1));
+	lua_pop(L, 1);
+	playerPosition.y = static_cast<float>(lua_tonumber(L, -1));
+	lua_pop(L, 1);
+	playerPosition.x = static_cast<float>(lua_tonumber(L, -1));
+	lua_pop(L, 1);
+}
+
+// LuaEnemyObject.lua에 있는 UpdatePlayerPosition 함수를 실행한다
+void lua_updatePlayerPosition(lua_State* L, float x, float y, float z) 
+{	
+	// UpdatePlayerPosition 함수를 스택에 올린다
+	lua_getglobal(L, "UpdatePlayerPosition");
+
+	// 좌표 값을 스택에 올린다
+	lua_pushnumber(L, x);
+	lua_pushnumber(L, y);
+	lua_pushnumber(L, z);
+
+	// 매개변수 3개와 반환값 0개를 가지는 함수를 실행한다
+	lua_pcall(L, 3, 0, 0);
+}
 
 
 // --- ### 테스트용 [출력] 데이터 표시 장치 ---
 // --- ### 사용 완료 후 지울 것 ---
-
 void LuaDebugOutput(const char* message) {
 	OutputDebugStringA(message);
 }

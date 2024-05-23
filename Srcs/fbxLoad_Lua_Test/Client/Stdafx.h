@@ -82,46 +82,14 @@ struct SEND_PLAYER
 
 /* ----- 여기부터 추가된 부분 ----- */
 
-enum OBJECT_DIR{LEFT, RIGHT, UP, DOWN};
-
-// 위치
-extern struct Position
-{
-	float x;
-	float y;
-	float z;
-
-	Position(float in_x, float in_y, float in_z) {
-		x = in_x;
-		y = in_y;
-		z = in_z;
-	}
-};
-
 // 오브젝트 구조체
+// ### 오브젝트 구조체까지 Lua로 완전히 옮길 것
 
 extern struct Object
 {
 	float scale_x{ 1.0f }, scale_y{ 1.0f }, scale_z{ 1.0f };    // 크기 배율
 	float rotate_x{ 0.0f }, rotate_y{ 0.0f }, rotate_z{ 0.0f }; // 회전 각도
 	float pos_x{ 0.0f }, pos_y{ 0.0f }, pos_z{ 0.0f };          // 위치
-
-	// '플레이어' 오브젝트용
-	bool bNowMoving{ false }; // 현재 이동중 여부
-
-	// '적' 오브젝트용
-	char cNowAction   { ACTION::DEFAULT }; // 현재 동작
-	char cNowLookingDir{ OBJECT_DIR::UP  }; // 현재 바라보는 위치
-
-	int behaviorpoint = 0; // 행동치 (임시)
-
-	bool bSetMove = false; // 이동 경로 설정 여부
-
-	// 플레이어를 보고 있는지 여부
-	bool IfLookingPlayer(char dir, Position enemyPos, Position playerPos, float areaLength); 
-
-	void DoAction(char cAction); // 동작 수행
-	void BehaviorTree(); // 행동 트리
 };
 
 // 이 부분의 본래 선언 위치는 d3dApp.cpp이다.

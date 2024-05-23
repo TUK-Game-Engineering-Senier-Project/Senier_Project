@@ -1,5 +1,4 @@
--- EnemyObject 테이블을 만든다
-EnemyObject = {}
+-- [[Lua로 작성한 Object 관련 내용 코드]]
 
 -- 상수들 
 local PI = 3.141592654 -- 원주율
@@ -8,6 +7,33 @@ local ATTACKAREA = 2.2 -- 적 공격 범위
 local DIROFFSET = 0.24 -- 적 방향 보정
 local DEFAULTWALKLENGTH = 0.005 -- 순찰시 한 번에 이동하는 거리
 local FOLLOWWALKLENGTH = 0.012 -- 플레이어 추격시 이동하는 거리
+
+-- Object 테이블을 만든다
+EnemyObject = {}
+PlayerObject = {}
+
+-- ### 플레이어 오브젝트도 lua로 가져올 예정
+-- ### Stdafx.h의 Object 구조체 지우기
+-- ### LuaEnemyObject.h에서 Position 구조체 지우기
+-- ### PlayerObject도 EnemyObject.new처럼 초기화할 것
+
+-- [[플레이어 위치]]
+
+local player_x = 0.0
+local player_y = 0.0
+local player_z = 0.0
+
+-- 위치 가져오기
+function GetPlayerPosition()
+    return player_x, player_y, player_z
+end
+
+-- 위치 업데이트하기
+function UpdatePlayerPosition(x, y, z)
+    player_x = x
+    player_y = y 
+    player_z = z 
+end
 
 -- [[새로운 EnemyObject를 생성하여 초기화]]
 
@@ -116,11 +142,14 @@ end
 function BehaviorTree(enemyName, px, pz)
     local enemy = _G[enemyName]
 
-    -- (예정) 공격 범위 내에 있다면 플레이어를 공격한다
-    if false then
+    -- 플레이어 위치 갱신
+    UpdatePlayerPosition(px, 0.0, pz)
+
+    -- (공격 범위 내에 있다면 플레이어를 공격한다
+    if IfLookingPlayer(enemyName, px, pz, ATTACKAREA) then
         enemy.nowState = "ATTACKPLAYER"
 
-    -- (예정) 플레이어를 바라보고 있다면 (사분면 시야 안에 있다면)
+    -- 플레이어를 바라보고 있다면 (사분면 시야 안에 있다면)
 	-- 플레이어에게 이동한다
     elseif IfLookingPlayer(enemyName, px, pz, LOOKINGAREA) then
         enemy.nowState = "MOVETOPLAYER"
@@ -151,7 +180,24 @@ function DoAction(name, px, pz)
     -- 현재 동작에 따른 동작 수행
 
     if enemy.nowState == "ATTACKPLAYER" then
-        enemy.nowState = "ATTACKPLAYER"
+        
+        -- 행동치와 행동치에 따른 동작
+
+		if behaviorpoint < 70 then
+            behaviorpoint = behaviorpoint + 1
+		else
+            behaviorpoint = 0
+        end
+
+		if behaviorpoint < 50 then
+			-- 회전 모션 (선딜레이?)
+			enemy.rotate_y = enemy.rotate_y - (2.0 * PI / 50)
+		elseif behaviorpoint < 70 then
+			-- 후 공격 (플레이어 밀쳐내기)
+			player_x = px + dx * 2
+			player_z = pz + dz * 2
+			behaviorpoint = 0
+        end
 
     elseif enemy.nowState == "MOVETOPLAYER" then
         
@@ -244,5 +290,4 @@ end
 
 -- ### 테스트용 [출력] 데이터 표시 장치
 -- ### 사용 완료 후 지울 것
-
 -- LuaDebugOutput("MOVETOPLAYER\n")

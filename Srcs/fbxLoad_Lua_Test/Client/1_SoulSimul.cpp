@@ -25,7 +25,6 @@
 #include "FrameResource.h"
 
 #include <fbxsdk.h>
-
 #include "LuaEnemyObject.h"
 
 using Microsoft::WRL::ComPtr;
@@ -39,6 +38,9 @@ const int gNumFrameResources = 3;
 constexpr char INDEXPLAYER = 0;
 constexpr char INDEXFLOOR = 1;
 constexpr char INDEXENEMY = 2;
+
+// x, y, z 위치
+Position position{ 0.0f, 0.0f, 0.0f };
 
 // lua 사용
 lua_State* L = luaL_newstate();
@@ -284,7 +286,7 @@ void SoulSimul::Update(const GameTimer& gt)
 	lua_BehaviorTree(L, "enemy_m", player[0].pos_x, player[0].pos_z); // 행동 트리 갱신
 	lua_DoAction(L, "enemy_m", player[0].pos_x, player[0].pos_z);     // 행동 트리에 따른 동작 수행
 
-	// --- 적 데이터 업데이트 ---
+	// --- 데이터 업데이트 ---
 
 	// 적 위치 업데이트
 	enemy_m.pos_x = lua_getFuncFloat(L, "enemy_m", "GetData", "pos_x");
@@ -296,7 +298,19 @@ void SoulSimul::Update(const GameTimer& gt)
 	enemy_m.rotate_y = lua_getFuncFloat(L, "enemy_m", "GetData", "rotate_y");
 	enemy_m.rotate_z = lua_getFuncFloat(L, "enemy_m", "GetData", "rotate_z");
 	
-	// --- 적 데이터가 업데이트된 후에 오브젝트를 업데이트함 ---
+	// 플레이어 위치 업데이트
+	// ### 플레이어도 적 내용 업데이트와 같은 방식으로 할 것
+	// ###
+	lua_getPlayerPosition(L, position); // ### 이 함수 지울 것
+	player[0].pos_x = position.x;
+	player[0].pos_y = position.y;
+	player[0].pos_z = position.z;
+	// player[0].pos_z = lua_getFuncFloat(L, "player", "GetData", "x");
+	// player[0].pos_z = lua_getFuncFloat(L, "player", "GetData", "y");
+	// player[0].pos_z = lua_getFuncFloat(L, "player", "GetData", "z");
+
+
+	// --- 데이터가 업데이트된 후에 오브젝트를 빌드함 ---
 
 	// 플레이어 빌드 
 	BuildObject("player", "playerMat", "playerGeo", player[0], INDEXPLAYER);

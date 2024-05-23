@@ -35,7 +35,6 @@
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="1_SoulSimul.cpp" />
     <ClCompile Include="LuaEnemyObject.cpp" />
-    <ClCompile Include="Stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Common\AnimationUtility.h" />
