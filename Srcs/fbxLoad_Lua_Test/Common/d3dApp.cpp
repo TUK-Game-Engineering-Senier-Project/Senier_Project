@@ -50,6 +50,7 @@ void info_show(const char* title, const char* text)
 
 void KeyBoardDown(unsigned char key, int x, int y)
 {
+
 	switch (key)
 	{
 		// ¿Ãµø

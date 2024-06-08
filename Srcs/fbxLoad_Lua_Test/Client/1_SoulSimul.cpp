@@ -39,9 +39,6 @@ constexpr char INDEXPLAYER = 0;
 constexpr char INDEXFLOOR = 1;
 constexpr char INDEXENEMY = 2;
 
-// x, y, z 위치
-Position position{ 0.0f, 0.0f, 0.0f };
-
 // lua 사용
 lua_State* L = luaL_newstate();
 
@@ -237,24 +234,21 @@ bool SoulSimul::Initialize()
     BuildShadersAndInputLayout();
     BuildShapeGeometry();
 
+	// 플레이어 오브젝트 추가 (체력, 좌표)
+	lua_newObject(L, "player1", 100, -4.0f, 0.0f, -3.0f);
+
 	// 적 오브젝트 추가 (체력, 좌표)
-	lua_newEnemy(L, "enemy_m", 100, 5.0f, 0.0f, 2.0f);
+	lua_newObject(L, "enemy_m", 100, 5.0f, 0.0f, 2.0f);
 
 	// 플레이어 모양 빌드 
 	// 매개변수 : 파일명, subMesh 이름, geo 이름, 불러올 때 크기 배율
 	BuildFbxGeometry("sample_humanoid.fbx", "player", "playerGeo", 0.017f, 0.017f, 0.017f);
-	player[0].pos_x = -3.0f;
-	player[0].pos_z = -4.0f;
 
 	// ### 중형 적 빌드 (임시)
 	BuildFbxGeometry("sample_humanoid.fbx", "enemy_m", "enemy_mGeo", 0.025f, 0.025f, 0.025f);
-	enemy_m.pos_x = lua_getFuncFloat(L, "enemy_m", "GetData", "x");
-	enemy_m.pos_z = lua_getFuncFloat(L, "enemy_m", "GetData", "z");
 
 	// ### 바닥 빌드 (임시)
 	BuildFbxGeometry("sample_box.fbx", "floor", "floor_mGeo", 0.04f, 0.02f, 0.04f);
-	floorobj.pos_x = 0.0f; // (고정) 중심
-	floorobj.pos_z = 0.0f; // (고정) 중심
 
 	BuildMaterials();
     BuildRenderItems();
@@ -299,16 +293,18 @@ void SoulSimul::Update(const GameTimer& gt)
 	enemy_m.rotate_z = lua_getFuncFloat(L, "enemy_m", "GetData", "rotate_z");
 	
 	// 플레이어 위치 업데이트
-	// ### 플레이어도 적 내용 업데이트와 같은 방식으로 할 것
-	// ###
-	lua_getPlayerPosition(L, position); // ### 이 함수 지울 것
-	player[0].pos_x = position.x;
-	player[0].pos_y = position.y;
-	player[0].pos_z = position.z;
-	// player[0].pos_z = lua_getFuncFloat(L, "player", "GetData", "x");
-	// player[0].pos_z = lua_getFuncFloat(L, "player", "GetData", "y");
-	// player[0].pos_z = lua_getFuncFloat(L, "player", "GetData", "z");
 
+	if (lua_getFuncFloat(L, "player1", "GetData", "hit_now") == 0)
+	{
+		lua_updateObject(L, "player1", 0, player[0].pos_x, player[0].pos_y, player[0].pos_z,
+			player[0].rotate_x, player[0].rotate_y, player[0].rotate_z);
+	}
+	else if (lua_getFuncFloat(L, "player1", "GetData", "hit_now") == 1)
+	{
+		player[0].pos_x = lua_getFuncFloat(L, "player1", "GetData", "pos_x");
+		player[0].pos_y = lua_getFuncFloat(L, "player1", "GetData", "pos_y");
+		player[0].pos_z = lua_getFuncFloat(L, "player1", "GetData", "pos_z");
+	}
 
 	// --- 데이터가 업데이트된 후에 오브젝트를 빌드함 ---
 

@@ -2,11 +2,11 @@
 
 #include "LuaEnemyObject.h"
 
-// 새로운 적을 생성하는 함수
-void lua_newEnemy(lua_State* L, const char* name, int hp, float x, float y, float z) {
+// 새로운 오브젝트를 생성하는 함수
+void lua_newObject(lua_State* L, const char* name, int hp, float x, float y, float z) {
 
 	// EnemyObject 테이블을 가져온다.
-	lua_getglobal(L, "EnemyObject");
+	lua_getglobal(L, "Object");
 
 	// EnemyObject 테이블 내의 new 함수를 가져온다.
 	lua_getfield(L, -1, "new");
@@ -23,6 +23,26 @@ void lua_newEnemy(lua_State* L, const char* name, int hp, float x, float y, floa
 
 	// 스택에서 EnemyObject 테이블을 제거한다
 	lua_pop(L, 1);
+}
+
+// 오브젝트 업데이트
+void lua_updateObject(lua_State* L, const char* name, int hp, int px, int py, int pz, int rx, int ry, int rz) 
+{
+	// 함수 이름을 스택에 올린다
+	lua_getglobal(L, "UpdateObject");
+
+	// 매개변수들을 스택에 올린다
+	lua_pushstring(L, name); 
+	lua_pushnumber(L, hp);  
+	lua_pushnumber(L, px); 
+	lua_pushnumber(L, py); 
+	lua_pushnumber(L, pz); 
+	lua_pushnumber(L, rx);
+	lua_pushnumber(L, ry);
+	lua_pushnumber(L, rz);
+
+	// 매개변수 8개와 반환값 0개를 가지는 함수를 실행한다
+	lua_pcall(L, 8, 0, 0);
 }
 
 // 적 행동 트리
@@ -104,39 +124,6 @@ bool lua_ifLookingPlayer(lua_State* L, const char* enemyName, const char* dir, f
 
 	// bool 결과값을 반환한다
 	return b;
-}
-
-// LuaEnemyObject.lua에 있는 GetPlayerPosition 함수를 실행한다
-void lua_getPlayerPosition(lua_State* L, Position& playerPosition) 
-{
-	// GetPlayerPosition 함수를 스택에 올린다
-	lua_getglobal(L, "GetPlayerPosition");
-
-	// 매개변수 3개와 반환값 1개를 가지는 함수를 실행한다.
-	lua_pcall(L, 0, 3, 0);
-
-	// 좌표 값을 받아온 뒤 lua 스택에서 지운다
-	playerPosition.z = static_cast<float>(lua_tonumber(L, -1));
-	lua_pop(L, 1);
-	playerPosition.y = static_cast<float>(lua_tonumber(L, -1));
-	lua_pop(L, 1);
-	playerPosition.x = static_cast<float>(lua_tonumber(L, -1));
-	lua_pop(L, 1);
-}
-
-// LuaEnemyObject.lua에 있는 UpdatePlayerPosition 함수를 실행한다
-void lua_updatePlayerPosition(lua_State* L, float x, float y, float z) 
-{	
-	// UpdatePlayerPosition 함수를 스택에 올린다
-	lua_getglobal(L, "UpdatePlayerPosition");
-
-	// 좌표 값을 스택에 올린다
-	lua_pushnumber(L, x);
-	lua_pushnumber(L, y);
-	lua_pushnumber(L, z);
-
-	// 매개변수 3개와 반환값 0개를 가지는 함수를 실행한다
-	lua_pcall(L, 3, 0, 0);
 }
 
 

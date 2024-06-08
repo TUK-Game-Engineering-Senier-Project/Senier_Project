@@ -9,35 +9,16 @@ local DEFAULTWALKLENGTH = 0.005 -- 순찰시 한 번에 이동하는 거리
 local FOLLOWWALKLENGTH = 0.012 -- 플레이어 추격시 이동하는 거리
 
 -- Object 테이블을 만든다
-EnemyObject = {}
-PlayerObject = {}
+Object = {}
 
 -- ### 플레이어 오브젝트도 lua로 가져올 예정
 -- ### Stdafx.h의 Object 구조체 지우기
 -- ### LuaEnemyObject.h에서 Position 구조체 지우기
 -- ### PlayerObject도 EnemyObject.new처럼 초기화할 것
 
--- [[플레이어 위치]]
+-- [[새로운 Object를 생성하여 초기화]]
 
-local player_x = 0.0
-local player_y = 0.0
-local player_z = 0.0
-
--- 위치 가져오기
-function GetPlayerPosition()
-    return player_x, player_y, player_z
-end
-
--- 위치 업데이트하기
-function UpdatePlayerPosition(x, y, z)
-    player_x = x
-    player_y = y 
-    player_z = z 
-end
-
--- [[새로운 EnemyObject를 생성하여 초기화]]
-
-function EnemyObject.new(name, hp, x, y, z)
+function Object.new(name, hp, x, y, z)
   local self = {
     nowState = "DEFAULT",
     dir = "DOWN",
@@ -58,22 +39,38 @@ function EnemyObject.new(name, hp, x, y, z)
   return self
 end
 
+-- [[오브젝트 업데이트]]
+
+function UpdateObject(objectName, hp, px, py, pz, rx, ry, rz);
+    local object = _G[objectName]
+
+    object.hp = object.hp + hp
+    object.pos_x = px
+    object.pos_y = py
+    object.pos_z = pz
+    object.rotate_x = rx
+    object.rotate_y = ry
+    object.rotate_z = rz
+end
+
 -- [[데이터 가져오기]]
 
-function GetData(enemyName, dataName)
-    local enemy = _G[enemyName]
+function GetData(objName, dataName)
+    local object = _G[objName]
     if dataName == "pos_x" then
-        return enemy.pos_x
+        return object.pos_x
     elseif dataName == "pos_y" then
-        return enemy.pos_y
+        return object.pos_y
     elseif dataName == "pos_z" then
-        return enemy.pos_z
+        return object.pos_z
     elseif dataName == "rotate_x" then
-        return enemy.rotate_x
+        return object.rotate_x
     elseif dataName == "rotate_y" then
-        return enemy.rotate_y
+        return object.rotate_y
     elseif dataName == "rotate_z" then
-        return enemy.rotate_z
+        return object.rotate_z
+    elseif dataName == "hit_now" then
+        return object.hit_now
     else
         return nil
     end
@@ -141,22 +138,23 @@ end
 
 function BehaviorTree(enemyName, px, pz)
     local enemy = _G[enemyName]
-
-    -- 플레이어 위치 갱신
-    UpdatePlayerPosition(px, 0.0, pz)
+    local player = _G["player1"]
 
     -- (공격 범위 내에 있다면 플레이어를 공격한다
     if IfLookingPlayer(enemyName, px, pz, ATTACKAREA) then
         enemy.nowState = "ATTACKPLAYER"
+        player.hit_now = 1
 
     -- 플레이어를 바라보고 있다면 (사분면 시야 안에 있다면)
 	-- 플레이어에게 이동한다
     elseif IfLookingPlayer(enemyName, px, pz, LOOKINGAREA) then
         enemy.nowState = "MOVETOPLAYER"
+        player.hit_now = 0
 
     -- Default (기본 대기) 동작을 맨 마지막에 수행한다
     else
         enemy.nowState = "DEFAULT"
+        player.hit_now = 0
 
     end
 end
@@ -168,6 +166,7 @@ local behaviorpoint = 0
 
 function DoAction(name, px, pz)
     local enemy = _G[name]
+    local player = _G["player1"]
 
     -- 사용할 지역변수들
     local ex = enemy.pos_x -- 적 x좌표
@@ -194,8 +193,8 @@ function DoAction(name, px, pz)
 			enemy.rotate_y = enemy.rotate_y - (2.0 * PI / 50)
 		elseif behaviorpoint < 70 then
 			-- 후 공격 (플레이어 밀쳐내기)
-			player_x = px + dx * 2
-			player_z = pz + dz * 2
+			player.pos_x = px + dx * 2
+			player.pos_z = pz + dz * 2
 			behaviorpoint = 0
         end
 

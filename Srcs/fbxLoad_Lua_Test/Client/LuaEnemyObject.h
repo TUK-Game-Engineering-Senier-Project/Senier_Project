@@ -17,22 +17,11 @@ extern "C" {
 
 #pragma comment(lib, "lua54.lib")
 
-// ### 위치 값 구조체 (삭제 예정)
-struct Position
-{
-	float x;
-	float y;
-	float z;
+// 새로운 오브젝트를 생성하는 함수
+void lua_newObject(lua_State* L, const char* enemyName, int hp, float x, float y, float z);
 
-	Position(float in_x, float in_y, float in_z) {
-		x = in_x;
-		y = in_y;
-		z = in_z;
-	}
-};
-
-// 새로운 적을 생성하는 함수
-void lua_newEnemy(lua_State* L, const char* enemyName, int hp, float x, float y, float z);
+// 오브젝트 업데이트
+void lua_updateObject(lua_State* L, const char* name, int hp, int px, int py, int pz, int rx, int ry, int rz);
 
 // 적 행동 트리
 void lua_BehaviorTree(lua_State* L, const char* enemyName, float px, float pz);
@@ -46,11 +35,6 @@ float lua_getFuncFloat(lua_State* L, const char* enemyName, const char* funcName
 // LuaEnemyObject.lua에 있는 IfLookingPlayer 함수를 실행한다
 bool lua_ifLookingPlayer(lua_State* L, const char* enemyName, const char* dir, float px, float pz, float areaLength);
 
-// LuaEnemyObject.lua에 있는 GetPlayerPosition 함수를 실행한다
-void lua_getPlayerPosition(lua_State* L, Position& playerPosition);
-
-// LuaEnemyObject.lua에 있는 UpdatePlayerPosition 함수를 실행한다
-void lua_updatePlayerPosition(lua_State* L, float x, float y, float z);
 
 // --- ### 테스트용 [출력] 데이터 표시 장치 ---
 // --- ### 사용 완료 후 지울 것 ---
