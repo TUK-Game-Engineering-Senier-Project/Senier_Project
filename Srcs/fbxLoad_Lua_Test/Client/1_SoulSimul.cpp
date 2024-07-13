@@ -6,7 +6,11 @@
 // fbx sdk 다운로드시 있던 sample 폴더에 있는 humanoid.fbx 사용
 // humanoid.fbx는 Client 폴더 내에 있음, 위치 변경시 변경된 위치 적용하기
 // 여기 있는, 방패나 무기를 언급하는 코드는 현재 의미 없음
+
+// Visual Studio에서 (본인 폴더 기준)
 // fbx sdk 사용시 #include <fbxsdk.h>를 필수로 할 것
+// - C / C++ - 일반 - 추가 포함 디렉터리 설정 : include 경로 D:\FBX_SDK\2020.3.7\include 지정
+// - 속성 - 링커 - 일반 - 추가 라이브러리 디렉터리 설정 : FBX SDK 경로 D:\FBX_SDK\2020.3.7\lib\x64\debug 지정
 
 // 추가한 것들
 // void SoulSimul::BuildFbxGeometry(const char* filename, const char* subMeshName, const char* geoName, 
@@ -25,7 +29,7 @@
 #include "FrameResource.h"
 
 #include <fbxsdk.h>
-#include "LuaEnemyObject.h"
+#include "LuaObject.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
@@ -177,9 +181,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
     PSTR cmdLine, int showCmd)
 {
     // Enable run-time memory check for debug builds.
-#if defined(DEBUG) | defined(_DEBUG)
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
+	#if defined(DEBUG) | defined(_DEBUG)
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	#endif
 
     try
     {
@@ -201,12 +205,11 @@ SoulSimul::SoulSimul(HINSTANCE hInstance)
 {
 	// ----- Lua 열기 -----
 	luaL_openlibs(L);
-	luaL_loadfile(L, "LuaEnemyObject.lua");
+	luaL_loadfile(L, "LuaObject.lua");
 	lua_pcall(L, 0, 0, 0);
 
 	// ### 테스트 [출력]용 함수 lua에 등록
-	lua_registerLuaDebugOutput(L);
-
+	// lua_registerLuaDebugOutput(L);
 }
 
 SoulSimul::~SoulSimul()
@@ -277,8 +280,8 @@ void SoulSimul::OnResize()
 
 void SoulSimul::Update(const GameTimer& gt)
 {
-	lua_BehaviorTree(L, "enemy_m", player[0].pos_x, player[0].pos_z); // 행동 트리 갱신
-	lua_DoAction(L, "enemy_m", player[0].pos_x, player[0].pos_z);     // 행동 트리에 따른 동작 수행
+	lua_BehaviorTree(L, "enemy_m", "player1", player[0].pos_x, player[0].pos_z); // 행동 트리 갱신
+	lua_DoAction(L, "enemy_m", "player1", player[0].pos_x, player[0].pos_z);     // 행동 트리에 따른 동작 수행
 
 	// --- 데이터 업데이트 ---
 

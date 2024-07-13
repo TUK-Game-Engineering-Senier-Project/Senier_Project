@@ -60,7 +60,7 @@
     <ClCompile Include="1_SoulSimul.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LuaEnemyObject.cpp">
+    <ClCompile Include="LuaObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,11 +107,11 @@
     <ClInclude Include="Stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LuaEnemyObject.h">
+    <ClInclude Include="LuaObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="LuaEnemyObject.lua" />
+    <None Include="LuaObject.lua" />
   </ItemGroup>
 </Project>

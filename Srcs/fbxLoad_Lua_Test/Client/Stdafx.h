@@ -83,7 +83,6 @@ struct SEND_PLAYER
 /* ----- 여기부터 추가된 부분 ----- */
 
 // 오브젝트 구조체
-// ### 오브젝트 구조체까지 Lua로 완전히 옮길 것
 
 extern struct Object
 {
