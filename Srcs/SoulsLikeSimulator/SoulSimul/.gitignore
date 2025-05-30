@@ -1,0 +1,17 @@
+# Visual Studio 관련 불필요 파일 무시
+.vs/
+*.ipch
+*.db
+*.suo
+*.user
+*.VC.db
+*.VC.db-shm
+*.VC.db-wal
+
+# 빌드 출력물 무시
+x64/
+Debug/
+Release/
+*.obj
+*.exe
+*.pdb
