@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "GameFramework.h"
 
+
 CSceneManager::CSceneManager()
 {
 	shared_ptr<CScene> pScene = make_shared<CMainScene>();
@@ -31,6 +32,13 @@ void CSceneManager::StartScene(const SceneState fSceneState)
 		pScene = make_shared<CSingleSettingScene>();
 		m_CurrentState = pScene->GetSceneState();
 		m_qScenes.push(pScene);
+
+		//  UI 초기화
+		if (gGameFramework.m_UIManager) {
+			gGameFramework.m_UIManager->PrepareSceneData();
+		}
+		break;
+
 		break;
 
 	case SceneState::SINGLE_PLAY:
@@ -67,6 +75,11 @@ void CSceneManager::EndCurrentScene()
 	{
 		m_qScenes.pop();
 		m_CurrentState = m_qScenes.top()->GetSceneState();
+
+		// ui 세팅 초기화
+		if (m_qScenes.top()->GetSceneState() == SceneState::SINGLE_SETTING) {
+			gGameFramework.m_UIManager->PrepareSceneData();
+		}
 	}
 }
 
@@ -79,41 +92,60 @@ bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	int x = LOWORD(lParam);
 	int y = HIWORD(lParam);
 
+	// 윈도우 좌표계는 좌상단(0, 0) 기준이므로 중심 좌표계 기준으로 변환
+	int cx = x - FRAME_BUFFER_WIDTH / 2;
+	int cy = FRAME_BUFFER_HEIGHT / 2 - y;
+
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
 		::SetCapture(hWnd);
+		
 		if (m_CurrentState == SceneState::MAIN_MENU) {
 
+
 			// 클릭한 좌표가 싱글 플레이 버튼의 영역에 속하는지 확인
-			if (x >= UI_MAIN_SIGLESETTING_BUTTON_x + 250 &&
-				x <= UI_MAIN_SIGLESETTING_BUTTON_x + UI_MAIN_SIGLESETTING_BUTTON_WIDTH  +250 &&
-				y >= UI_MAIN_SIGLESETTING_BUTTON_y + 250 &&
-				y <= UI_MAIN_SIGLESETTING_BUTTON_y + UI_MAIN_SIGLESETTING_BUTTON_HEIGHT + 250) {
+			if (cx >= UI_MAIN_SIGLESETTING_BUTTON_x - UI_MAIN_SIGLESETTING_BUTTON_WIDTH / 2 &&
+				cx <= UI_MAIN_SIGLESETTING_BUTTON_x + UI_MAIN_SIGLESETTING_BUTTON_WIDTH / 2 &&
+				cy >= UI_MAIN_SIGLESETTING_BUTTON_y - UI_MAIN_SIGLESETTING_BUTTON_HEIGHT / 2 &&
+				cy <= UI_MAIN_SIGLESETTING_BUTTON_y + UI_MAIN_SIGLESETTING_BUTTON_HEIGHT / 2) {
 				StartScene(SceneState::SINGLE_SETTING);
 				b_change = true;
 			}
-			else if (x >= UI_MAIN_MULTISETTING_BUTTON_x + 250 &&
-				x <= UI_MAIN_MULTISETTING_BUTTON_x + UI_MAIN_MULTISETTING_BUTTON_WIDTH + 250 &&
-				y >= UI_MAIN_MULTISETTING_BUTTON_y + 250 +(2*150) &&
-				y <= UI_MAIN_MULTISETTING_BUTTON_y + UI_MAIN_MULTISETTING_BUTTON_HEIGHT + 250 + (2 * 150)) {
-				StartScene(SceneState::MULTI_SETTING);
-				b_change = true;
+			else if (cx >= UI_MAIN_MULTISETTING_BUTTON_x - UI_MAIN_MULTISETTING_BUTTON_WIDTH / 2 &&
+					cx <= UI_MAIN_MULTISETTING_BUTTON_x + UI_MAIN_MULTISETTING_BUTTON_WIDTH / 2 &&
+					cy >= UI_MAIN_MULTISETTING_BUTTON_y - UI_MAIN_MULTISETTING_BUTTON_HEIGHT / 2 &&
+					cy <= UI_MAIN_MULTISETTING_BUTTON_y + UI_MAIN_MULTISETTING_BUTTON_HEIGHT / 2) {
+					StartScene(SceneState::MULTI_SETTING);
+					b_change = true;
 			}
 		}
 		if (m_CurrentState == SceneState::SINGLE_SETTING)
 		{
-			// 윈도우 좌표계는 좌상단 (0,0) 기준이므로 중심 좌표계 기준으로 변환
-			int cx = x - FRAME_BUFFER_WIDTH / 2;
-			int cy = FRAME_BUFFER_HEIGHT / 2 - y;
+		
 
 			// 버튼 바운딩 영역 비교
-			if (cx >= UI_SINGLE_START_BUTTON_x - UI_SINGLE_START_BUTTON_WIDTH / 2 &&
-				cx <= UI_SINGLE_START_BUTTON_x + UI_SINGLE_START_BUTTON_WIDTH / 2 &&
-				cy >= UI_SINGLE_START_BUTTON_y - UI_SINGLE_START_BUTTON_HEIGHT / 2 &&
-				cy <= UI_SINGLE_START_BUTTON_y + UI_SINGLE_START_BUTTON_HEIGHT / 2)
+			if (cx >= UI_PLAY_START_BUTTON_x - UI_PLAY_START_BUTTON_WIDTH / 2 &&
+				cx <= UI_PLAY_START_BUTTON_x + UI_PLAY_START_BUTTON_WIDTH / 2 &&
+				cy >= UI_PLAY_START_BUTTON_y - UI_PLAY_START_BUTTON_HEIGHT / 2 &&
+				cy <= UI_PLAY_START_BUTTON_y + UI_PLAY_START_BUTTON_HEIGHT / 2)
 			{
 				StartScene(SceneState::SINGLE_PLAY);
+				b_change = true;
+			}
+		}
+
+		if (m_CurrentState == SceneState::MULTI_SETTING)
+		{
+
+
+			// 버튼 바운딩 영역 비교
+			if (cx >= UI_PLAY_START_BUTTON_x - UI_PLAY_START_BUTTON_WIDTH / 2 &&
+				cx <= UI_PLAY_START_BUTTON_x + UI_PLAY_START_BUTTON_WIDTH / 2 &&
+				cy >= UI_PLAY_START_BUTTON_y - UI_PLAY_START_BUTTON_HEIGHT / 2 &&
+				cy <= UI_PLAY_START_BUTTON_y + UI_PLAY_START_BUTTON_HEIGHT / 2)
+			{
+				StartScene(SceneState::MULTI_PLAY);
 				b_change = true;
 			}
 		}

@@ -44,11 +44,11 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////
 
-class CMulitSetSceneShader : public CObjectsShader
+class CMultiSetSceneShader : public CObjectsShader
 {
 public:
-	CMulitSetSceneShader();
-	virtual ~CMulitSetSceneShader();
+	CMultiSetSceneShader();
+	virtual ~CMultiSetSceneShader();
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		* pd3dCommandList, CScene* pScene, void* pContext = NULL);
@@ -57,11 +57,11 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////
 
-class CMulitPlaySceneShader : public CObjectsShader
+class CMultiPlaySceneShader : public CObjectsShader
 {
 public:
-	CMulitPlaySceneShader();
-	virtual ~CMulitPlaySceneShader();
+	CMultiPlaySceneShader();
+	virtual ~CMultiPlaySceneShader();
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		* pd3dCommandList, CScene* pScene, void* pContext = NULL);

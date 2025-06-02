@@ -412,6 +412,15 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case 'A': // A 키를 누르면 체력 감소
 			if (m_UIManager) {
 				m_UIManager->DecreasePlayerHp();
+				m_UIManager->DecreaseMonsterHp();
+				m_UIManager->DecreaseStamina();
+			}
+			break;
+
+		case 'R': // R 키를 누르면 포션 사용
+			if (m_UIManager) {
+				m_UIManager->UsePotion();
+
 			}
 			break;
 			/*‘F1’ 키를 누르면 1인칭 카메라,
@@ -668,6 +677,7 @@ void CGameFramework::FrameAdvance()
 		break;
 	case SceneState::SINGLE_SETTING:
 		m_UIManager->SingleSettingUI();
+		m_UIManager->SingleSettingUI2();
 		break;
 	case SceneState::SINGLE_PLAY:
 		m_UIManager->SinglePlayUI();

@@ -154,7 +154,7 @@ void CSinglePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
-	CSingleSetSceneShader* pSinglePlaySceneShader = new CSingleSetSceneShader[m_nShaders];
+	CSinglePlaySceneShader* pSinglePlaySceneShader = new CSinglePlaySceneShader[m_nShaders];
 	pSinglePlaySceneShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pSinglePlaySceneShader->BuildObjects(pd3dDevice, pd3dCommandList, this, NULL);
 
@@ -209,12 +209,12 @@ void CMultiSettingScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	int nObjects = 4;
+	int nObjects = 2;
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, nObjects + 1, UI_MULTI_TEXTURE);
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
-	CMulitSetSceneShader* pMulitSetSceneShader = new CMulitSetSceneShader[m_nShaders];
+	CMultiSetSceneShader* pMulitSetSceneShader = new CMultiSetSceneShader[m_nShaders];
 	pMulitSetSceneShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pMulitSetSceneShader->BuildObjects(pd3dDevice, pd3dCommandList, this, NULL);
 
@@ -268,8 +268,36 @@ void CMultiPlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 {
 	// 그래픽 루트 시그너쳐를 생성한다. 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	int nObjects = 1;
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, nObjects + 1, UI_SINGLE_PLAY_TEXTURE);
+
+	m_nShaders = 1;
+	m_ppShaders = new CShader * [m_nShaders];
+	CMultiPlaySceneShader* pMultiPlaySceneShader = new CMultiPlaySceneShader[m_nShaders];
+	pMultiPlaySceneShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pMultiPlaySceneShader->BuildObjects(pd3dDevice, pd3dCommandList, this, NULL);
+
+	m_ppShaders[0] = pMultiPlaySceneShader;
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CMultiPlayScene::ReleaseObjects()
 {
+	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
+
+	if (m_ppShaders)
+	{
+		for (int i = 0; i < m_nShaders; i++)
+		{
+			m_ppShaders[i]->ReleaseShaderVariables();
+			m_ppShaders[i]->ReleaseObjects();
+			m_ppShaders[i]->Release();
+		}
+		delete[] m_ppShaders;
+	}
+
+	ReleaseShaderVariables();
 }
