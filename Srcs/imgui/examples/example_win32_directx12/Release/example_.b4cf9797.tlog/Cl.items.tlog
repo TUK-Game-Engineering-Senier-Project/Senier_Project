@@ -1,0 +1,8 @@
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\imgui.cpp;D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\Release\imgui.obj
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\imgui_demo.cpp;D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\Release\imgui_demo.obj
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\imgui_draw.cpp;D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\Release\imgui_draw.obj
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\imgui_tables.cpp;D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\Release\imgui_tables.obj
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\imgui_widgets.cpp;D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\Release\imgui_widgets.obj
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\backends\imgui_impl_dx12.cpp;D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\Release\imgui_impl_dx12.obj
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\backends\imgui_impl_win32.cpp;D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\Release\imgui_impl_win32.obj
+D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\main.cpp;D:\2dgp\TeamProject\Senier_Project\Srcs\imgui\examples\example_win32_directx12\Release\main.obj
